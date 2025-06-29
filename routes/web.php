@@ -1,9 +1,12 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Session;
 use App\Livewire\Pages\Dashboard;
 use App\Livewire\Pages\Roles\Assign;
+use Illuminate\Support\Facades\Route;
+use App\Livewire\Pages\Users\UserList;
+use Illuminate\Support\Facades\Session;
+use App\Livewire\Pages\Roles\PermissionList;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -20,9 +23,7 @@ require __DIR__ . '/auth.php';
 Route::get('/', fn() => redirect()->route('login'));
 
 
-Route::get('dashboard', function () {
-    return view('pages.dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('dashboard', Dashboard::class)->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::view('profile', 'pages.profile')
     ->middleware(['auth'])
@@ -37,13 +38,9 @@ Route::get('/lang/{locale}', function ($locale) {
     return redirect()->back();
 });
 
-Route::get('/users', function () {
-    return view('pages.users.list');
-})->middleware(['auth', 'verified'])->name('users');
+Route::get('/users', UserList::class)->middleware(['auth', 'verified'])->name('users');
 
 Route::get('/roles', function () {
     return view('pages.roles.roles');
 })->middleware(['auth', 'verified'])->name('roles');
-Route::get('/permissions', function () {
-    return view('pages.roles.permissions');
-})->middleware(['auth', 'verified'])->name('permissions');
+Route::get('/permissions', PermissionList::class)->middleware(['auth', 'verified'])->name('permissions');

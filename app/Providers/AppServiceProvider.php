@@ -3,10 +3,12 @@
 namespace App\Providers;
 
 use Livewire\Livewire;
+use Filament\Support\Colors\Color;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\ServiceProvider;
+use Filament\Support\Facades\FilamentColor;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -29,5 +31,9 @@ class AppServiceProvider extends ServiceProvider
         App::setLocale($locale);
         // Optional: Set locale for Livewire response
         // Livewire::setUpdateLocale($locale);
+
+        FilamentColor::register([
+            'primary' => Color::hex("#1976D2")
+        ]);
     }
 }

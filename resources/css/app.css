@@ -5,6 +5,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@tailwind variants;
 
 [x-cloak] {
     display: none !important;
@@ -32,3 +33,21 @@
         font-size: 32px !important;
     }
 }
+
+/* Example: Change table header background color */
+.fi-ta-table thead tr {
+    @apply !bg-text-dark/70  !border-border !text-red-600;
+}
+
+/* Optional: Add dark mode support */
+.dark .fi-ta-table thead tr {
+    @apply !bg-text/70 !border-border-dark !text-red-600;
+}
+
+.fi-ta-header-cell-label {
+    @apply text-text-muted;
+}
+.dark .fi-ta-header-cell-label {
+    @apply text-text-muted-dark;
+}
+
