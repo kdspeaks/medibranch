@@ -1,22 +1,22 @@
 <?php
 
-namespace App\Livewire\Pages\Users;
+namespace App\Livewire\Pages\Roles;
 
-use App\Models\User;
+
 use Livewire\Component;
 use Filament\Tables\Table;
 use Filament\Actions\Action;
 use Livewire\Attributes\Title;
 use Filament\Actions\CreateAction;
 use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Roles;
 use Filament\Forms\Components\Group;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Forms\Components\TextInput;
-use Filament\Tables\Columns\ImageColumn;
+use Spatie\Permission\Models\Permission;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Components\CheckboxList;
@@ -24,9 +24,8 @@ use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Tables\Actions\CreateAction as ActionsCreateAction;
-use Filament\Tables\Columns\ViewColumn;
 
-class UserList extends Component implements HasForms, HasActions, HasTable
+class RoleList extends Component implements HasForms, HasActions, HasTable
 {
     use InteractsWithActions;
     use InteractsWithTable;
@@ -55,24 +54,25 @@ class UserList extends Component implements HasForms, HasActions, HasTable
     public function createAction(): Action
     {
         return CreateAction::make('create')
-            ->model(User::class)
-            ->label('Create User')
-            ->modalHeading('Create New User')
+            ->model(Role::class)
+            ->label('Create Role')
+            ->modalHeading('Create New Role')
             ->form([
                 Group::make([
                     TextInput::make('name')
                         ->unique(ignoreRecord: true)
-                        ->label('Name')
+                        ->label('Role Name')
                         ->required()
                         ->maxLength(255),
 
-                    Select::make('roles')
-                        ->required()
-                        ->relationship('roles', 'name')
-                        ->label('Role')
-                        ->required()
-                        ->columns(4)
-                        ->native(false),
+                    CheckboxList::make('permissions')
+                        // ->required()
+                        ->relationship('permissions', 'name')
+                        ->label('Assign Permissions')
+                        ->options(
+                            Permission::all()->pluck('name', 'id')
+                        )
+                        ->columns(2),
 
 
 
@@ -83,17 +83,14 @@ class UserList extends Component implements HasForms, HasActions, HasTable
     public function table(Table $table): Table
     {
         return $table
-            ->query(User::query())
+            ->query(Role::query())
 
             ->columns([
-                ViewColumn::make('name')
-                    ->view('components.datatable.name')
+                TextColumn::make('name')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('email'),
-                TextColumn::make('roles.name')
-                ->sortable()
-
+                TextColumn::make('permissions.name')
+                    ->separator(', ')
             ])
             ->filters([
                 // ...
@@ -107,13 +104,11 @@ class UserList extends Component implements HasForms, HasActions, HasTable
                             ->required()
                             ->unique(ignoreRecord: true)
                             ->maxLength(255),
-                        Select::make('roles')
-                            ->required()
-                            ->relationship('roles', 'name')
+                        CheckboxList::make('permissions')
+                            ->relationship('permissions', 'name')
                             ->label('Assign Permissions')
-                            ->required()
-                            ->columns(4)
-                            ->native(false),
+                            // ->required()
+                            ->columns(4),
                     ]),
                 DeleteAction::make()
                     ->visible(fn($record) => $record->name !== 'Super Admin')
@@ -126,8 +121,9 @@ class UserList extends Component implements HasForms, HasActions, HasTable
             ->paginated([10, 20, 50, 100, 'all'])
             ->defaultPaginationPageOption(20);;
     }
+
     public function render()
     {
-        return view('livewire.pages.users.user-list');
+        return view('livewire.pages.roles.role-list');
     }
 }

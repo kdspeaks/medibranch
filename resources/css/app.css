@@ -34,20 +34,25 @@
     }
 }
 
-/* Example: Change table header background color */
+.fi-ta-table {
+    @apply divide-border;
+}
+.dark .fi-ta-table {
+    @apply divide-border-dark;
+}
+
 .fi-ta-table thead tr {
-    @apply !bg-text-dark/70  !border-border !text-red-600;
+    @apply bg-text-dark/70 ;
 }
 
 /* Optional: Add dark mode support */
 .dark .fi-ta-table thead tr {
-    @apply !bg-text/70 !border-border-dark !text-red-600;
+    @apply bg-text/70;
 }
 
-.fi-ta-header-cell-label {
-    @apply text-text-muted;
+.fi-ta-ctn {
+    @apply bg-surface rounded-sm divide-border;  
 }
-.dark .fi-ta-header-cell-label {
-    @apply text-text-muted-dark;
+.dark .fi-ta-ctn {
+    @apply bg-surface-dark rounded-sm divide-border-dark;
 }
-

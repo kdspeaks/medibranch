@@ -1,4 +1,3 @@
-@props(['title' => 'Page Title', 'hasPadding' => true, 'slot' => null])
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
@@ -33,6 +32,7 @@
 
     {{ $slot }}
 
+    @livewire('notifications')
     @vite('resources/js/app.js')
     @filamentScripts
     @livewireScripts

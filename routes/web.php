@@ -1,35 +1,44 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Session;
+
 use App\Livewire\Pages\Dashboard;
 use App\Livewire\Pages\Roles\Assign;
-use Illuminate\Support\Facades\Route;
 use App\Livewire\Pages\Users\UserList;
-use Illuminate\Support\Facades\Session;
+use App\Livewire\Pages\Roles\RoleList;
 use App\Livewire\Pages\Roles\PermissionList;
-
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
-*/
+use App\Livewire\Pages\Settings\SiteSettings;
 
 require __DIR__ . '/auth.php';
 
 Route::get('/', fn() => redirect()->route('login'));
 
+Route::middleware(['auth', 'verified'])->group(function () {
 
-Route::get('dashboard', Dashboard::class)->middleware(['auth', 'verified'])->name('dashboard');
+    Route::get('dashboard', Dashboard::class)
+        // ->middleware('can:view dashboard')
+        ->name('dashboard');
 
-Route::view('profile', 'pages.profile')
-    ->middleware(['auth'])
-    ->name('profile');
+    Route::view('profile', 'pages.profile')
+        ->name('profile');
 
+    Route::get('/users', UserList::class)
+        ->middleware('can:manage-users')
+        ->name('users');
 
+    Route::get('/roles', RoleList::class)
+        ->middleware('can:manage-roles-permission')
+        ->name('roles');
+
+    Route::get('/permissions', PermissionList::class)
+        ->middleware('can:manage-roles-permission')
+        ->name('permissions');
+
+    Route::get('/settings/site', SiteSettings::class)
+        ->middleware('can:manage-settings')
+        ->name('settings.site');
+});
 
 Route::view('/style-guide', 'style-guide')->name('style.guide');
 
@@ -38,9 +47,3 @@ Route::get('/lang/{locale}', function ($locale) {
     return redirect()->back();
 });
 
-Route::get('/users', UserList::class)->middleware(['auth', 'verified'])->name('users');
-
-Route::get('/roles', function () {
-    return view('pages.roles.roles');
-})->middleware(['auth', 'verified'])->name('roles');
-Route::get('/permissions', PermissionList::class)->middleware(['auth', 'verified'])->name('permissions');

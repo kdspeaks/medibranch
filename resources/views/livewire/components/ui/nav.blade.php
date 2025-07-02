@@ -32,8 +32,11 @@
 
                  <a href="./" class="flex mr-14">
                      <img src="../images/logo.svg" class="h-8 mr-3" alt="Logo" />
-                     <span
-                         class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">Medibranch</span>
+                     <span class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white"
+                         x-data="{ siteName: '{{ setting('site_name') }}' }" x-init="window.addEventListener('site-name-updated', e => {
+                             siteName = e.detail.site_name;
+                         })"
+                         x-text="siteName"></span>
                  </a>
 
              </div>

@@ -1,5 +1,5 @@
-@props(['name'])
 @php
+    $name = $getRecord()->name;
     $colors = [
         'bg-red-500',
         'bg-green-500',
@@ -28,11 +28,9 @@
 </div> --}}
 <div class="flex items-center space-x-2 whitespace-nowrap lg:mr-0">
     <div x-data="avatarComponent(@js($name), @js($colors))">
-        <div
-            class="flex items-center justify-center w-6 h-6 text-xxs text-white rounded-full"
-            :class="bgColor">
+        <div class="flex items-center justify-center w-6 h-6 text-white rounded-full text-xxs" :class="bgColor">
             <span x-text="initials"></span>
         </div>
     </div>
-   <div class="font-semibold text-text dark:text-text-dark">{{ $name }}</div>
+    <div class="text-sm font-semibold text-text dark:text-text-dark">{{ $name }}</div>
 </div>

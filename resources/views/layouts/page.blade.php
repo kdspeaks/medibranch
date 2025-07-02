@@ -3,6 +3,9 @@
     'hasPadding' => true,
     'actionButton' => null,
 ])
+<x-slot name="title">
+    {{ $title }}
+</x-slot>
 <div>
     <livewire:components.ui.nav />
     <div class="flex pt-16 overflow-hidden bg-background dark:bg-background-dark">

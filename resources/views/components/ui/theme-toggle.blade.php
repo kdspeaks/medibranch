@@ -18,7 +18,7 @@
                 <i class="fas fa-sun text-surface text-sm relative z-10 transition-colors duration-300"></i>
             </template>
             <template x-if="dark">
-                <i class="fas fa-moon text-primary-dark text-sm relative z-10 transition-colors duration-300"></i>
+                <i class="fas fa-moon text-text-muted-dark text-sm relative z-10 transition-colors duration-300"></i>
             </template>
             <span class="sr-only">Toggle Theme</span>
         </button>

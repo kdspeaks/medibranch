@@ -1,4 +1,4 @@
-<x-page-layout>
+<x-page-layout title="Permissions">
     <x-slot name="actionButton">
         {{-- <x-ui.button icon="fas-plus" class="w-full" @click="$dispatch('create-permission')">
              Create Permission
@@ -7,10 +7,8 @@
     </x-slot>
 
     <div class="md:mt-5">
-        <livewire:filament-permission-table />
+        {{ $this->table }}
     </div>
-    <livewire:components.ui.modal.create-permission />
-    <livewire:components.ui.modal.delete />
 
 
     <x-filament-actions::modals />

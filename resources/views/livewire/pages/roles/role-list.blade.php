@@ -1,13 +1,12 @@
-<x-page-layout title="Users">
+<x-page-layout title="Roles">
     <x-slot name="actionButton">
         {{-- <x-ui.button icon="fas-plus" class="w-full" @click="$dispatch('create-permission')">
              Create Permission
          </x-ui.button> --}}
         {{ $this->createAction }}
     </x-slot>
-    <div class="my-5">
-        {{-- <livewire:pages.users.user-table /> --}}
+    <div class="md:mt-5">
         {{ $this->table }}
     </div>
-    <livewire:components.ui.modal.change-role />
+    <x-filament-actions::modals />
 </x-page-layout>
