@@ -30,13 +30,23 @@
                      <x-icon name="fas-xmark" id="toggleSidebarMobileClose" class="hidden w-6 h-6" />
                  </button>
 
-                 <a href="./" class="flex mr-14">
-                     <img src="../images/logo.svg" class="h-8 mr-3" alt="Logo" />
-                     <span class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white"
-                         x-data="{ siteName: '{{ setting('site_name') }}' }" x-init="window.addEventListener('site-name-updated', e => {
-                             siteName = e.detail.site_name;
-                         })"
-                         x-text="siteName"></span>
+                 <a href="{{route('dashboard')}}" class="flex mr-14 flex-col relative">
+                     <div class="flex">
+                         <img src="../images/logo.svg" class="h-8 mr-3" alt="Logo" />
+                         <span class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white"
+                             x-data="{ siteName: '{{ setting('site_name') }}' }" x-init="window.addEventListener('site-name-updated', e => {
+                                 siteName = e.detail.site_name;
+                             })"
+                             x-text="siteName"></span>
+                     </div>
+                     <div class="ml-auto absolute -bottom-4 right-0">
+                        <span
+                         x-data="{ siteBranch: '{{ activeBranch()->name }}' }"
+                         x-init="window.addEventListener('branch-name-updated', e => {
+                                 siteBranch = e.detail.branch_name;
+                             })"
+                        class="bg-primary p-1 rounded text-text-dark text-xxs" x-text="siteBranch"></span>
+                     </div>
                  </a>
 
              </div>

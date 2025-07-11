@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Livewire\Pages\Roles;
+namespace App\Livewire\Pages\Medicines;
 
-
+use App\Models\Medicine;
 use Livewire\Component;
 use Filament\Tables\Table;
 use Filament\Actions\Action;
@@ -25,7 +25,7 @@ use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Tables\Actions\CreateAction as ActionsCreateAction;
 
-class RoleList extends Component implements HasForms, HasActions, HasTable
+class MedicineList extends Component implements HasForms, HasActions, HasTable
 {
     use InteractsWithActions;
     use InteractsWithTable;
@@ -54,7 +54,7 @@ class RoleList extends Component implements HasForms, HasActions, HasTable
     public function createAction(): Action
     {
         return CreateAction::make('create')
-            ->model(Role::class)
+            ->model(Medicine::class)
             ->label('Create Role')
             ->modalHeading('Create New Role')
             ->form([
@@ -83,7 +83,7 @@ class RoleList extends Component implements HasForms, HasActions, HasTable
     public function table(Table $table): Table
     {
         return $table
-            ->query(Role::query())
+            ->query(Medicine::query())
 
             ->columns([
                 TextColumn::make('name')
@@ -124,6 +124,6 @@ class RoleList extends Component implements HasForms, HasActions, HasTable
 
     public function render()
     {
-        return view('livewire.pages.roles.role-list');
+        return view('livewire.pages.medicines.medicine-list');
     }
 }

@@ -56,3 +56,17 @@
 .dark .fi-ta-ctn {
     @apply bg-surface-dark rounded-sm divide-border-dark;
 }
+
+.fi-modal-window, .fi-section {
+    @apply bg-surface;
+}
+.dark .fi-modal-window, .dark .fi-section {
+    @apply bg-surface-dark;
+}
+
+.fi-no-notification {
+    @apply bg-surface ring-border;
+}
+.dark .fi-no-notification {
+    @apply bg-surface-dark ring-border-dark;
+}
