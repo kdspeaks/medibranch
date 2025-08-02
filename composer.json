@@ -18,6 +18,7 @@
         "owenvoke/blade-fontawesome": "^2.9",
         "power-components/livewire-powergrid": "^6.4",
         "spatie/laravel-permission": "^6.18",
+        "symfony/intl": "^7.3",
         "themesberg/flowbite-blade-icons": "^1.2"
     },
     "require-dev": {

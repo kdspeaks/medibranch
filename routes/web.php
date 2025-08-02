@@ -7,10 +7,15 @@ use App\Livewire\Pages\Roles\RoleList;
 use App\Livewire\Pages\Users\UserList;
 use Illuminate\Support\Facades\Session;
 use App\Livewire\Pages\Branches\BranchList;
-use App\Livewire\Pages\Medicines\MedicineCreate;
-use App\Livewire\Pages\Medicines\MedicineList;
 use App\Livewire\Pages\Roles\PermissionList;
 use App\Livewire\Pages\Settings\SiteSettings;
+use App\Livewire\Pages\Medicines\MedicineEdit;
+use App\Livewire\Pages\Medicines\MedicineList;
+use App\Livewire\Pages\Medicines\MedicineView;
+use App\Livewire\Pages\Medicines\MedicineCreate;
+use App\Livewire\Pages\Medicines\ManufacturerList;
+use App\Livewire\Pages\Medicines\TaxList;
+use App\Models\Tax;
 
 require __DIR__ . '/auth.php';
 
@@ -26,15 +31,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('profile');
 
     Route::get('/users', UserList::class)
-        ->middleware('can:manage-users')
+        // ->middleware('can:manage-users')
         ->name('users');
 
     Route::get('/roles', RoleList::class)
-        ->middleware('can:manage-roles-permission')
+        // ->middleware('can:manage-roles-permission')
         ->name('roles');
 
     Route::get('/permissions', PermissionList::class)
-        ->middleware('can:manage-roles-permission')
+        // ->middleware('can:manage-roles-permission')
         ->name('permissions');
 
     Route::get('/settings/site', SiteSettings::class)
@@ -48,10 +53,27 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/medicines/list', MedicineList::class)
         ->middleware('can:manage-medicines')
         ->name('medicines.list');
-    
-        Route::get('/medicines/create', MedicineCreate::class)
+
+    Route::get('/medicines/create', MedicineCreate::class)
         ->middleware('can:manage-medicines')
         ->name('medicines.create');
+
+    Route::get('/medicines/{medicine}/edit', MedicineEdit::class)
+        ->middleware('can:manage-medicines')
+        ->name('medicines.edit');
+
+    Route::get('/medicines/view/{medicine}', MedicineView::class)
+        ->middleware('can:manage-medicines')
+        ->name('medicines.view');
+
+
+    Route::get('/medicines/manufacturers', ManufacturerList::class)
+        ->middleware('can:manage-medicines')
+        ->name('medicines.manufacturers');
+    
+        Route::get('/medicines/taxes', TaxList::class)
+        ->middleware('can:manage-medicines')
+        ->name('medicines.taxes');
 });
 
 Route::view('/style-guide', 'style-guide')->name('style.guide');

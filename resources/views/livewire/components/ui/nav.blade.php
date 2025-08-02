@@ -41,7 +41,7 @@
                      </div>
                      <div class="ml-auto absolute -bottom-4 right-0">
                         <span
-                         x-data="{ siteBranch: '{{ activeBranch()->name }}' }"
+                         x-data="{ siteBranch: '{{ activeBranch()?->name ?? "" }}' }"
                          x-init="window.addEventListener('branch-name-updated', e => {
                                  siteBranch = e.detail.branch_name;
                              })"

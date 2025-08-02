@@ -25,6 +25,7 @@ use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Tables\Actions\CreateAction as ActionsCreateAction;
 use Filament\Tables\Columns\ViewColumn;
+use Illuminate\Support\Facades\Auth;
 
 class UserList extends Component implements HasForms, HasActions, HasTable
 {
@@ -61,10 +62,18 @@ class UserList extends Component implements HasForms, HasActions, HasTable
             ->form([
                 Group::make([
                     TextInput::make('name')
-                        ->unique(ignoreRecord: true)
                         ->label('Name')
                         ->required()
                         ->maxLength(255),
+                    TextInput::make('email')
+                        ->unique(ignoreRecord: true)
+                        ->required()
+                        ->maxLength(255),
+                    TextInput::make('password')
+                        ->required()
+                        ->maxLength(255)
+                        ->password()
+                        ->revealable(),
 
                     Select::make('roles')
                         ->required()
@@ -87,12 +96,12 @@ class UserList extends Component implements HasForms, HasActions, HasTable
 
             ->columns([
                 ViewColumn::make('name')
-                    ->view('components.datatable.name')
+                    ->view('components.datatable.user_name')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('email'),
                 TextColumn::make('roles.name')
-                ->sortable()
+                    ->sortable()
 
             ])
             ->filters([
@@ -100,23 +109,38 @@ class UserList extends Component implements HasForms, HasActions, HasTable
             ])
             ->actions([
                 EditAction::make()
-                    ->modalHeading('Edit Permission')
-                    ->visible(fn($record) => $record->name !== 'Super Admin')
+                    ->modalHeading('Edit User')
+                    ->visible(fn($record) => !$record->roles->contains('name', 'Super Admin'))
                     ->form([
-                        TextInput::make('name')
-                            ->required()
-                            ->unique(ignoreRecord: true)
-                            ->maxLength(255),
-                        Select::make('roles')
-                            ->required()
-                            ->relationship('roles', 'name')
-                            ->label('Assign Permissions')
-                            ->required()
-                            ->columns(4)
-                            ->native(false),
+                        Group::make([
+                            TextInput::make('name')
+                                ->label('Name')
+                                ->required()
+                                ->maxLength(255),
+                            TextInput::make('email')
+                                ->unique(ignoreRecord: true)
+                                ->required()
+                                ->maxLength(255),
+                            TextInput::make('password')
+                                ->required()
+                                ->maxLength(255)
+                                ->password()
+                                ->revealable(),
+
+                            Select::make('roles')
+                                ->required()
+                                ->relationship('roles', 'name')
+                                ->label('Role')
+                                ->required()
+                                ->columns(4)
+                                ->native(false),
+
+
+
+                        ])
                     ]),
                 DeleteAction::make()
-                    ->visible(fn($record) => $record->name !== 'Super Admin')
+                    ->visible(fn($record) => !$record->roles->contains('name', 'Super Admin'))
                     ->requiresConfirmation()
             ])
             ->bulkActions([

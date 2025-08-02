@@ -203,3 +203,13 @@ document.addEventListener('livewire:navigated', () => {
     initFlowbite()
     sidebarToggler();
 })
+
+window.addEventListener('livewire:updated', () => {
+    
+});
+// Livewire.hook('morph.updated', ({ el, component }) => {
+//     console.log('[Livewire] DOM updated — reinitializing...');
+//     initFlowbite();
+//     sidebarToggler();
+// })
+

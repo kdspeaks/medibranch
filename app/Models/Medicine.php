@@ -2,9 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\Tax;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Medicine extends Model
 {
@@ -86,5 +87,10 @@ class Medicine extends Model
     public function getPackingLabelAttribute(): string
     {
         return "{$this->packing_quantity} {$this->packing_unit}";
+    }
+
+    public function tax()
+    {
+        return $this->belongsTo(Tax::class);
     }
 }

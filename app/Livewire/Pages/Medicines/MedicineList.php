@@ -2,8 +2,8 @@
 
 namespace App\Livewire\Pages\Medicines;
 
-use App\Models\Medicine;
 use Livewire\Component;
+use App\Models\Medicine;
 use Filament\Tables\Table;
 use Filament\Actions\Action;
 use Livewire\Attributes\Title;
@@ -11,13 +11,17 @@ use Filament\Actions\CreateAction;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Roles;
 use Filament\Forms\Components\Group;
+use Illuminate\Support\Facades\Auth;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ViewColumn;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
 use Spatie\Permission\Models\Permission;
 use Filament\Tables\Actions\DeleteAction;
+use Filament\Tables\Columns\ToggleColumn;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -84,32 +88,55 @@ class MedicineList extends Component implements HasForms, HasActions, HasTable
     {
         return $table
             ->query(Medicine::query())
-
             ->columns([
-                TextColumn::make('name')
-                    ->searchable()
+                ViewColumn::make('name')
+                    ->view('components.datatable.medicine_name')
+                    ->searchable(['name', 'sku'])
                     ->sortable(),
-                TextColumn::make('permissions.name')
-                    ->separator(', ')
+                // TextColumn::make('name')
+                //     ->searchable()
+                //     ->sortable(),
+
+                TextColumn::make('potency')
+                    ->separator(', '),
+                TextColumn::make('form')
+                    ->separator(', '),
+                TextColumn::make('barcode')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('packing_info')
+                    ->label('Packing')
+                    ->state(fn($record) => "{$record->packing_quantity}{$record->packing_unit}"),
+                TextColumn::make('price_info')
+                    ->label('Last Updated Price')
+                    ->view('components.datatable.medicine_price'),
+                TextColumn::make('tax.name')
+                    ->separator(', '),
+                ToggleColumn::make('is_active')
+                    ->label('Active')
+                    ->onIcon('heroicon-m-check-circle')
+                    ->offIcon('heroicon-m-x-circle')
+                    ->toggleable()
+                    ->sortable()
+                    ->visible(Auth::user()?->can('manage_medicines'))
+                    ->afterStateUpdated(function ($record, $state) {
+                        // Runs after the state is saved to the database.
+                        Notification::make()
+                            ->title('Medicine Updated')
+                            ->body('Medicine has been successfully updated.')
+                            ->success()
+                            ->send();
+                    }),
+
             ])
             ->filters([
                 // ...
             ])
             ->actions([
-                EditAction::make()
-                    ->modalHeading('Edit Permission')
-                    ->visible(fn($record) => $record->name !== 'Super Admin')
-                    ->form([
-                        TextInput::make('name')
-                            ->required()
-                            ->unique(ignoreRecord: true)
-                            ->maxLength(255),
-                        CheckboxList::make('permissions')
-                            ->relationship('permissions', 'name')
-                            ->label('Assign Permissions')
-                            // ->required()
-                            ->columns(4),
-                    ]),
+                \Filament\Tables\Actions\Action::make('edit')
+                    ->icon('heroicon-m-pencil-square')
+                    ->url(fn(Medicine $record) => route('medicines.edit', ['medicine' => $record]))
+                    ->extraAttributes(['wire:navigate' => 'true']),
                 DeleteAction::make()
                     ->visible(fn($record) => $record->name !== 'Super Admin')
                     ->requiresConfirmation()
@@ -119,7 +146,10 @@ class MedicineList extends Component implements HasForms, HasActions, HasTable
             ])
             ->headerActions([])
             ->paginated([10, 20, 50, 100, 'all'])
-            ->defaultPaginationPageOption(20);;
+            ->defaultPaginationPageOption(20)
+            ->recordUrl(
+                fn(Medicine $record) => route('medicines.view', ['medicine' => $record])
+            );
     }
 
     public function render()

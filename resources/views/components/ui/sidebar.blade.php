@@ -9,39 +9,46 @@
                     <x-ui.sidebar-link route="dashboard" icon="fas-chart-pie">
                         Dashboard
                     </x-ui.sidebar-link>
+                    
                     @can('manage-medicines')
-                        <x-ui.sidebar-link route="medicines.list" icon="fas-pills">
-                            Medicines
+                        <x-ui.sidebar-dropdown title="Medicines" icon="fas-pills">
+                            <x-ui.sidebar-subitem route="medicines.list">Medicines List</x-ui.sidebar-subitem>
+                            <x-ui.sidebar-subitem route="medicines.manufacturers">Manufacturers</x-ui.sidebar-subitem>
+                            <x-ui.sidebar-subitem route="medicines.taxes">Taxes</x-ui.sidebar-subitem>
+                        </x-ui.sidebar-dropdown>
+                    @endcan
+
+                     @can('manage-branches')
+                        <x-ui.sidebar-link route="branches" icon="fas-store">
+                            Branches
                         </x-ui.sidebar-link>
                     @endcan
+
+                    
                     @can('manage-users')
                         <x-ui.sidebar-link route="users" icon="fas-users">
                             Users
                         </x-ui.sidebar-link>
                     @endcan
+                    
                     @can('manage-roles-permission')
                         <x-ui.sidebar-dropdown title="Roles & Permissions" icon="fas-shield-halved">
                             <x-ui.sidebar-subitem route="roles">Roles</x-ui.sidebar-subitem>
                             <x-ui.sidebar-subitem route="permissions">Permissions</x-ui.sidebar-subitem>
                         </x-ui.sidebar-dropdown>
                     @endcan
-                    
-                    @can('manage-branches')
-                        <x-ui.sidebar-link route="branches" icon="fas-store">
-                            Branches
-                        </x-ui.sidebar-link>
-                    @endcan
 
+                   
                     @can('manage-settings')
                         <x-ui.sidebar-link route="settings.site" icon="fas-cog">
                             Settings
                         </x-ui.sidebar-link>
                     @endcan
-                    
-                    
-                    
-                    
-                    
+
+
+
+
+
                 </ul>
 
 

@@ -21,6 +21,6 @@ class Checkbox extends Component
      */
     public function render(): View|Closure|string
     {
-        return view('components.u-i.checkbox');
+        return view('components.ui.checkbox');
     }
 }
