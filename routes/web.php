@@ -1,21 +1,24 @@
 <?php
 
-use App\Livewire\Pages\Dashboard;
+use App\Models\Tax;
 
+use App\Livewire\Pages\Dashboard;
 use Illuminate\Support\Facades\Route;
 use App\Livewire\Pages\Roles\RoleList;
 use App\Livewire\Pages\Users\UserList;
 use Illuminate\Support\Facades\Session;
+use App\Livewire\Pages\Medicines\TaxList;
 use App\Livewire\Pages\Branches\BranchList;
 use App\Livewire\Pages\Roles\PermissionList;
+use App\Livewire\Pages\Purchase\PurchaseList;
 use App\Livewire\Pages\Settings\SiteSettings;
+use App\Livewire\Pages\Supplier\SupplierList;
 use App\Livewire\Pages\Medicines\MedicineEdit;
 use App\Livewire\Pages\Medicines\MedicineList;
 use App\Livewire\Pages\Medicines\MedicineView;
+use App\Livewire\Pages\Purchase\PurchaseCreate;
 use App\Livewire\Pages\Medicines\MedicineCreate;
 use App\Livewire\Pages\Medicines\ManufacturerList;
-use App\Livewire\Pages\Medicines\TaxList;
-use App\Models\Tax;
 
 require __DIR__ . '/auth.php';
 
@@ -58,7 +61,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->middleware('can:manage-medicines')
         ->name('medicines.create');
 
-    Route::get('/medicines/{medicine}/edit', MedicineEdit::class)
+    Route::get('/medicines/edit/{medicine}', MedicineEdit::class)
         ->middleware('can:manage-medicines')
         ->name('medicines.edit');
 
@@ -70,10 +73,22 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/medicines/manufacturers', ManufacturerList::class)
         ->middleware('can:manage-medicines')
         ->name('medicines.manufacturers');
-    
-        Route::get('/medicines/taxes', TaxList::class)
+
+    Route::get('/medicines/taxes', TaxList::class)
         ->middleware('can:manage-medicines')
         ->name('medicines.taxes');
+
+    Route::get('/medicines/suppliers', SupplierList::class)
+        ->middleware('can:manage-medicines')
+        ->name('medicines.suppliers');
+
+    Route::get('/medicines/purchases/list', PurchaseList::class)
+        ->middleware('can:manage-medicines')
+        ->name('medicines.purchases.list');
+    
+        Route::get('/medicines/purchases/create', PurchaseCreate::class)
+        ->middleware('can:manage-medicines')
+        ->name('medicines.purchases.create');
 });
 
 Route::view('/style-guide', 'style-guide')->name('style.guide');

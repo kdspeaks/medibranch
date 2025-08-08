@@ -73,5 +73,9 @@ class DatabaseSeeder extends Seeder
         ]);
         
         $medicines = Medicine::factory(50)->create();
+
+        $this->call([
+            SupplierSeeder::class, // Add SupplierSeeder to the call
+        ]);
     }
 }

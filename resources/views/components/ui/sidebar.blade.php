@@ -15,6 +15,8 @@
                             <x-ui.sidebar-subitem route="medicines.list">Medicines List</x-ui.sidebar-subitem>
                             <x-ui.sidebar-subitem route="medicines.manufacturers">Manufacturers</x-ui.sidebar-subitem>
                             <x-ui.sidebar-subitem route="medicines.taxes">Taxes</x-ui.sidebar-subitem>
+                            <x-ui.sidebar-subitem route="medicines.suppliers">Suppliers</x-ui.sidebar-subitem>
+                            <x-ui.sidebar-subitem route="medicines.purchases.list">Purchases</x-ui.sidebar-subitem>
                         </x-ui.sidebar-dropdown>
                     @endcan
 
