@@ -3,6 +3,7 @@
 namespace App\Livewire\Pages\Medicines;
 
 use App\Livewire\Pages\Medicines\Concerns\HasMedicineForm;
+use Livewire\Attributes\On;
 use Livewire\Component;
 // use Filament\Actions\Action;
 use App\Models\Medicine;
@@ -30,11 +31,11 @@ class MedicineCreate extends Component implements HasForms
         $this->form->fill();
     }
 
-    public function resetForm() {
+    public function resetForm()
+    {
         $this->form->fill();
     }
 
-    
 
     public function submit()
     {
@@ -49,14 +50,14 @@ class MedicineCreate extends Component implements HasForms
     public function formSubmit()
     {
         $this->submit();
-            
+
         return $this->redirect(route('medicines.list'), navigate: true); // Update this route to your actual list page
     }
-    
+
     public function submitAndCreate()
     {
         $this->submit();
-        
+
         $this->form->fill(); // Reset the form for creating another medicine
         $this->dispatch('scroll-to-top');
     }

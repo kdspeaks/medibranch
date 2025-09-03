@@ -1,6 +1,7 @@
 <x-page-layout title="Create Purchase">
     <x-slot name="actionButton">
-        <x-ui.button icon="fas-plus" variant="outline" class="w-full" wire:navigate href="{{ route('medicines.purchases.list') }}">
+        <x-ui.button icon="fas-plus" variant="outline" class="w-full" wire:navigate
+            href="{{ route('medicines.purchases.list') }}">
             Back to Purchases
         </x-ui.button>
     </x-slot>
@@ -23,7 +24,11 @@
                 behavior: 'smooth'
             });
         });
+        // document.addEventListener('livewire:init', () => {
+        //     Livewire.on('medicine-selected', (event) => {
+        //         //
+        //     });
+        // });
     </script>
     <x-filament-actions::modals />
 </x-page-layout>
-

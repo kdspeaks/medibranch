@@ -2,46 +2,45 @@
 
 namespace App\Livewire\Pages\Purchase\Concerns;
 
-use Filament\Forms\Components\View;
-use App\Models\{Branch, Supplier, Medicine, Tax, InventoryBatch, Purchase};
-use Filament\Forms\Components\{Section, Group, Grid, Select, TextInput, DatePicker, Textarea, Repeater, ToggleButtons};
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Livewire;
+use App\Models\{Branch, Supplier, Medicine, Tax, Purchase};
+use Filament\Forms\Components\{Section, Select, TextInput, DatePicker, Textarea, Repeater};
 
 trait HasPurchaseForm
 {
     public ?Purchase $cPurchase = null;
-    public string $medicineSearch = '';
-    public array $medicineSuggestions = [];
 
     public function setPurchase(Purchase $purchase): void
     {
         $this->cPurchase = $purchase;
-        // dd($this->cMedicine);
-    }
-    public function computeAndSetSku(callable $get, callable $set): void
-    {
-        $name = $get('name') ?? '';
-        $potency = $get('potency') ?? '';
-        $form = $get('form') ?? '';
-        $packingQuantity = $get('packing_quantity') ?? '';
-        $packingUnit = $get('packing_unit') ?? '';
-        $formShort = $form ? substr($form, 0, 3) : '';
-        $slugName = $name ? strtolower(preg_replace('/[^A-Za-z0-9]/', '_', $name)) : '';
-        $unitCode = Medicine::packingUnitCodeMap()[$packingUnit] ?? strtoupper($packingUnit);
-        $sku = "{$slugName}-{$potency}-{$formShort}-{$packingQuantity}{$unitCode}";
-        $set('sku', strtoupper(trim($sku, '-')));
+        $this->form->fill($purchase->load('items')->toArray()); // fill with existing data
     }
 
-    public function saveMedicine(): Medicine
+    public function savePurchase(): Purchase
     {
         $validated = $this->form->getState();
-        dd($validated);
 
-        $medicine = Medicine::create($validated);
+        if ($this->cPurchase?->exists) {
+            // --- Update existing purchase ---
+            $this->cPurchase->update($validated);
+            $this->cPurchase->items()->delete();
 
+            foreach ($validated['items'] ?? [] as $item) {
+                $this->cPurchase->items()->create($item);
+            }
 
+            return $this->cPurchase;
+        }
 
+        // --- Create new purchase ---
+        $purchase = Purchase::create($validated);
 
-        return $medicine;
+        foreach ($validated['items'] ?? [] as $item) {
+            $purchase->items()->create($item);
+        }
+
+        return $purchase;
     }
 
     public function purchaseFormSchema(): array
@@ -54,18 +53,18 @@ trait HasPurchaseForm
                         ->label('Branch')
                         ->required()
                         ->searchable()
-                        ->relationship('branch', 'name'),
+                        ->options(fn() => Branch::pluck('name', 'id')->toArray())
+                        ->default(fn() => activeBranch()?->id ?? null),
 
                     Select::make('supplier_id')
                         ->label('Supplier')
                         ->nullable()
                         ->searchable()
-                        ->relationship('supplier', 'name'),
+                        ->options(fn() => Supplier::pluck('name', 'id')->toArray()),
 
                     TextInput::make('invoice_number')
                         ->label('Invoice No.')
-                        ->maxLength(255)
-                        ->columnSpan(1),
+                        ->maxLength(255),
 
                     DatePicker::make('purchase_date')
                         ->label('Purchase Date')
@@ -92,7 +91,7 @@ trait HasPurchaseForm
                         ->label('Status')
                         ->required()
                         ->options([
-                            'pending' => 'Pending',
+                            'pending'   => 'Pending',
                             'completed' => 'Completed',
                             'cancelled' => 'Cancelled',
                         ])
@@ -101,32 +100,42 @@ trait HasPurchaseForm
 
             Section::make('Items')
                 ->schema([
-                    View::make('livewire.pages.purchase.medicine-search-dropdown')
+                    Livewire::make(\App\Livewire\Pages\Medicines\MedicineSearch::class)
+                        ->key('medicine-search') // unique key for this instance
+                        ->lazy()
                         ->label('Search or Scan Medicine'),
-
-
-                    Repeater::make('')
-                        ->label('Purchase Items')
-                        ->relationship()
-                        ->columns(3)
+                    Repeater::make('items')
+                        ->addable(false)
+                        ->defaultItems(0)
+                        ->columns(9)
                         ->schema([
-                            Select::make('medicine_id')
+                            Hidden::make('medicine_id'),
+
+                            TextInput::make('medicine_name')
                                 ->label('Medicine')
-                                ->searchable()
-                                ->required(),
-                            // ->relationship('medicine', 'name'),
+                                ->disabled(),
 
                             TextInput::make('quantity')
                                 ->label('Quantity')
                                 ->numeric()
                                 ->required()
-                                ->minValue(1),
+                                ->minValue(1)
+                                ->reactive()
+                                ->afterStateUpdated(
+                                    fn($state, $set, $get) =>
+                                    $set('total_amount', (float)$state * (float)$get('unit_purchase_price'))
+                                ),
 
                             TextInput::make('unit_purchase_price')
                                 ->label('Purchase Price')
                                 ->numeric()
                                 ->required()
-                                ->minValue(0),
+                                ->minValue(0)
+                                ->reactive()
+                                ->afterStateUpdated(
+                                    fn($state, $set, $get) =>
+                                    $set('total_amount', (float)$get('quantity') * (float)$state)
+                                ),
 
                             TextInput::make('unit_selling_price')
                                 ->label('Selling Price')
@@ -151,7 +160,7 @@ trait HasPurchaseForm
                                 ->label('Tax')
                                 ->nullable()
                                 ->searchable()
-                                ->relationship('tax', 'name'),
+                                ->options(fn() => Tax::pluck('name', 'id')->toArray()),
 
                             TextInput::make('total_amount')
                                 ->label('Line Total')
@@ -160,9 +169,14 @@ trait HasPurchaseForm
                                 ->disabled()
                                 ->default(0.00),
                         ])
-                        ->createItemButtonLabel('Add Item')
                         ->collapsible()
-                        ->statePath('purchase_items') // Explicitly define path,
+                        ->afterStateUpdated(function ($state, $set) {
+                            // $state is the updated repeater array
+                            $total = collect($state)
+                                ->sum(fn($item) => (float) ($item['total_amount'] ?? 0));
+
+                            $set('total_amount', $total);
+                        }),
                 ]),
 
             Section::make('Additional Notes')
@@ -172,68 +186,6 @@ trait HasPurchaseForm
                         ->rows(3)
                         ->nullable(),
                 ])
-        ];
-    }
-
-
-
-
-
-    public function updatedMedicineSearch($value)
-    {
-        dd($value);
-        // Search only if 2+ characters
-        if (strlen($value) < 2) {
-            $this->medicineSuggestions = [];
-            return;
-        }
-
-        $this->medicineSuggestions = Medicine::query()
-            ->where('name', 'like', '%' . $value . '%')
-            ->orWhere('barcode', $value)
-            ->limit(10)
-            ->get()
-            ->map(function ($medicine) {
-                return [
-                    'id' => $medicine->id,
-                    'name' => $medicine->name,
-                    'barcode' => $medicine->barcode,
-                    'price' => $medicine->purchase_price,
-                ];
-            })
-            ->toArray();
-
-        // dd($this->medicineSuggestions);
-    }
-
-    public function selectMedicineFromSearch($medicineId)
-    {
-        $medicine = Medicine::find($medicineId);
-        if (! $medicine) return;
-
-        $this->addPurchaseItem($medicine);
-        $this->medicineSearch = '';
-        $this->medicineSuggestions = [];
-    }
-
-
-    public function addPurchaseItem(Medicine $medicine)
-    {
-        // Check if already added
-        if (collect($this->purchase_items)->contains('medicine_id', $medicine->id)) {
-            return; // Or increase quantity if desired
-        }
-
-        $this->purchase_items[] = [
-            'medicine_id' => $medicine->id,
-            'quantity' => 1,
-            'unit_purchase_price' => $medicine->purchase_price ?? 0,
-            'unit_selling_price' => $medicine->selling_price ?? 0,
-            'batch_number' => '',
-            'mfg_date' => null,
-            'expiry_date' => null,
-            'tax_id' => null,
-            'total_amount' => 0,
         ];
     }
 }

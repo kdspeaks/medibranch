@@ -4,7 +4,13 @@
             Back to Medicines
         </x-ui.button>
     </x-slot>
-    <div class="my-5">
+    <div class="my-5" {{-- x-data --}} {{-- x-on:ui:medicine-selected.window="
+            // $event.detail has: id, name, purchase_price, selling_price
+            $wire.call('onMedicineSelectedFromJs', $event.detail.id)
+        " --}}
+        x-on:medicine-selected.window="
+            alert('ok')
+        ">
         <form wire:submit.prevent="formSubmit" id="create-medicine-form">
             {{ $this->form }}
             <div class="flex gap-2">
