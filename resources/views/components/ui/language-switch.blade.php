@@ -1,7 +1,7 @@
 <div x-data="{ open: false }">
     <div class="relative">
         <button @click="open = !open"
-            class="flex items-center justify-between px-4 py-2 text-sm font-medium text-text bg-surface border border-border rounded-lg shadow-md hover:bg-surface/80 focus:outline-none dark:bg-surface-dark dark:text-text-dark dark:border-border-dark">
+            class="flex items-center justify-between px-4 py-2 text-sm font-medium text-text bg-surface border border-border rounded-lg shadow-md hover:bg-surface/80 focus:outline-hidden dark:bg-surface-dark dark:text-text-dark dark:border-border-dark">
             <i class="fas fa-language mr-2"></i> {{ strtoupper(app()->getLocale()) }}
             <i class="fas fa-chevron-down ml-2 text-xs" x-show="!open"></i>
             <i class="fas fa-chevron-up ml-2 text-xs" x-show="open"></i>

@@ -25,7 +25,7 @@
 
         <!-- Flowbite Tooltip -->
         <div id="tooltip-theme" role="tooltip"
-            class="absolute z-50 invisible inline-block px-2 py-1 text-xs font-medium text-text transition-opacity bg-surface rounded-lg shadow-sm opacity-0 tooltip dark:bg-surface-dark dark:text-text-dark whitespace-nowrap">
+            class="absolute z-50 invisible inline-block px-2 py-1 text-xs font-medium text-text transition-opacity bg-surface rounded-lg shadow-xs opacity-0 tooltip dark:bg-surface-dark dark:text-text-dark whitespace-nowrap">
             <span x-text="dark ? '{{ __('messages.light_mode') }}' : '{{ __('messages.dark_mode') }}'"></span>
             <div class="tooltip-arrow" data-popper-arrow></div>
         </div>

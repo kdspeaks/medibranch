@@ -19,8 +19,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Anek+Bangla:wght@100..800&display=swap" rel="stylesheet">
 
     <!-- Scripts -->
-    @filamentStyles
+    
     @vite('resources/css/app.css')
+    @filamentStyles
     @livewireStyles
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="{{ asset('images/favicon.ico') }}">
@@ -33,9 +34,10 @@
     {{ $slot }}
 
     @livewire('notifications')
-    @vite('resources/js/app.js')
     @filamentScripts
     @livewireScripts
+    @vite('resources/js/app.js')
+    
 </body>
 
 </html>

@@ -19,12 +19,12 @@
          <div class="flex items-center justify-between">
              <div class="flex items-center justify-start">
                  <button id="toggleSidebar" aria-expanded="true" aria-controls="sidebar"
-                     class="hidden p-2 mr-3 text-text rounded cursor-pointer lg:inline hover:text-text hover:bg-surface focus:ring-2 focus:ring-border dark:text-text-dark dark:hover:text-text-dark dark:hover:bg-surface-dark dark:focus:ring-border-dark">
+                     class="hidden p-2 mr-3 text-text rounded-sm cursor-pointer lg:inline hover:text-text hover:bg-surface focus:ring-2 focus:ring-border dark:text-text-dark dark:hover:text-text-dark dark:hover:bg-surface-dark dark:focus:ring-border-dark">
                      <x-icon name="fas-bars-staggered" class="w-6 h-6" />
                  </button>
 
                  <button id="toggleSidebarMobile" aria-expanded="true" aria-controls="sidebar"
-                     class="p-2 mr-2 text-text rounded cursor-pointer lg:hidden hover:text-text hover:bg-surface focus:bg-surface focus:ring-2 focus:ring-border dark:text-text-dark dark:hover:text-text-dark dark:hover:bg-surface-dark dark:focus:bg-surface-dark dark:focus:ring-border-dark">
+                     class="p-2 mr-2 text-text rounded-sm cursor-pointer lg:hidden hover:text-text hover:bg-surface focus:bg-surface focus:ring-2 focus:ring-border dark:text-text-dark dark:hover:text-text-dark dark:hover:bg-surface-dark dark:focus:bg-surface-dark dark:focus:ring-border-dark">
 
                      <x-icon name="fas-bars-staggered" id="toggleSidebarMobileHamburger" class="w-6 h-6" />
                      <x-icon name="fas-xmark" id="toggleSidebarMobileClose" class="hidden w-6 h-6" />
@@ -45,7 +45,7 @@
                          x-init="window.addEventListener('branch-name-updated', e => {
                                  siteBranch = e.detail.branch_name;
                              })"
-                        class="bg-primary p-1 rounded text-text-dark text-xxs" x-text="siteBranch"></span>
+                        class="bg-primary p-1 rounded-sm text-text-dark text-xxs" x-text="siteBranch"></span>
                      </div>
                  </a>
 
@@ -87,7 +87,7 @@
 
                      </div>
 
-                     <div class="z-50 hidden my-4 text-base list-none bg-surface divide-y divide-border rounded shadow dark:bg-surface-dark dark:divide-border-dark"
+                     <div class="z-50 hidden my-4 text-base list-none bg-surface divide-y divide-border rounded-sm shadow-sm dark:bg-surface-dark dark:divide-border-dark"
                          id="dropdown-2">
                          <div class="px-4 py-3" role="none">
                              <p class="text-sm text-text dark:text-text-dark" role="none">
@@ -100,7 +100,7 @@
                              </p>
                              @foreach (auth()->user()->getRoleNames() as $role)
                                  <span
-                                     class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-primary/10 text-primary dark:bg-primary-dark/10 dark:text-primary-dark mr-1">
+                                     class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-primary/10 text-primary dark:bg-primary-dark/10 dark:text-primary-dark mr-1">
                                      {{ $role }}
                                  </span>
                              @endforeach

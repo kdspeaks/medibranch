@@ -15,7 +15,7 @@
         <div class="fixed inset-0 z-10 hidden bg-background-dark/50 dark:bg-background-dark/90" id="sidebarBackdrop">
         </div>
         <div class="relative flex flex-col w-full min-h-[calc(100vh-64px)] overflow-hidden lg:ml-64 " id="main-content">
-            <main class="flex-grow">
+            <main class="grow">
                 <div class="pt-6">
                     <div class="flex flex-col md:flex-row justify-between items-start px-4">
                         <div class="flex flex-col justify-between h-full">

@@ -46,7 +46,7 @@
                 <div class="flex justify-center mt-2 md:flex-none md:justify-end sm:mt-0">
 
                     @if (!$paginator->onFirstPage())
-                        <a class="cursor-pointer relative inline-flex items-center px-2 py-2 text-sm font-medium text-primary dark:text-primary-dark bg-surface dark:bg-surface-dark border border-border dark:border-border-dark leading-5 hover:bg-surface-dark/10 dark:hover:bg-surface/10 focus:z-10 focus:outline-none focus:shadow-outline-blue active:bg-primary-100 active:text-white active:dark:text-white  ease-in-out  rounded-l-md"
+                        <a class="cursor-pointer relative inline-flex items-center px-2 py-2 text-sm font-medium text-primary dark:text-primary-dark bg-surface dark:bg-surface-dark border border-border dark:border-border-dark leading-5 hover:bg-surface-dark/10 dark:hover:bg-surface/10 focus:z-10 focus:outline-hidden focus:shadow-outline-blue active:bg-primary-100 active:text-white dark:active:text-white  ease-in-out  rounded-l-md"
                             wire:click="gotoPage(1, '{{ $paginator->getPageName() }}')">
                             <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
                                 class="w-5 h-5">
@@ -76,7 +76,7 @@
                                         $page === $paginator->currentPage() + 2 ||
                                         $page === $paginator->currentPage() - 1 ||
                                         $page === $paginator->currentPage() - 2)
-                                    <a class="select-none cursor-pointer relative inline-flex items-center px-3 py-2 -ml-px text-sm font-medium text-primary dark:text-primary-dark bg-surface dark:bg-surface-dark border border-border dark:border-border-dark leading-5 hover:bg-surface-dark/10 dark:hover:bg-surface/10 focus:z-10 focus:outline-none focus:shadow-outline-blue active:bg-primary-100 active:text-primary  ease-in-out "
+                                    <a class="select-none cursor-pointer relative inline-flex items-center px-3 py-2 -ml-px text-sm font-medium text-primary dark:text-primary-dark bg-surface dark:bg-surface-dark border border-border dark:border-border-dark leading-5 hover:bg-surface-dark/10 dark:hover:bg-surface/10 focus:z-10 focus:outline-hidden focus:shadow-outline-blue active:bg-primary-100 active:text-primary  ease-in-out "
                                         wire:click="gotoPage({{ $page }}, '{{ $paginator->getPageName() }}')">{{ $page }}</a>
                                 @endif
                             @endforeach
@@ -87,7 +87,7 @@
                         <a @class([
                             'block' => $paginator->lastPage() - $paginator->currentPage() >= 2,
                             'hidden' => $paginator->lastPage() - $paginator->currentPage() < 2,
-                            'select-none cursor-pointer relative inline-flex items-center px-2 py-2 text-sm font-medium text-primary dark:text-primary-dark bg-surface dark:bg-surface-dark border border-border dark:border-border-dark leading-5 hover:bg-surface-dark/10 dark:hover:bg-surface/10 focus:z-10 focus:outline-none focus:shadow-outline-blue active:bg-primary-100 active:text-primary  ease-in-out ',
+                            'select-none cursor-pointer relative inline-flex items-center px-2 py-2 text-sm font-medium text-primary dark:text-primary-dark bg-surface dark:bg-surface-dark border border-border dark:border-border-dark leading-5 hover:bg-surface-dark/10 dark:hover:bg-surface/10 focus:z-10 focus:outline-hidden focus:shadow-outline-blue active:bg-primary-100 active:text-primary  ease-in-out ',
                         ]) wire:click="nextPage('{{ $paginator->getPageName() }}')"
                             rel="next">
                             <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
@@ -95,7 +95,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
                             </svg>
                         </a>
-                        <a class="select-none cursor-pointer relative inline-flex items-center px-2 py-2 text-sm font-medium text-primary dark:text-primary-dark bg-surface dark:bg-surface-dark border border-border dark:border-border-dark rounded-r-md leading-5 hover:bg-surface-dark/10 dark:hover:bg-surface/10 focus:z-10 focus:outline-none focus:shadow-outline-blue active:bg-primary-100 active:text-primary  ease-in-out "
+                        <a class="select-none cursor-pointer relative inline-flex items-center px-2 py-2 text-sm font-medium text-primary dark:text-primary-dark bg-surface dark:bg-surface-dark border border-border dark:border-border-dark rounded-r-md leading-5 hover:bg-surface-dark/10 dark:hover:bg-surface/10 focus:z-10 focus:outline-hidden focus:shadow-outline-blue active:bg-primary-100 active:text-primary  ease-in-out "
                             wire:click="gotoPage({{ $paginator->lastPage() }}, '{{ $paginator->getPageName() }}')">
                             <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
                                 class="w-5 h-5">

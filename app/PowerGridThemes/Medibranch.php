@@ -13,7 +13,7 @@ class Medibranch extends Tailwind
         return [
             'layout' => [
                 'base'      => 'inline-block min-w-full align-middle',
-                'div'       => 'overflow-hidden shadow border-border dark:border-border-dark',
+                'div'       => 'overflow-hidden shadow-sm border-border dark:border-border-dark',
                 'table'     => 'min-w-full divide-y divide-border table-fixed dark:divide-border-dark',
                 'container' => 'overflow-x-auto',
                 'actions'   => 'flex gap-2',
@@ -23,7 +23,7 @@ class Medibranch extends Tailwind
                 'thead'    => 'bg-text-dark/70 dark:bg-text/70 border-border dark:border-border-dark',
                 'tr'       => '',
                 'th'       => 'p-4 text-xs font-bold text-left text-muted-text uppercase dark:text-text-muted-dark border-border dark:border-border-dark',
-                'thAction' => '!font-bold',
+                'thAction' => 'font-bold!',
             ],
 
             'body' => [
@@ -45,7 +45,7 @@ class Medibranch extends Tailwind
     {
         return [
             'view'                   => $this->root() . '.footer',
-            'select'                 => 'appearance-none !bg-none flex rounded-md rounded-md border-1 py-1.5 px-4 pr-7 focus:outline-none sm:text-sm sm:leading-6 w-auto bg-input-bg border border-input-border text-text-muted focus:ring-primary focus:border-primary dark:bg-input-bg-dark dark:border-input-border-dark placeholder-input-placeholder dark:placeholder-input-placeholder dark:text-text-muted-dark dark:focus:ring-primary-dark dark:focus:border-primary-dark',
+            'select'                 => 'appearance-none bg-none! flex rounded-md rounded-md border py-1.5 px-4 pr-7 focus:outline-hidden sm:text-sm sm:leading-6 w-auto bg-input-bg border border-input-border text-text-muted focus:ring-primary focus:border-primary dark:bg-input-bg-dark dark:border-input-border-dark placeholder-input-placeholder dark:placeholder-input-placeholder dark:text-text-muted-dark dark:focus:ring-primary-dark dark:focus:border-primary-dark',
             'footer'                 => 'sticky right-0 bottom-0 items-center p-4 w-full bg-surface border-t border-border sm:flex sm:justify-between dark:bg-surface-dark dark:border-border-dark text-text dark:text-text-dark',
             'footer_with_pagination' => '',
         ];
@@ -62,7 +62,7 @@ class Medibranch extends Tailwind
     {
         return [
             'view'  => $this->root() . '.editable',
-            'input' => 'focus:ring-primary-600 focus-within:focus:ring-primary-600 focus-within:ring-primary-600 dark:focus-within:ring-primary-600 flex rounded-md ring-1 transition focus-within:ring-2 dark:ring-pg-primary-600 dark:text-pg-primary-300 text-gray-600 ring-gray-300 dark:bg-pg-primary-800 bg-white dark:placeholder-pg-primary-400 w-full rounded-md border-0 bg-transparent py-1.5 px-2 ring-0 placeholder:text-gray-400 focus:outline-none sm:text-sm sm:leading-6 w-full',
+            'input' => 'focus:ring-primary-600 focus-within:focus:ring-primary-600 focus-within:ring-primary-600 dark:focus-within:ring-primary-600 flex rounded-md ring-1 transition focus-within:ring-2 dark:ring-pg-primary-600 dark:text-pg-primary-300 text-gray-600 ring-gray-300 dark:bg-pg-primary-800 bg-white dark:placeholder-pg-primary-400 w-full rounded-md border-0 bg-transparent py-1.5 px-2 ring-0 placeholder:text-gray-400 focus:outline-hidden sm:text-sm sm:leading-6 w-full',
         ];
     }
 
@@ -79,7 +79,7 @@ class Medibranch extends Tailwind
             'th'    => 'p-4 w-4 text-base font-medium',
             'base'  => '',
             'label' => 'flex items-center',
-            'input' => 'w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600',
+            'input' => 'w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-xs focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600',
         ];
     }
 
@@ -97,8 +97,8 @@ class Medibranch extends Tailwind
     {
         return [
             'view'   => $this->root() . '.filters.boolean',
-            'base'   => 'min-w-[5rem]',
-            'select' => 'appearance-none !bg-none focus:ring-primary-600 focus-within:focus:ring-primary-600 focus-within:ring-primary-600 dark:focus-within:ring-primary-600 flex rounded-md ring-1 transition focus-within:ring-2 dark:ring-pg-primary-600 dark:text-pg-primary-300 text-gray-600 ring-gray-300 dark:bg-pg-primary-800 bg-white dark:placeholder-pg-primary-400 w-full rounded-md border-0 bg-transparent py-1.5 px-2 ring-0 placeholder:text-gray-400 focus:outline-none sm:text-sm sm:leading-6 w-full',
+            'base'   => 'min-w-20',
+            'select' => 'appearance-none bg-none! focus:ring-primary-600 focus-within:focus:ring-primary-600 focus-within:ring-primary-600 dark:focus-within:ring-primary-600 flex rounded-md ring-1 transition focus-within:ring-2 dark:ring-pg-primary-600 dark:text-pg-primary-300 text-gray-600 ring-gray-300 dark:bg-pg-primary-800 bg-white dark:placeholder-pg-primary-400 w-full rounded-md border-0 bg-transparent py-1.5 px-2 ring-0 placeholder:text-gray-400 focus:outline-hidden sm:text-sm sm:leading-6 w-full',
         ];
     }
 
@@ -107,7 +107,7 @@ class Medibranch extends Tailwind
         return [
             'base'  => '',
             'view'  => $this->root() . '.filters.date-picker',
-            'input' => 'flatpickr flatpickr-input focus:ring-primary-600 focus-within:focus:ring-primary-600 focus-within:ring-primary-600 dark:focus-within:ring-primary-600 flex rounded-md ring-1 transition focus-within:ring-2 dark:ring-pg-primary-600 dark:text-pg-primary-300 text-gray-600 ring-gray-300 dark:bg-pg-primary-800 bg-white dark:placeholder-pg-primary-400 w-full rounded-md border-0 bg-transparent py-1.5 px-2 ring-0 placeholder:text-gray-400 focus:outline-none sm:text-sm sm:leading-6 w-auto',
+            'input' => 'flatpickr flatpickr-input focus:ring-primary-600 focus-within:focus:ring-primary-600 focus-within:ring-primary-600 dark:focus-within:ring-primary-600 flex rounded-md ring-1 transition focus-within:ring-2 dark:ring-pg-primary-600 dark:text-pg-primary-300 text-gray-600 ring-gray-300 dark:bg-pg-primary-800 bg-white dark:placeholder-pg-primary-400 w-full rounded-md border-0 bg-transparent py-1.5 px-2 ring-0 placeholder:text-gray-400 focus:outline-hidden sm:text-sm sm:leading-6 w-auto',
         ];
     }
 
@@ -124,7 +124,7 @@ class Medibranch extends Tailwind
     {
         return [
             'view'  => $this->root() . '.filters.number',
-            'input' => 'w-full min-w-[5rem] block focus:ring-primary-600 focus-within:focus:ring-primary-600 focus-within:ring-primary-600 dark:focus-within:ring-primary-600 flex rounded-md ring-1 transition focus-within:ring-2 dark:ring-pg-primary-600 dark:text-pg-primary-300 text-gray-600 ring-gray-300 dark:bg-pg-primary-800 bg-white dark:placeholder-pg-primary-400 rounded-md border-0 bg-transparent py-1.5 pl-2 ring-0 placeholder:text-gray-400 focus:outline-none sm:text-sm sm:leading-6',
+            'input' => 'w-full min-w-20 block focus:ring-primary-600 focus-within:focus:ring-primary-600 focus-within:ring-primary-600 dark:focus-within:ring-primary-600 flex rounded-md ring-1 transition focus-within:ring-2 dark:ring-pg-primary-600 dark:text-pg-primary-300 text-gray-600 ring-gray-300 dark:bg-pg-primary-800 bg-white dark:placeholder-pg-primary-400 rounded-md border-0 bg-transparent py-1.5 pl-2 ring-0 placeholder:text-gray-400 focus:outline-hidden sm:text-sm sm:leading-6',
         ];
     }
 
@@ -133,7 +133,7 @@ class Medibranch extends Tailwind
         return [
             'view'   => $this->root() . '.filters.select',
             'base'   => '',
-            'select' => 'appearance-none !bg-none focus:ring-primary-600 focus-within:focus:ring-primary-600 focus-within:ring-primary-600 dark:focus-within:ring-primary-600 flex rounded-md ring-1 transition focus-within:ring-2 dark:ring-pg-primary-600 dark:text-pg-primary-300 text-gray-600 ring-gray-300 dark:bg-pg-primary-800 bg-white dark:placeholder-pg-primary-400 rounded-md border-0 bg-transparent py-1.5 px-2 ring-0 placeholder:text-gray-400 focus:outline-none sm:text-sm sm:leading-6 w-full',
+            'select' => 'appearance-none bg-none! focus:ring-primary-600 focus-within:focus:ring-primary-600 focus-within:ring-primary-600 dark:focus-within:ring-primary-600 flex rounded-md ring-1 transition focus-within:ring-2 dark:ring-pg-primary-600 dark:text-pg-primary-300 text-gray-600 ring-gray-300 dark:bg-pg-primary-800 bg-white dark:placeholder-pg-primary-400 rounded-md border-0 bg-transparent py-1.5 px-2 ring-0 placeholder:text-gray-400 focus:outline-hidden sm:text-sm sm:leading-6 w-full',
         ];
     }
 
@@ -141,9 +141,9 @@ class Medibranch extends Tailwind
     {
         return [
             'view'   => $this->root() . '.filters.input-text',
-            'base'   => 'min-w-[9.5rem]',
-            'select' => 'appearance-none !bg-none focus:ring-primary-600 focus-within:focus:ring-primary-600 focus-within:ring-primary-600 dark:focus-within:ring-primary-600 flex rounded-md ring-1 transition focus-within:ring-2 dark:ring-pg-primary-600 dark:text-pg-primary-300 text-gray-600 ring-gray-300 dark:bg-pg-primary-800 bg-white dark:placeholder-pg-primary-400 w-full rounded-md border-0 bg-transparent py-1.5 px-2 ring-0 placeholder:text-gray-400 focus:outline-none sm:text-sm sm:leading-6 w-full',
-            'input'  => 'focus:ring-primary-600 focus-within:focus:ring-primary-600 focus-within:ring-primary-600 dark:focus-within:ring-primary-600 flex rounded-md ring-1 transition focus-within:ring-2 dark:ring-pg-primary-600 dark:text-pg-primary-300 text-gray-600 ring-gray-300 dark:bg-pg-primary-800 bg-white dark:placeholder-pg-primary-400 w-full rounded-md border-0 bg-transparent py-1.5 px-2 ring-0 placeholder:text-gray-400 focus:outline-none sm:text-sm sm:leading-6 w-full',
+            'base'   => 'min-w-38',
+            'select' => 'appearance-none bg-none! focus:ring-primary-600 focus-within:focus:ring-primary-600 focus-within:ring-primary-600 dark:focus-within:ring-primary-600 flex rounded-md ring-1 transition focus-within:ring-2 dark:ring-pg-primary-600 dark:text-pg-primary-300 text-gray-600 ring-gray-300 dark:bg-pg-primary-800 bg-white dark:placeholder-pg-primary-400 w-full rounded-md border-0 bg-transparent py-1.5 px-2 ring-0 placeholder:text-gray-400 focus:outline-hidden sm:text-sm sm:leading-6 w-full',
+            'input'  => 'focus:ring-primary-600 focus-within:focus:ring-primary-600 focus-within:ring-primary-600 dark:focus-within:ring-primary-600 flex rounded-md ring-1 transition focus-within:ring-2 dark:ring-pg-primary-600 dark:text-pg-primary-300 text-gray-600 ring-gray-300 dark:bg-pg-primary-800 bg-white dark:placeholder-pg-primary-400 w-full rounded-md border-0 bg-transparent py-1.5 px-2 ring-0 placeholder:text-gray-400 focus:outline-hidden sm:text-sm sm:leading-6 w-full',
         ];
     }
 

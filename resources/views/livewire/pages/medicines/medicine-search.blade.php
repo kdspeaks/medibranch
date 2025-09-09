@@ -1,8 +1,8 @@
 <div>
-    <input type="text" wire:model.live.debounce.300ms="query" class="border p-2 w-full rounded" placeholder="Search medicine...">
+    <input type="text" wire:model.live.debounce.300ms="query" class="border p-2 w-full rounded-sm" placeholder="Search medicine...">
 
     @if(!empty($results))
-        <ul class="border mt-2 rounded bg-white">
+        <ul class="border mt-2 rounded-sm bg-white">
             @foreach($results as $medicine)
                 <li class="p-2 border-b last:border-none cursor-pointer hover:bg-gray-100"
                     wire:click="$parent.addPurchaseItem({{ $medicine['id'] }})"

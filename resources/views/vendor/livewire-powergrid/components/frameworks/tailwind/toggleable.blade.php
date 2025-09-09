@@ -37,7 +37,7 @@
             ></label>
             <input
                 type="checkbox"
-                class="appearance-none opacity-0 w-full h-full active:outline-none focus:outline-none"
+                class="appearance-none opacity-0 w-full h-full active:outline-hidden focus:outline-hidden"
                 x-on:click="save"
             >
         </div>

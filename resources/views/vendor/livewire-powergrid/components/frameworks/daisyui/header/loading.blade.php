@@ -1,4 +1,4 @@
-<div class="hidden lg:!block">
+<div class="hidden lg:block!">
     <div
         wire:loading
         wire:target.except="toggleDetail"

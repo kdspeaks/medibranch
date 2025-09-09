@@ -11,7 +11,7 @@
 
         @if ($search)
             <span class="absolute opacity-0 group-hover:opacity-100 transition-all inset-y-0 right-0 flex items-center">
-                <span class="p-2 rounded-full focus:outline-none focus:shadow-outline cursor-pointer">
+                <span class="p-2 rounded-full focus:outline-hidden focus:shadow-outline cursor-pointer">
                     <a
                         class="cursor-pointer"
                         wire:click.prevent="$set('search','')"

@@ -6,7 +6,7 @@
     <button
         wire:click="toggleFilters"
         type="button"
-        class="btn btn-light btn-sm border rounded-circle d-flex align-items-center justify-content-center p-2 shadow-sm"
+        class="btn btn-light btn-sm border rounded-circle d-flex align-items-center justify-content-center p-2 shadow-xs"
         style="width: 36px; height: 36px;"
     >
         <x-livewire-powergrid::icons.filter class="bi bi-filter" />

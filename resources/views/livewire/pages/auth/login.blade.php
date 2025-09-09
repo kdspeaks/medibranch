@@ -39,7 +39,7 @@ new #[Layout('layouts.guest')] class extends Component {
         {{-- <div>
             <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
             <input wire:model="form.email" id="email" type="email" name="email"
-                   class="w-full mt-1 border-gray-300 rounded form-input" required autofocus autocomplete="username">
+                   class="w-full mt-1 border-gray-300 rounded-sm form-input" required autofocus autocomplete="username">
             <x-input-error :messages="$errors->get('form.email')" class="mt-2" />
         </div> --}}
         <x-ui.input label="{{ __('messages.email') }}" name="email" type="email" icon="fas fa-envelope" :error="$errors->first('form.email')"
@@ -49,7 +49,7 @@ new #[Layout('layouts.guest')] class extends Component {
         {{-- <div>
             <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
             <input wire:model="form.password" id="password" type="password" name="password"
-                class="w-full mt-1 border-gray-300 rounded form-input" required autocomplete="current-password">
+                class="w-full mt-1 border-gray-300 rounded-sm form-input" required autocomplete="current-password">
             <x-input-error :messages="$errors->get('form.password')" class="mt-2" />
         </div> --}}
         <x-ui.input label="{{ __('messages.password') }}" name="password" type="password" icon="fas fa-lock" required
@@ -58,7 +58,7 @@ new #[Layout('layouts.guest')] class extends Component {
         <div class="flex items-center justify-between">
             {{-- <label class="flex items-center">
                 <input wire:model="form.remember" id="remember" type="checkbox"
-                    class="border-gray-300 rounded form-checkbox text-primary focus:ring-primary">
+                    class="border-gray-300 rounded-sm form-checkbox text-primary focus:ring-primary">
                 <span class="ml-2 text-sm text-gray-700">Remember me</span>
             </label> --}}
 

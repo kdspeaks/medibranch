@@ -6,12 +6,12 @@
         @if ($batchExporting && !$batchFinished)
             <div
                 wire:poll="updateExportProgress"
-                class="w-full my-3 px-4 rounded dark:text-pg-primary-300 bg-pg-primary-100 dark:bg-pg-primary-800 py-3 text-center"
+                class="w-full my-3 px-4 rounded-sm dark:text-pg-primary-300 bg-pg-primary-100 dark:bg-pg-primary-800 py-3 text-center"
             >
                 <div>{{ trans('livewire-powergrid::datatable.export.exporting') }}</div>
                 <span class="font-normal text-xs">{{ $batchProgress }}%</span>
                 <div
-                    class="bg-emerald-500 rounded h-1 text-center"
+                    class="bg-emerald-500 rounded-sm h-1 text-center"
                     style="width: {{ $batchProgress }}%; transition: width 300ms;"
                 >
                 </div>
@@ -25,12 +25,12 @@
                     class="rounded-top"
                 >
                     <div
-                        class="px-4 py-3 rounded-md cursor-pointer bg-pg-primary-100 shadow dark:bg-pg-primary-800"
+                        class="px-4 py-3 rounded-md cursor-pointer bg-pg-primary-100 shadow-sm dark:bg-pg-primary-800"
                         x-on:click="show =!show"
                     >
                         <div class="flex justify-between">
                             <button
-                                class="appearance-none text-left text-base font-medium text-pg-primary-500 focus:outline-none dark:text-pg-primary-300"
+                                class="appearance-none text-left text-base font-medium text-pg-primary-500 focus:outline-hidden dark:text-pg-primary-300"
                                 type="button"
                             >
                                 ⚡ {{ trans('livewire-powergrid::datatable.export.completed') }}

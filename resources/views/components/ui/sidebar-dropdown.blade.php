@@ -16,7 +16,7 @@
 
         @if ($icon)
             <x-icon :name="$icon"
-                class="flex-shrink-0 w-5 h-5 text-text-muted transition duration-75 group-hover:text-text dark:text-text-muted-dark dark:group-hover:text-text-dark" />
+                class="shrink-0 w-5 h-5 text-text-muted transition duration-75 group-hover:text-text dark:text-text-muted-dark dark:group-hover:text-text-dark" />
         @endif
 
         <span class="flex-1 ml-4 text-left whitespace-nowrap" sidebar-toggle-item>{{ $title }}</span>

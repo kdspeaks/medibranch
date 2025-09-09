@@ -1,39 +1,277 @@
-@import "@fortawesome/fontawesome-free/css/all.min.css";
+@import '@fortawesome/fontawesome-free/css/all.min.css' layer(base);
 /*resources/css/app.css*/
 
 /* @import './../../vendor/power-components/livewire-powergrid/dist/tailwind.css'; */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-@tailwind variants;
+@import 'tailwindcss';
 
-@config "../../tailwind.config.js";
+/* Required by all components */
+@import '../../vendor/filament/support/resources/css/index.css';
 
-[x-cloak] {
-    display: none !important;
+/* Required by actions and tables */
+@import '../../vendor/filament/actions/resources/css/index.css';
+
+/* Required by actions, forms and tables */
+@import '../../vendor/filament/forms/resources/css/index.css';
+
+/* Required by actions and infolists */
+@import '../../vendor/filament/infolists/resources/css/index.css';
+
+/* Required by notifications */
+@import '../../vendor/filament/notifications/resources/css/index.css';
+
+/* Required by actions, infolists, forms, schemas and tables */
+@import '../../vendor/filament/schemas/resources/css/index.css';
+
+/* Required by tables */
+@import '../../vendor/filament/tables/resources/css/index.css';
+
+/* Required by widgets */
+/* @import '../../vendor/filament/widgets/resources/css/index.css'; */
+
+@variant dark (&:where(.dark, .dark *));
+
+@plugin '@tailwindcss/forms';
+@plugin '@tailwindcss/typography';
+@plugin 'flowbite/plugin';
+
+@source '../../node_modules/flowbite/**/*.js';
+@source '../../vendor/power-components/livewire-powergrid/resources/views/**/*.php';
+@source '../../vendor/power-components/livewire-powergrid/src/Themes/Tailwind.php';
+@source '../../vendor/filament/**/*.blade.php';
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  --color-test: #1976d2;
+
+  --color-primary: #1976d2;
+  --color-primary-dark: #1976d2;
+
+  --color-secondary: #5c946e;
+  --color-secondary-dark: #5c946e;
+
+  --color-accent: #ffd54f;
+  --color-accent-dark: #ffee58;
+
+  --color-background: #f9fafb;
+  --color-background-dark: #1e1e1e;
+
+  --color-surface: #ffffff;
+  --color-surface-dark: #2a2d34;
+
+  --color-border: #e0e0e0;
+  --color-border-dark: #444c56;
+
+  --color-text: #1e293b;
+  --color-text-dark: #e3eaf5;
+  --color-text-muted: #64748b;
+  --color-text-muted-dark: #94a3b8;
+
+  --color-success: #2e7d32;
+  --color-success-dark: #66bb6a;
+
+  --color-error: #d32f2f;
+  --color-error-dark: #ef5350;
+
+  --color-warning: #fb8c00;
+  --color-warning-dark: #ffa726;
+
+  --color-info: #0288d1;
+  --color-info-dark: #4fc3f7;
+
+  --color-input-bg: #ffffff;
+  --color-input-bg-dark: #2a2d34;
+  --color-input-border: #cbd5e1;
+  --color-input-border-dark: #444c56;
+  --color-input-text: #1e293b;
+  --color-input-text-dark: #e3eaf5;
+  --color-input-placeholder: #94a3b8;
+
+  --color-button-bg: #1976d2;
+  --color-button-bg-dark: #1976d2;
+  --color-button-text: #ffffff;
+  --color-button-text-dark: #ffffff;
+
+  --color-chip-primary-text: #1976d2;
+  --color-chip-primary-text-dark: #e3eaf5;
+
+  --color-chip-primary-bg: #e3f2fd;
+  --color-chip-primary-bg-dark: #1565c0;
+
+  --color-chip-primary-border: #bbdefb;
+  --color-chip-primary-border-dark: #90caf9;
+
+  --color-chip-secondary-text: #5c946e;
+  --color-chip-secondary-text-dark: #e3eaf5;
+
+  --color-chip-secondary-bg: #e8f5e9;
+  --color-chip-secondary-bg-dark: #446f5a;
+
+  --color-chip-secondary-border: #a5d6a7;
+  --color-chip-secondary-border-dark: #5c946e;
+
+  --color-chip-accent-text: #fb8c00;
+  --color-chip-accent-text-dark: #1e1e1e;
+
+  --color-chip-accent-bg: #fff8e1;
+  --color-chip-accent-bg-dark: #ffecb3;
+
+  --color-chip-accent-border: #ffd54f;
+  --color-chip-accent-border-dark: #ffee58;
+
+  --color-chip-success-text: #2e7d32;
+  --color-chip-success-text-dark: #e3eaf5;
+
+  --color-chip-success-bg: #e8f5e9;
+  --color-chip-success-bg-dark: #1b5e20;
+
+  --color-chip-success-border: #a5d6a7;
+  --color-chip-success-border-dark: #66bb6a;
+
+  --color-chip-error-text: #d32f2f;
+  --color-chip-error-text-dark: #e3eaf5;
+
+  --color-chip-error-bg: #ffebee;
+  --color-chip-error-bg-dark: #c62828;
+
+  --color-chip-error-border: #ef9a9a;
+  --color-chip-error-border-dark: #ef5350;
+
+  --color-chip-warning-text: #fb8c00;
+  --color-chip-warning-text-dark: #1e1e1e;
+
+  --color-chip-warning-bg: #fff3e0;
+  --color-chip-warning-bg-dark: #ef6c00;
+
+  --color-chip-warning-border: #ffcc80;
+  --color-chip-warning-border-dark: #ffa726;
+
+  --color-chip-info-text: #0288d1;
+  --color-chip-info-text-dark: #e3eaf5;
+
+  --color-chip-info-bg: #e1f5fe;
+  --color-chip-info-bg-dark: #0277bd;
+
+  --color-chip-info-border: #81d4fa;
+  --color-chip-info-border-dark: #4fc3f7;
+
+  --color-chip-neutral-text: #64748b;
+  --color-chip-neutral-text-dark: #94a3b8;
+
+  --color-chip-neutral-bg: #f1f5f9;
+  --color-chip-neutral-bg-dark: #2a2d34;
+
+  --color-chip-neutral-border: #e0e0e0;
+  --color-chip-neutral-border-dark: #444c56;
+
+  --font-sans:
+    Inter, ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
+    'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  --font-bengali: Anek Bangla, sans-serif;
+
+  --text-base: 16px;
+  --text-xxs: 10px;
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-lg: 18px;
+  --text-xl: 20px;
+  --text-2xl: 24px;
+  --text-3xl: 30px;
+
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.75;
+  --leading-loose: 2;
+
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
 }
+
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+}
+
+@utility font-bengali {
+  & .text-xs {
+    font-size: 14px !important;
+  }
+  & .text-sm {
+    font-size: 16px !important;
+  }
+  & .text-base {
+    font-size: 18px !important;
+  }
+  & .text-lg {
+    font-size: 20px !important;
+  }
+  & .text-xl {
+    font-size: 22px !important;
+  }
+  & .text-2xl {
+    font-size: 26px !important;
+  }
+  & .text-3xl {
+    font-size: 32px !important;
+  }
+}
+@utility text-xs {
+  .font-bengali & {
+    font-size: 14px !important;
+  }
+}
+@utility text-sm {
+  .font-bengali & {
+    font-size: 16px !important;
+  }
+}
+@utility text-base {
+  .font-bengali & {
+    font-size: 18px !important;
+  }
+}
+@utility text-lg {
+  .font-bengali & {
+    font-size: 20px !important;
+  }
+}
+@utility text-xl {
+  .font-bengali & {
+    font-size: 22px !important;
+  }
+}
+@utility text-2xl {
+  .font-bengali & {
+    font-size: 26px !important;
+  }
+}
+@utility text-3xl {
+  .font-bengali & {
+    font-size: 32px !important;
+  }
+}
+
 @layer utilities {
-    .font-bengali .text-xs {
-        font-size: 14px !important;
-    }
-    .font-bengali .text-sm {
-        font-size: 16px !important;
-    }
-    .font-bengali .text-base {
-        font-size: 18px !important;
-    }
-    .font-bengali .text-lg {
-        font-size: 20px !important;
-    }
-    .font-bengali .text-xl {
-        font-size: 22px !important;
-    }
-    .font-bengali .text-2xl {
-        font-size: 26px !important;
-    }
-    .font-bengali .text-3xl {
-        font-size: 32px !important;
-    }
+}
+
+@layer utilities {
+  [x-cloak] {
+    display: none !important;
+  }
 }
 
 .fi-ta-table {
@@ -53,10 +291,10 @@
 }
 
 .fi-ta-ctn {
-    @apply bg-surface rounded-sm divide-border;  
+    @apply bg-surface rounded-xs divide-border;  
 }
 .dark .fi-ta-ctn {
-    @apply bg-surface-dark rounded-sm divide-border-dark;
+    @apply bg-surface-dark rounded-xs divide-border-dark;
 }
 
 .fi-modal-window, .fi-section {

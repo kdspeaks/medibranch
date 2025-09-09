@@ -16,7 +16,7 @@
             'bg-secondary text-white hover:bg-secondary/80 dark:bg-secondary-dark focus:ring-secondary/30 dark:focus:ring-secondary-dark/30',
         'danger' =>
             'bg-error text-white hover:bg-error/90 dark:bg-error-dark focus:ring-error/30 dark:focus:ring-error-dark/30',
-        'outline' =>
+        'outline-solid' =>
             'border border-border text-text hover:bg-border dark:text-text-dark dark:border-border-dark dark:hover:bg-border-dark focus:ring-border/30 dark:focus-ring-border-dark/30',
     ];
     $classes = $base . ' ' . ($variants[$variant] ?? $variants['primary']);
