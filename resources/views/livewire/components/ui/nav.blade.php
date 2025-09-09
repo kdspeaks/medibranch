@@ -32,7 +32,7 @@
 
                  <a href="{{route('dashboard')}}" class="flex mr-14 flex-col relative">
                      <div class="flex">
-                         <img src="../images/logo.svg" class="h-8 mr-3" alt="Logo" />
+                         <img src="{{ asset('images/logo.svg') }}" class="h-8 mr-3" alt="Logo" />
                          <span class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white"
                              x-data="{ siteName: '{{ setting('site_name') }}' }" x-init="window.addEventListener('site-name-updated', e => {
                                  siteName = e.detail.site_name;
