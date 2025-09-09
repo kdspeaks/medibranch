@@ -2,9 +2,10 @@
 
 namespace App\Livewire\Pages\Purchase\Concerns;
 
-use Filament\Schemas\Components\Livewire;
-use App\Livewire\Pages\Medicines\MedicineSearch;
 use Filament\Forms\Components\Hidden;
+use Filament\Schemas\Components\Livewire;
+use Filament\Infolists\Components\TextEntry;
+use App\Livewire\Pages\Medicines\MedicineSearch;
 use App\Models\{Branch, Supplier, Medicine, Tax, Purchase};
 use Filament\Forms\Components\{Section, Select, TextInput, DatePicker, Textarea, Repeater};
 
@@ -103,8 +104,8 @@ trait HasPurchaseForm
                 ->schema([
                     Livewire::make(MedicineSearch::class)
                         ->key('medicine-search') // unique key for this instance
-                        ->lazy()
-                        ->label('Search or Scan Medicine'),
+                        ->lazy(),
+                        // ->label('Search or Scan Medicine'),
                     Repeater::make('items')
                         ->addable(false)
                         ->defaultItems(0)
@@ -112,7 +113,7 @@ trait HasPurchaseForm
                         ->schema([
                             Hidden::make('medicine_id'),
 
-                            TextInput::make('medicine_name')
+                            TextEntry::make('medicine_name')
                                 ->label('Medicine')
                                 ->disabled(),
 
