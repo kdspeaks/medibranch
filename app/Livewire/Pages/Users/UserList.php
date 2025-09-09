@@ -2,6 +2,9 @@
 
 namespace App\Livewire\Pages\Users;
 
+use Filament\Schemas\Components\Group;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
 use App\Models\User;
 use Livewire\Component;
 use Filament\Tables\Table;
@@ -9,15 +12,12 @@ use Filament\Actions\Action;
 use Livewire\Attributes\Title;
 use Filament\Actions\CreateAction;
 use Spatie\Permission\Models\Role;
-use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Forms\Components\TextInput;
 use Filament\Tables\Columns\ImageColumn;
-use Filament\Tables\Actions\DeleteAction;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -59,7 +59,7 @@ class UserList extends Component implements HasForms, HasActions, HasTable
             ->model(User::class)
             ->label('Create User')
             ->modalHeading('Create New User')
-            ->form([
+            ->schema([
                 Group::make([
                     TextInput::make('name')
                         ->label('Name')
@@ -107,11 +107,11 @@ class UserList extends Component implements HasForms, HasActions, HasTable
             ->filters([
                 // ...
             ])
-            ->actions([
+            ->recordActions([
                 EditAction::make()
                     ->modalHeading('Edit User')
                     ->visible(fn($record) => !$record->roles->contains('name', 'Super Admin'))
-                    ->form([
+                    ->schema([
                         Group::make([
                             TextInput::make('name')
                                 ->label('Name')
@@ -143,7 +143,7 @@ class UserList extends Component implements HasForms, HasActions, HasTable
                     ->visible(fn($record) => !$record->roles->contains('name', 'Super Admin'))
                     ->requiresConfirmation()
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 // ...
             ])
             ->headerActions([])

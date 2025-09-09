@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -113,11 +114,11 @@ class Inventory extends Model
             ->first();
 
         if (! $inventory) {
-            throw new \Exception("No inventory found for this branch and medicine.");
+            throw new Exception("No inventory found for this branch and medicine.");
         }
 
         if ($inventory->quantity < $qty) {
-            throw new \Exception("Insufficient stock in inventory.");
+            throw new Exception("Insufficient stock in inventory.");
         }
 
         $remainingQty = $qty;

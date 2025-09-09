@@ -2,8 +2,9 @@
 
 namespace App\Livewire\Pages\Purchase\Concerns;
 
+use Filament\Schemas\Components\Livewire;
+use App\Livewire\Pages\Medicines\MedicineSearch;
 use Filament\Forms\Components\Hidden;
-use Filament\Forms\Components\Livewire;
 use App\Models\{Branch, Supplier, Medicine, Tax, Purchase};
 use Filament\Forms\Components\{Section, Select, TextInput, DatePicker, Textarea, Repeater};
 
@@ -46,7 +47,7 @@ trait HasPurchaseForm
     public function purchaseFormSchema(): array
     {
         return [
-            Section::make('Purchase Details')
+            \Filament\Schemas\Components\Section::make('Purchase Details')
                 ->columns(3)
                 ->schema([
                     Select::make('branch_id')
@@ -98,9 +99,9 @@ trait HasPurchaseForm
                         ->default('pending'),
                 ]),
 
-            Section::make('Items')
+            \Filament\Schemas\Components\Section::make('Items')
                 ->schema([
-                    Livewire::make(\App\Livewire\Pages\Medicines\MedicineSearch::class)
+                    Livewire::make(MedicineSearch::class)
                         ->key('medicine-search') // unique key for this instance
                         ->lazy()
                         ->label('Search or Scan Medicine'),
@@ -179,7 +180,7 @@ trait HasPurchaseForm
                         }),
                 ]),
 
-            Section::make('Additional Notes')
+            \Filament\Schemas\Components\Section::make('Additional Notes')
                 ->schema([
                     Textarea::make('notes')
                         ->label('Notes')

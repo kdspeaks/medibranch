@@ -2,6 +2,9 @@
 
 namespace App\Livewire\Pages\Supplier;
 
+use Filament\Schemas\Components\Group;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
 use App\Models\Supplier;
 use App\Models\Tax;
 use Livewire\Component;
@@ -9,14 +12,11 @@ use Filament\Tables\Table;
 use Filament\Actions\Action;
 use Livewire\Attributes\Title;
 use Filament\Actions\CreateAction;
-use Filament\Forms\Components\Group;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Forms\Components\TextInput;
 use Spatie\Permission\Models\Permission;
-use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Components\ToggleButtons;
@@ -36,7 +36,7 @@ class SupplierList extends Component implements HasForms, HasActions, HasTable
             ->modalHeading("Create New Supplier")
             ->model(Supplier::class)
             ->label('Create Supplier')
-            ->form([
+            ->schema([
                 Group::make()
                     ->columns(2)
                     ->schema([
@@ -114,10 +114,10 @@ class SupplierList extends Component implements HasForms, HasActions, HasTable
             ->filters([
                 // ...
             ])
-            ->actions([
+            ->recordActions([
                 EditAction::make()
                     ->modalHeading('Edit Supplier')
-                    ->form([
+                    ->schema([
                         Group::make()
                             ->columns(2)
                             ->schema([
@@ -173,7 +173,7 @@ class SupplierList extends Component implements HasForms, HasActions, HasTable
                 DeleteAction::make()
                     ->requiresConfirmation()
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 // ...
             ])
             ->headerActions([])

@@ -3,19 +3,21 @@
 // app/Livewire/Pages/Settings/SiteSettings.php
 namespace App\Livewire\Pages\Settings;
 
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Group;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms;
 use App\Models\Branch;
 use App\Models\Setting;
-use Filament\Forms\Components\Group;
 use Livewire\Component;
-use Filament\Forms\Form;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
 
 class SiteSettings extends Component implements HasForms
 {
-    use Forms\Concerns\InteractsWithForms;
+    use InteractsWithForms;
 
     public ?array $data = [];
 
@@ -27,14 +29,14 @@ class SiteSettings extends Component implements HasForms
         ]);
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Group::make()
                     ->columns(2)
                     ->schema(([
-                        Forms\Components\TextInput::make('site_name')
+                        TextInput::make('site_name')
                             ->label('Site Name')
                             ->required()
                             ->minLength(3)

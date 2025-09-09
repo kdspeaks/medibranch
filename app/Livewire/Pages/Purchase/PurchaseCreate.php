@@ -2,10 +2,10 @@
 
 namespace App\Livewire\Pages\Purchase;
 
+use App\Models\Purchase;
+use Filament\Schemas\Schema;
 use Livewire\Component;
 use App\Models\Medicine;
-// use Filament\Actions\Action;
-use Filament\Forms\Form;
 use Livewire\Attributes\On;
 use Filament\Forms\Components\Grid;
 use Illuminate\Contracts\View\View;
@@ -28,7 +28,7 @@ class PurchaseCreate extends Component implements HasForms
 
     public function mount(): void
     {
-        $this->cPurchase = new \App\Models\Purchase();
+        $this->cPurchase = new Purchase();
         $this->form->fill();
     }
 
@@ -64,10 +64,10 @@ class PurchaseCreate extends Component implements HasForms
         $this->dispatch('scroll-to-top');
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema($this->purchaseFormSchema())
+        return $schema
+            ->components($this->purchaseFormSchema())
             ->statePath('data');
     }
 
@@ -80,7 +80,7 @@ class PurchaseCreate extends Component implements HasForms
 
     public function addPurchaseItem(int $medicineId): void
     {
-        $medicine = \App\Models\Medicine::find($medicineId);
+        $medicine = Medicine::find($medicineId);
         if (! $medicine) return;
 
         // get existing items

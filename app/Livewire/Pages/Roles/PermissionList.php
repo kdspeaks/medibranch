@@ -2,17 +2,17 @@
 
 namespace App\Livewire\Pages\Roles;
 
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
 use Livewire\Component;
 use Filament\Tables\Table;
 use Filament\Actions\Action;
 use Livewire\Attributes\Title;
 use Filament\Actions\CreateAction;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
 use Spatie\Permission\Models\Permission;
-use Filament\Tables\Actions\DeleteAction;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Tables\Concerns\InteractsWithTable;
@@ -36,7 +36,7 @@ class PermissionList extends Component implements HasForms, HasActions, HasTable
        ->modalHeading("Create New Permission")
         ->model(Permission::class)
         ->label('Create Permission')
-        ->form([
+        ->schema([
                     TextInput::make('name')
                     ->model(Permission::class)
                         ->required()
@@ -58,10 +58,10 @@ class PermissionList extends Component implements HasForms, HasActions, HasTable
             ->filters([
                 // ...
             ])
-            ->actions([
+            ->recordActions([
                 EditAction::make()
                 ->modalHeading('Edit Permission')
-                ->form([
+                ->schema([
                     TextInput::make('name')
                         ->required()
                         ->maxLength(255),
@@ -70,7 +70,7 @@ class PermissionList extends Component implements HasForms, HasActions, HasTable
                 DeleteAction::make()
                 ->requiresConfirmation()
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 // ...
             ])
             ->headerActions([

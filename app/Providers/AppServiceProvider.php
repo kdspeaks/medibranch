@@ -34,8 +34,8 @@ class AppServiceProvider extends ServiceProvider
         // Livewire::setUpdateLocale($locale);
 
         FilamentColor::register([
-            'primary' => Color::hex("#1976D2"),
-            'danger' => Color::hex("#D32F2F"),
+            'primary' => Color::generateV3Palette("#1976D2"),
+            'danger' => Color::generateV3Palette("#D32F2F"),
         ]);
 
         // Implicitly grant "Super Admin" role all permissions

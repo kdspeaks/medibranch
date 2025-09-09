@@ -2,12 +2,12 @@
 
 namespace App\Livewire\Pages\Medicines;
 
+use Filament\Schemas\Schema;
 use App\Livewire\Pages\Medicines\Concerns\HasMedicineForm;
 use Livewire\Attributes\On;
 use Livewire\Component;
 // use Filament\Actions\Action;
 use App\Models\Medicine;
-use Filament\Forms\Form;
 use Filament\Forms\Components\Grid;
 use Illuminate\Contracts\View\View;
 use Filament\Forms\Components\Group;
@@ -62,10 +62,10 @@ class MedicineCreate extends Component implements HasForms
         $this->dispatch('scroll-to-top');
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema($this->medicineFormSchema())
+        return $schema
+            ->components($this->medicineFormSchema())
             ->statePath('data');
     }
 

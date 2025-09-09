@@ -2,6 +2,10 @@
 
 namespace App\Livewire\Pages\Branches;
 
+use Filament\Schemas\Components\Group;
+use Filament\Schemas\Components\Section;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
 use App\Models\Branch;
 use Livewire\Component;
 use Filament\Tables\Table;
@@ -10,22 +14,18 @@ use Livewire\Attributes\Title;
 use Filament\Actions\CreateAction;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Roles;
-use Filament\Forms\Components\Group;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Components\Textarea;
-use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Forms\Components\TextInput;
 use Spatie\Permission\Models\Permission;
-use Filament\Tables\Actions\DeleteAction;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Forms\Components\Radio;
-use Filament\Forms\Components\Section;
 use Filament\Tables\Actions\CreateAction as ActionsCreateAction;
 use Filament\Tables\Columns\IconColumn;
 
@@ -47,7 +47,7 @@ class BranchList extends Component  implements HasForms, HasActions, HasTable
             ->model(Branch::class)
             ->label('Create Branch')
             ->modalHeading('Create New Branch')
-            ->form([
+            ->schema([
                 Group::make([
                     Section::make()
                         ->columns([
@@ -117,11 +117,11 @@ class BranchList extends Component  implements HasForms, HasActions, HasTable
             ->filters([
                 // ...
             ])
-            ->actions([
+            ->recordActions([
                 EditAction::make()
                     ->modalHeading('Edit Permission')
                     ->visible(fn($record) => $record->name !== 'Super Admin')
-                    ->form([
+                    ->schema([
                         Group::make([
                             Section::make()
                                 ->columns([
@@ -170,7 +170,7 @@ class BranchList extends Component  implements HasForms, HasActions, HasTable
                     ->visible(fn($record) => $record->name !== 'Super Admin')
                     ->requiresConfirmation()
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 // ...
             ])
             ->headerActions([])

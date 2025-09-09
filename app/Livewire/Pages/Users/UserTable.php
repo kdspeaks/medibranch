@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Pages\Users;
 
+use Livewire\Attributes\On;
 use Illuminate\View\View;
 use App\Models\User;
 use Illuminate\Support\Carbon;
@@ -81,13 +82,13 @@ final class UserTable extends PowerGridComponent
         return [];
     }
 
-    #[\Livewire\Attributes\On('edit')]
+    #[On('edit')]
     public function edit($rowId): void
     {
         $this->js('alert(' . $rowId . ')');
     }
 
-    #[\Livewire\Attributes\On('open-edit-modal')]
+    #[On('open-edit-modal')]
     public function openEditModal(int $userId): void
     {
         // $this->js("alert(". $userId .")");

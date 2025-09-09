@@ -2,6 +2,9 @@
 
 namespace App\Livewire\Pages\Medicines;
 
+use Filament\Schemas\Components\Group;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
 use Livewire\Component;
 use Filament\Tables\Table;
 use App\Models\Manufacturer;
@@ -10,17 +13,14 @@ use Livewire\Attributes\Title;
 use Filament\Actions\CreateAction;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Roles;
-use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Forms\Components\TextInput;
 use Spatie\Permission\Models\Permission;
-use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Components\CheckboxList;
@@ -63,7 +63,7 @@ class ManufacturerList extends Component implements HasForms, HasActions, HasTab
             ->model(Manufacturer::class)
             ->label('Create Manufacturer')
             ->modalHeading('Create New Manufacturer')
-            ->form([
+            ->schema([
                 Group::make()
                     ->schema([
                         TextInput::make('name')
@@ -143,10 +143,10 @@ class ManufacturerList extends Component implements HasForms, HasActions, HasTab
             ->filters([
                 // ...
             ])
-            ->actions([
+            ->recordActions([
                 EditAction::make()
                     ->modalHeading('Edit Manufacturer')
-                    ->form([
+                    ->schema([
                         Group::make()
                             ->schema([
                                 TextInput::make('name')
@@ -200,7 +200,7 @@ class ManufacturerList extends Component implements HasForms, HasActions, HasTab
                     ->visible(fn($record) => $record->name !== 'Super Admin')
                     ->requiresConfirmation()
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 // ...
             ])
             ->headerActions([])

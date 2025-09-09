@@ -2,19 +2,21 @@
 
 namespace App\Livewire\Pages\Medicines\Concerns;
 
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Group;
+use Filament\Actions\Action;
+use Filament\Schemas\Components\Utilities\Set;
+use App\Models\Tax;
 use App\Models\Medicine;
 use Filament\Forms\Form;
 use App\Models\Manufacturer;
 use Illuminate\Validation\Rule;
 use Filament\Forms\Components\Grid;
-use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
 use Symfony\Component\Intl\Countries;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ToggleButtons;
-use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\MarkdownEditor;
 use Filament\Forms\Components\RichEditor;
 
@@ -77,7 +79,7 @@ trait HasMedicineForm
                             Action::make('generateBarcode')
                                 ->icon('heroicon-m-sparkles')
                                 ->tooltip('Generate Barcode')
-                                ->action(function (\Filament\Forms\Set $set) {
+                                ->action(function (Set $set) {
                                     $set('barcode', 'MED' . rand(1000000000, 9999999999));
                                 })
                         )
@@ -214,7 +216,7 @@ trait HasMedicineForm
                 ->schema([
                     Select::make('tax_id')
                         ->label('Tax')
-                        ->options(fn() => \App\Models\Tax::where('is_active', true)->pluck('name', 'id'))
+                        ->options(fn() => Tax::where('is_active', true)->pluck('name', 'id'))
                         ->searchable()
                         ->preload()
                         ->nullable()

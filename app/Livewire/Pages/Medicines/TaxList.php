@@ -2,20 +2,20 @@
 
 namespace App\Livewire\Pages\Medicines;
 
+use Filament\Schemas\Components\Group;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
 use App\Models\Tax;
 use Livewire\Component;
 use Filament\Tables\Table;
 use Filament\Actions\Action;
 use Livewire\Attributes\Title;
 use Filament\Actions\CreateAction;
-use Filament\Forms\Components\Group;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Forms\Components\TextInput;
 use Spatie\Permission\Models\Permission;
-use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Components\ToggleButtons;
@@ -39,7 +39,7 @@ class TaxList extends Component implements HasForms, HasActions, HasTable
             ->modalHeading("Create New Tax")
             ->model(Tax::class)
             ->label('Create Tax')
-            ->form([
+            ->schema([
                 Group::make()
                     ->schema([
                         TextInput::make('name')
@@ -87,10 +87,10 @@ class TaxList extends Component implements HasForms, HasActions, HasTable
             ->filters([
                 // ...
             ])
-            ->actions([
+            ->recordActions([
                 EditAction::make()
                     ->modalHeading('Edit Tax')
-                    ->form([
+                    ->schema([
                         Group::make()
                             ->schema([
                                 TextInput::make('name')
@@ -117,7 +117,7 @@ class TaxList extends Component implements HasForms, HasActions, HasTable
                 DeleteAction::make()
                     ->requiresConfirmation()
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 // ...
             ])
             ->headerActions([])

@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Pages\Medicines;
 
+use Filament\Schemas\Components\Group;
+use Filament\Actions\DeleteAction;
 use Livewire\Component;
 use App\Models\Medicine;
 use Filament\Tables\Table;
@@ -10,7 +12,6 @@ use Livewire\Attributes\Title;
 use Filament\Actions\CreateAction;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Roles;
-use Filament\Forms\Components\Group;
 use Illuminate\Support\Facades\Auth;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Tables\Actions\EditAction;
@@ -20,7 +21,6 @@ use Filament\Tables\Contracts\HasTable;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Spatie\Permission\Models\Permission;
-use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Components\CheckboxList;
@@ -61,7 +61,7 @@ class MedicineList extends Component implements HasForms, HasActions, HasTable
             ->model(Medicine::class)
             ->label('Create Role')
             ->modalHeading('Create New Role')
-            ->form([
+            ->schema([
                 Group::make([
                     TextInput::make('name')
                         ->unique(ignoreRecord: true)
@@ -132,8 +132,8 @@ class MedicineList extends Component implements HasForms, HasActions, HasTable
             ->filters([
                 // ...
             ])
-            ->actions([
-                \Filament\Tables\Actions\Action::make('edit')
+            ->recordActions([
+                Action::make('edit')
                     ->icon('heroicon-m-pencil-square')
                     ->url(fn(Medicine $record) => route('medicines.edit', ['medicine' => $record]))
                     ->extraAttributes(['wire:navigate' => 'true']),
@@ -141,7 +141,7 @@ class MedicineList extends Component implements HasForms, HasActions, HasTable
                     ->visible(fn($record) => $record->name !== 'Super Admin')
                     ->requiresConfirmation()
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 // ...
             ])
             ->headerActions([])

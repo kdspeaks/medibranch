@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Components\Ui\Modal;
 
+use Livewire\Attributes\On;
 use App\Models\User;
 use Livewire\Component;
 use Spatie\Permission\Models\Role;
@@ -49,7 +50,7 @@ class ChangeRole extends Base
         $this->selectedRole = $this->user->getRoleNames()->first() ?? '';
     }
 
-    #[\Livewire\Attributes\On('edit-user-modal')]
+    #[On('edit-user-modal')]
     public function showModal(int $userId): void
     {
         $this->setUser($userId);
