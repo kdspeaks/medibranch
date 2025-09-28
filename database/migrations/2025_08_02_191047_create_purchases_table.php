@@ -13,6 +13,8 @@ return new class extends Migration {
             // The branch where stock is received
             $table->foreignId('branch_id')->constrained()->onDelete('cascade');
 
+            
+
             // Supplier (optional — can be null if walk-in purchase)
             $table->foreignId('supplier_id')->nullable()->constrained()->onDelete('set null');
 

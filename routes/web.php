@@ -85,10 +85,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/medicines/purchases/list', PurchaseList::class)
         ->middleware('can:manage-medicines')
         ->name('medicines.purchases.list');
-    
-        Route::get('/medicines/purchases/create', PurchaseCreate::class)
+
+    Route::get('/medicines/purchases/create', PurchaseCreate::class)
         ->middleware('can:manage-medicines')
         ->name('medicines.purchases.create');
+
+    Route::get('/medicines/purchases/view/{purchase}', PurchaseCreate::class)
+        ->middleware('can:manage-medicines')
+        ->name('medicines.purchases.view');
 });
 
 Route::view('/style-guide', 'style-guide')->name('style.guide');

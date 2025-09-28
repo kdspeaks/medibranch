@@ -30,8 +30,8 @@ class MedicineFactory extends Factory
             'packing_quantity' => $this->faker->numberBetween(10, 100),
             'packing_unit' => $this->faker->randomElement(['ml', 'g', 'pcs', 'bottle']),
 
-            'purchase_price' => $this->faker->randomFloat(2, 5, 50),
-            'selling_price' => $this->faker->randomFloat(2, 51, 120),
+            'purchase_price' => $this->faker->randomFloat(2, 5, 500),
+            'margin' => $this->faker->randomFloat(2, 2, 20),
 
             'description' => $this->faker->optional()->sentence(),
             'is_active' => $this->faker->boolean(90), // 90% chance of being active

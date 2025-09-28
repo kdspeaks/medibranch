@@ -31,6 +31,10 @@ class MedicineSearch extends Component
         return view('livewire.pages.medicines.medicine-search');
     }
 
+    // #[On('clearResults')]
+    // public function clearResults(): void {
+    //     $this->results = [];
+    // }
 
 
     // MedicineSearch.php

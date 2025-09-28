@@ -16,6 +16,9 @@ class Purchase extends Model
         'total_amount',
         'status',
         'notes',
+        'ref_code_prefix',
+        'ref_code_count',
+        
     ];
 
     public function branch()

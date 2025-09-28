@@ -188,8 +188,8 @@ trait HasMedicineForm
                     ->default(0.00)
                     ->required(),
 
-                TextInput::make('selling_price')
-                    ->label('Selling Price')
+                TextInput::make('margin')
+                    ->label('Margin')
                     ->numeric()
                     ->default(0.00)
                     ->required(),

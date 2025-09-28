@@ -7,6 +7,7 @@ use Filament\Actions\DeleteAction;
 use App\Models\Tax;
 use Livewire\Component;
 use App\Models\Medicine;
+use App\Models\Purchase;
 use App\Models\Supplier;
 use Filament\Tables\Table;
 use Filament\Actions\Action;
@@ -38,7 +39,7 @@ class PurchaseList extends Component implements HasForms, HasActions, HasTable
     public function createAction(): Action
     {
         return CreateAction::make('create')
-            ->model(Medicine::class)
+            ->model(Purchase::class)
             ->label('Create Role')
             ->modalHeading('Create New Role')
             ->schema([
@@ -67,23 +68,23 @@ class PurchaseList extends Component implements HasForms, HasActions, HasTable
     public function table(Table $table): Table
     {
         return $table
-            ->query(Medicine::query())
+            ->query(Purchase::query())
             ->columns([
-                ViewColumn::make('name')
-                    ->view('components.datatable.medicine_name')
-                    ->searchable(['name', 'sku'])
-                    ->sortable(),
-                // TextColumn::make('name')
-                //     ->searchable()
+                // ViewColumn::make('name')
+                //     ->view('components.datatable.medicine_name')
+                //     ->searchable(['name', 'sku'])
                 //     ->sortable(),
+                // // TextColumn::make('name')
+                // //     ->searchable()
+                // //     ->sortable(),
 
-                TextColumn::make('potency')
+                TextColumn::make('purchase_date')
+                    ->state(fn($record) => date('d M, Y', strtotime($record->purchase_date)))
                     ->separator(', '),
-                TextColumn::make('form')
+                TextColumn::make('supplier.name')
                     ->separator(', '),
-                TextColumn::make('barcode')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('total_amount')
+                    ->searchable(),
                 TextColumn::make('packing_info')
                     ->label('Packing')
                     ->state(fn($record) => "{$record->packing_quantity}{$record->packing_unit}"),
@@ -115,7 +116,7 @@ class PurchaseList extends Component implements HasForms, HasActions, HasTable
             ->recordActions([
                 Action::make('edit')
                     ->icon('heroicon-m-pencil-square')
-                    ->url(fn(Medicine $record) => route('medicines.edit', ['medicine' => $record]))
+                    // ->url(fn(Medicine $record) => route('medicines.edit', ['medicine' => $record]))
                     ->extraAttributes(['wire:navigate' => 'true']),
                 DeleteAction::make()
                     ->visible(fn($record) => $record->name !== 'Super Admin')
@@ -128,7 +129,7 @@ class PurchaseList extends Component implements HasForms, HasActions, HasTable
             ->paginated([10, 20, 50, 100, 'all'])
             ->defaultPaginationPageOption(20)
             ->recordUrl(
-                fn(Medicine $record) => route('medicines.view', ['medicine' => $record])
+                fn(Purchase $record) => route('medicines.purchases.view', ['purchase' => $record])
             );
     }
 
