@@ -17,7 +17,7 @@ class MedicineSearch extends Component
         $this->results = Medicine::query()
             ->where('name', 'like', "%{$this->query}%")
             ->limit(10)
-            ->get(['id', 'name', 'purchase_price', 'selling_price'])
+            ->get(['id', 'name', 'purchase_price', 'margin'])
             ->map(fn($m) => $m->toArray())
             ->toArray();
     }
