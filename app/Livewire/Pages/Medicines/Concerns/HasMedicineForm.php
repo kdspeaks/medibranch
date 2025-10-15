@@ -2,23 +2,40 @@
 
 namespace App\Livewire\Pages\Medicines\Concerns;
 
-use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\Group;
-use Filament\Actions\Action;
-use Filament\Schemas\Components\Utilities\Set;
 use App\Models\Tax;
 use App\Models\Medicine;
-use Filament\Forms\Form;
 use App\Models\Manufacturer;
+use Filament\Actions\Action;
+use Filament\Schemas\Schema;
 use Illuminate\Validation\Rule;
-use Filament\Forms\Components\Grid;
+// use Filament\Tables\Grouping\Group;
+use Filament\Actions\CreateAction;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Toggle;
 use Symfony\Component\Intl\Countries;
+use Filament\Schemas\Components\Group;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\ToggleButtons;
-use Filament\Forms\Components\MarkdownEditor;
+use Filament\Schemas\Components\Section;
 use Filament\Forms\Components\RichEditor;
+use Illuminate\Support\Facades\Validator;
+use Filament\Forms\Components\ToggleButtons;
+
+// use Filament\Schemas\Components\Section;
+// use Filament\Schemas\Components\Group;
+// use Filament\Actions\Action;
+// use Filament\Schemas\Components\Utilities\Set;
+// use App\Models\Tax;
+// use App\Models\Medicine;
+// use Filament\Forms\Form;
+// use App\Models\Manufacturer;
+// use Illuminate\Validation\Rule;
+// use Filament\Forms\Components\Grid;
+// use Filament\Forms\Components\Select;
+// use Filament\Forms\Components\Toggle;
+// use Symfony\Component\Intl\Countries;
+// use Filament\Forms\Components\TextInput;
+// use Filament\Forms\Components\ToggleButtons;
+// use Filament\Forms\Components\MarkdownEditor;
+// use Filament\Forms\Components\RichEditor;
 
 trait HasMedicineForm
 {
@@ -45,7 +62,7 @@ trait HasMedicineForm
     public function saveMedicine(): Medicine
     {
         $validated = $this->form->getState();
-        dd($validated);
+        // dd($validated);
 
         $medicine = Medicine::create($validated);
 
@@ -55,9 +72,9 @@ trait HasMedicineForm
         return $medicine;
     }
 
-    public function medicineFormSchema(): array
+    public function medicineFormSchema(Schema $schema): Schema
     {
-        return [
+        return $schema->components([
             Section::make()->columns(['sm' => 3])->schema([
                 TextInput::make('name')
                     ->label('Medicine Name')
@@ -73,18 +90,18 @@ trait HasMedicineForm
                             Rule::unique('medicines', 'barcode')->ignore($this->cMedicine?->id ?? null),
                         ])
                         ->maxLength(255)
-                        ->extraAttributes(['x-model' => 'barcode'])
-                        ->suffixAction(
-                            fn() =>
-                            Action::make('generateBarcode')
+                        // ->extraAttributes(['x-model' => 'barcode'])
+                        ->suffixAction(function () {
+                            return \Filament\Actions\Action::make('generateBarcode')
                                 ->icon('heroicon-m-sparkles')
                                 ->tooltip('Generate Barcode')
-                                ->action(function (Set $set) {
+                                ->action(function (\Filament\Schemas\Components\Utilities\Set $set) {
+                                    // dd($set);
                                     $set('barcode', 'MED' . rand(1000000000, 9999999999));
-                                })
-                        )
-                ])->reactive()
-                    ->extraAttributes(['x-data' => '{ barcode: $wire.entangle("data.barcode") }']),
+                                });
+                        })
+                ])->reactive(),
+                    // ->extraAttributes(['x-data' => '{ barcode: $wire.entangle("data.barcode") }']),
                 Select::make('manufacturer_id')
                     ->label('Manufacturer')
 
@@ -142,6 +159,72 @@ trait HasMedicineForm
                             ->columns(2)
                             ->columnSpanFull()
                     ])
+                    ->createOptionAction(function (Action $action) {
+                        return $action
+                            ->modalHeading('Create manufaturer')
+                            ->modalSubmitActionLabel('Create manufaturer')
+                            ->modalWidth('xl');
+                    })
+                    ->createOptionUsing(function (array $data) {
+                        // Server-side validation
+                        $validator = Validator::make($data, [
+                            'name'         => ['required', 'string', 'max:255', Rule::unique('manufacturers', 'name')],
+                            'contact_name' => ['nullable', 'string', 'max:255'],
+                            'phone'        => ['nullable', 'string', 'max:20'],
+                            'email'        => ['nullable', 'email', 'max:255', Rule::unique('manufacturers', 'email')],
+                            'address'      => ['nullable', 'string', 'max:255'],
+                            'website'      => ['nullable', 'url', 'max:255'],
+                            'country'      => ['nullable', 'string', 'max:8'], // adjust if you store ISO codes
+                            'is_active'    => ['nullable', 'boolean'],
+                        ]);
+
+                        // This will throw ValidationException automatically and Filament will show errors.
+                        $validated = $validator->validate();
+
+                        // Optional: normalize phone (strip non-digits, etc.)
+                        if (! empty($validated['phone'])) {
+                            $validated['phone'] = preg_replace('/\D+/', '', $validated['phone']);
+                        }
+
+                        // Create the model
+                        $manufacturer = Manufacturer::create([
+                            'name'         => $validated['name'],
+                            'contact_name' => $validated['contact_name'] ?? null,
+                            'phone'        => $validated['phone'] ?? null,
+                            'email'        => $validated['email'] ?? null,
+                            'address'      => $validated['address'] ?? null,
+                            'website'      => $validated['website'] ?? null,
+                            'country'      => $validated['country'] ?? null,
+                            'is_active'    => $validated['is_active'] ?? true,
+                        ]);
+
+                        return $manufacturer->id;
+                    }),
+                // Select::make('shop_customer_id')
+                //     ->relationship('customer', 'name')
+                //     ->searchable()
+                //     ->required()
+                //     ->createOptionForm([
+                //         TextInput::make('name')
+                //             ->required()
+                //             ->maxLength(255),
+
+                //         TextInput::make('email')
+                //             ->label('Email address')
+                //             ->required()
+                //             ->email()
+                //             ->maxLength(255)
+                //             ->unique(),
+
+                //         TextInput::make('phone')
+                //             ->maxLength(255),
+                //     ])
+                //     ->createOptionAction(function (Action $action) {
+                //         return $action
+                //             ->modalHeading('Create customer')
+                //             ->modalSubmitActionLabel('Create customer')
+                //             ->modalWidth('lg');
+                //     }),
             ]),
 
             Section::make()->columns(['sm' => 2])->schema([
@@ -251,6 +334,6 @@ trait HasMedicineForm
                         ->default(true)
                 ]),
 
-        ];
+        ]);
     }
 }

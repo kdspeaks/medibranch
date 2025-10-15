@@ -6,15 +6,23 @@
 <x-slot name="title">
     {{ $title }}
 </x-slot>
-<div>
+<div 
+x-data="{ showSidebar: window.innerWidth >= 1024 }" 
+     x-init="
+        // Auto-toggle based on screen resize
+        window.addEventListener('resize', () => {
+            showSidebar = window.innerWidth >= 1024;
+        });
+     "
+>
     <livewire:components.ui.nav />
-    <div class="flex pt-16 overflow-hidden bg-background dark:bg-background-dark">
+    <div class="flex pt-16 overflow-hidden bg-background dark:bg-background-dark" >
 
         <x-ui.sidebar />
 
-        <div class="fixed inset-0 z-10 hidden bg-background-dark/50 dark:bg-background-dark/90" id="sidebarBackdrop">
+        <div class="fixed inset-0 z-10 lg:hidden bg-background-dark/50 dark:bg-background-dark/90 overflow-hidden" x-show="showSidebar" @click="showSidebar = false">
         </div>
-        <div class="relative flex flex-col w-full min-h-[calc(100vh-64px)] overflow-hidden lg:ml-64 " id="main-content">
+        <div class="relative flex flex-col w-full min-h-[calc(100vh-64px)] overflow-hidden" :class="showSidebar ? 'lg:ml-64' : ''" id="main-content">
             <main class="grow">
                 <div class="pt-6">
                     <div class="flex flex-col md:flex-row justify-between items-start px-4">

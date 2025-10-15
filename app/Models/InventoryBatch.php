@@ -12,8 +12,9 @@ class InventoryBatch extends Model
         'quantity',
         'available_quantity',
         'unit_purchase_price',
-        'unit_selling_price',
+        'margin',
         'batch_number',
+        'mfg_date',
         'expiry_date',
     ];
 

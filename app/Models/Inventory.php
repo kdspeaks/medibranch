@@ -38,9 +38,10 @@ class Inventory extends Model
         int $medicineId,
         int $qty,
         float $purchasePrice,
-        float $sellingPrice,
+        float $margin,
         ?string $reason = null,
         ?string $batchNumber = null,
+        ?string $mfgDate = null,
         ?string $expiryDate = null
     ): Inventory {
         // 1️⃣ Find or create inventory record for branch + medicine
@@ -71,7 +72,8 @@ class Inventory extends Model
             // Optionally update prices / expiry
             $batch->update([
                 'unit_purchase_price' => $purchasePrice,
-                'unit_selling_price'  => $sellingPrice,
+                'margin'  => $margin,
+                'mfg_date'    => $mfgDate,
                 'expiry_date'    => $expiryDate,
             ]);
         } else {
@@ -80,8 +82,10 @@ class Inventory extends Model
                 'quantity'           => $qty,
                 'available_quantity' => $qty,
                 'unit_purchase_price'     => $purchasePrice,
-                'unit_selling_price'      => $sellingPrice,
+                'margin'  => $margin,
+
                 'batch_number'       => $batchNumber,
+                'mfg_date'    => $mfgDate,
                 'expiry_date'        => $expiryDate,
                 'status'             => 'active',
             ]);
@@ -106,7 +110,7 @@ class Inventory extends Model
         int $medicineId,
         int $qty,
         ?string $reason = null
-    ): Inventory {
+    ): ?Inventory {
         // 1️⃣ Get inventory record
         $inventory = self::where('branch_id', $branchId)
             ->where('medicine_id', $medicineId)
@@ -114,7 +118,8 @@ class Inventory extends Model
             ->first();
 
         if (! $inventory) {
-            throw new Exception("No inventory found for this branch and medicine.");
+            // throw new Exception("No inventory found for this branch and medicine.");
+            return null;
         }
 
         if ($inventory->quantity < $qty) {

@@ -3,26 +3,35 @@
 @php
     $href = Route::has($route) ? route($route) : '/' . $route;
     // $addWireNavigate = Route::has($route) ? true : false;
-    $active = request()->routeIs($route) || request()->is($route . '/*') ? true : false;
+    // $active = request()->routeIs($route) || request()->is($route . '/*') ? true : false;
 @endphp
 
-<a href="{{ $href }}" wire:navigate {{ $attributes->except(['class']) }}
+<a data-href="{{ $href }}" x-data="{
+    isActive: false,
+    checkActive() {
+        console.log('run');
+        const current = window.location.pathname.replace(/\/+$/, '');
+        const target = new URL('{{ $href }}').pathname.replace(/\/+$/, '');
+        this.isActive = current === target || current.startsWith(target + '/');
+    }
+}" x-init="checkActive()" @popstate.window="checkActive()"
+    x-bind:class="isActive ? 'text-text bg-surface-dark/10 dark:text-text-dark dark:bg-surface/10' :
+        'text-text hover:bg-surface-dark/10 dark:text-text-dark dark:hover:bg-surface/10'"
+    href="{{ $href }}" wire:navigate {{ $attributes->except(['class']) }}
     {{ $attributes->merge([
-        'class' =>
-            'flex items-center p-2 text-base font-normal rounded-lg transition duration-75 group ' .
-            ($active
-                ? 'text-text bg-surface-dark/10 dark:text-text-dark dark:bg-surface/10'
-                : 'text-text hover:bg-surface-dark/10 dark:text-text-dark dark:hover:bg-surface/10'),
+        'class' => 'flex items-center p-2 text-base font-normal rounded-lg transition duration-75 group ',
+        // ($active
+        //     ? 'text-text bg-surface-dark/10 dark:text-text-dark dark:bg-surface/10'
+        //     : 'text-text hover:bg-surface-dark/10 dark:text-text-dark dark:hover:bg-surface/10'),
     ]) }}>
 
     @if ($icon)
         <x-icon :name="$icon"
             {{ $attributes->merge([
-                'class' =>
-                    'w-5 h-5 group-hover:text-text dark:group-hover:text-text-dark ' .
-                    ($active
-                        ? 'text-text dark:text-text-dark'
-                        : 'text-text-muted dark:text-text-muted-dark'),
+                'class' => 'w-5 h-5 group-hover:text-text dark:group-hover:text-text-dark ',
+                // ($active
+                //     ? 'text-text dark:text-text-dark'
+                //     : 'text-text-muted dark:text-text-muted-dark'),
             ]) }} />
     @endif
 

@@ -1,6 +1,6 @@
 <div x-data>
     {{-- Search / Barcode input --}}
-    <x-ui.input id="barcode-input" name="barcode" type="text" icon="fas fa-barcode" wire:model.live.debounce.300ms="query"
+    <x-ui.input id="barcode-input" name="barcode" type="text" icon="fas fa-barcode" wire:model.live.debounce.500ms="query"
         wire:keydown.enter.prevent="$parent.addByBarcode($event.target.value)" placeholder="Search or scan barcode..."
         autocomplete="off" class="h-12 !bg-white dark:!bg-[#35383E] shadow" />
 

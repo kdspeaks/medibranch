@@ -26,6 +26,7 @@ return new class extends Migration
             $table->date('expiry_date')->nullable();
 
             $table->foreignId('tax_id')->nullable()->constrained()->onDelete('set null');
+            $table->decimal('tax_amount', 10, 2)->default(0.00);
             $table->decimal('line_total_amount', 12, 2)->default(0.00);
             $table->string('status')->default('pending'); // pending, stocked, cancelled
 

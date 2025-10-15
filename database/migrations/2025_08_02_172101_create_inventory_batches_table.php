@@ -19,7 +19,9 @@ return new class extends Migration
             $table->decimal('unit_purchase_price', 10, 2);
             $table->decimal('margin', 10, 2);
             $table->string('batch_number')->nullable();
+            $table->date('mfg_date')->nullable();
             $table->date('expiry_date')->nullable();
+
 
             // Status for batch control
             $table->enum('status', ['active', 'expired', 'quarantined'])->default('active');

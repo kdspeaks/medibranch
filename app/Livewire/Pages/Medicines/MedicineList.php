@@ -149,7 +149,8 @@ class MedicineList extends Component implements HasForms, HasActions, HasTable
             ->defaultPaginationPageOption(20)
             ->recordUrl(
                 fn(Medicine $record) => route('medicines.view', ['medicine' => $record])
-            );
+            )
+            ->striped();
     }
 
     public function render()

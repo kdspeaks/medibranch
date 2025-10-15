@@ -116,7 +116,7 @@ class PurchaseList extends Component implements HasForms, HasActions, HasTable
             ->recordActions([
                 Action::make('edit')
                     ->icon('heroicon-m-pencil-square')
-                    // ->url(fn(Medicine $record) => route('medicines.edit', ['medicine' => $record]))
+                    ->url(fn(Purchase $record) => route('medicines.purchases.edit', ['purchase' => $record]))
                     ->extraAttributes(['wire:navigate' => 'true']),
                 DeleteAction::make()
                     ->visible(fn($record) => $record->name !== 'Super Admin')
@@ -129,7 +129,7 @@ class PurchaseList extends Component implements HasForms, HasActions, HasTable
             ->paginated([10, 20, 50, 100, 'all'])
             ->defaultPaginationPageOption(20)
             ->recordUrl(
-                fn(Purchase $record) => route('medicines.purchases.view', ['purchase' => $record])
+                fn(Purchase $record) => route('medicines.purchases.edit', ['purchase' => $record])
             );
     }
 

@@ -3,126 +3,153 @@
 namespace App\Livewire\Pages\Purchase;
 
 use App\Models\Purchase;
-use Filament\Actions\Contracts\HasActions;
-use Filament\Schemas\Schema;
-use Livewire\Component;
 use App\Models\Medicine;
-use Livewire\Attributes\On;
-use Filament\Forms\Components\Grid;
-use Illuminate\Contracts\View\View;
-use Filament\Forms\Components\Group;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Section;
+use Livewire\Component;
+use Filament\Schemas\Schema;
+use Filament\Forms\Form;
+use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
-use Filament\Actions\Action;
-use Filament\Forms\Components\MarkdownEditor;
 use Filament\Forms\Concerns\InteractsWithForms;
-use App\Livewire\Pages\Purchase\Concerns\HasPurchaseForm;
 use Filament\Actions\Concerns\InteractsWithActions;
+use App\Livewire\Pages\Purchase\Concerns\HasPurchaseForm;
 
-class PurchaseCreate extends Component implements HasForms, HasActions
+class PurchaseEdit extends Component implements HasForms, HasActions
 {
-
     use InteractsWithForms, HasPurchaseForm, InteractsWithActions;
-    public ?array $data = [];
 
-    public function mount(): void
+    public ?array $data = [];
+    public Purchase $purchaseModel; // the model being edited
+
+    /**
+     * Mount with the Purchase model (route-model bound)
+     */
+    public function mount(Purchase $purchase): void
     {
-        $this->cPurchase = new Purchase();
-        $this->form->fill();
+        $this->purchaseModel = $purchase->load('items');
+
+        // initialize trait-level purchase and fill the form state with model + items
+        $this->setPurchase($this->purchaseModel);
+
+        // dd($this->purchaseModel);
+
+        // if the trait's setPurchase already filled the form, keep consistent.
+        // Ensure top-level $this->data has model values (form state path is 'data')
+        $this->form->fill($this->purchaseModel->load('items')->toArray());
     }
 
     public function resetForm()
     {
-        $this->form->fill();
+        // Reset form to the original model values
+        $this->form->fill($this->purchaseModel->load('items')->toArray());
     }
 
-
-
-    public function submit()
+    /**
+     * Update/save the existing purchase
+     */
+    public function update(): void
     {
+        // SavePurchase handles create vs update depending on $this->cPurchase
         $this->savePurchase();
 
         Notification::make()
-            ->title('Medicine Created')
-            ->body('Medicines have been successfully created.')
+            ->title('Purchase updated')
+            ->body('Purchase has been successfully updated.')
             ->success()
             ->send();
+
+        // Redirect to a view page — adjust route name as needed
+        $this->redirect(route('medicines.purchases.edit', ['purchase' => $this->purchaseModel]), navigate: true);
     }
+
+    /**
+     * Generic submit alias (keeps API similar to create)
+     */
+    public function submit()
+    {
+        $this->update();
+    }
+
     public function formSubmit()
     {
         $this->submit();
-
-        // return $this->redirect(route('purchases.create'), navigate: true); // Update this route to your actual list page
     }
 
-    public function submitAndCreate()
-    {
-        $this->submit();
-
-        $this->form->fill(); // Reset the form for creating another medicine
-        $this->dispatch('scroll-to-top');
-    }
-
+    /**
+     * Filament expects: form(Form $form): Form
+     * We call the trait's purchaseFormSchema which is Schema-based,
+     * then try to extract underlying components for Form::schema(...)
+     */
     public function form(Schema $schema): Schema
     {
-        return $this->purchaseFormSchema($schema)
+        // // Build a Schema instance and pass to trait
+        // $schema = Schema::make();
+        // $schema = $this->purchaseFormSchema($schema);
+
+        // // Try to extract components from Schema.
+        // // Defensive: if Schema exposes getComponents(), use it; if it returned array, use that.
+        // $components = [];
+        // if (is_object($schema) && method_exists($schema, 'getComponents')) {
+        //     $components = $schema->getComponents();
+        // } elseif (is_array($schema)) {
+        //     $components = $schema;
+        // } else {
+        //     // Fallback: try to cast to array (best-effort)
+        //     $components = (array) $schema;
+        // }
+
+        // return $form->schema($components)->statePath('data');
+
+         return $this->purchaseFormSchema($schema)
             ->statePath('data');
     }
 
     public function render()
     {
-        return view('livewire.pages.purchase.purchase-create');
+        return view('livewire.pages.purchase.purchase-edit');
     }
 
-    // PurchaseCreate.php
-
+    /**
+     * Add item by barcode or name snippet — same behaviour as PurchaseCreate
+     */
     public function addByBarcode(string $code)
     {
         $code = trim($code);
         if ($code === '') return;
-        // dd($code);
-        // Try lookup by barcode(s)
+
         $medicine = Medicine::where('barcode', $code)
             ->orWhere('name', 'like', "%{$code}%")
             ->first();
 
         if ($medicine) {
-            // call your existing parent-level method
             $this->addPurchaseItem($medicine->id);
 
-
-            // optional: reset any search state in child by dispatching back or clearing relevant props
-            // e.g., you may want to reset query on parent so child sees it via binding
-            // $this->dispatchBrowserEvent('toast', ['message' => 'Added: ' . $medicine->name]);
+            // clear search UI in child
+            $this->dispatch('clear-results');
             return;
         }
     }
 
+    /**
+     * Add or bump an item in the current purchase data (identical logic to PurchaseCreate)
+     */
     public function addPurchaseItem(int $medicineId): void
     {
         $medicine = Medicine::find($medicineId);
         if (! $medicine) return;
 
-        // get existing items
         $items = $this->data['items'] ?? [];
-        // if already present, just bump quantity & totals
+
         $existingIndex = collect($items)->search(
             fn($row) => (int)($row['medicine_id'] ?? 0) === (int)$medicine->id
         );
 
-        // determine base unit purchase price (float)
         $ppu = isset($medicine->purchase_price) ? (float) $medicine->purchase_price : 0.0;
 
-        
         if ($existingIndex !== false) {
-            // bump qty
             $items[$existingIndex]['quantity'] = (int)($items[$existingIndex]['quantity'] ?? 0) + 1;
             $qty = (int)$items[$existingIndex]['quantity'];
 
-            // prefer existing unit_purchase_price if present, otherwise fallback to $ppu
             $unitPrice = isset($items[$existingIndex]['unit_purchase_price'])
                 ? (float)$items[$existingIndex]['unit_purchase_price']
                 : $ppu;
@@ -131,26 +158,24 @@ class PurchaseCreate extends Component implements HasForms, HasActions
 
             $calc = $this->computeLineWithTax($qty, $unitPrice, $taxId);
 
-            // store computed values back on the item
             $items[$existingIndex]['unit_purchase_price'] = round($unitPrice, 2);
             $items[$existingIndex]['line_total_amount'] = $calc['line_total_amount'];
             $items[$existingIndex]['tax_amount'] = $calc['tax_amount'];
             $items[$existingIndex]['tax_rate'] = $calc['tax_rate'];
             $items[$existingIndex]['tax_id'] = $taxId;
         } else {
-            // new item
             $qty = 1;
             $unitPrice = $ppu;
             $taxId = $medicine->tax_id ?? null;
 
             $calc = $this->computeLineWithTax($qty, $unitPrice, $taxId);
-            
+
             $items[] = [
                 'medicine_id'         => $medicine->id,
                 'medicine_name'       => $medicine->name,
                 'quantity'            => $qty,
                 'unit_purchase_price' => round($unitPrice, 2),
-                'margin'  => (float)($medicine->margin ?? 0),
+                'margin'              => (float)($medicine->margin ?? 0),
                 'batch_number'        => '',
                 'mfg_date'            => null,
                 'expiry_date'         => null,
@@ -161,25 +186,21 @@ class PurchaseCreate extends Component implements HasForms, HasActions
             ];
         }
 
-        // reindex to keep repeater happy
         $this->data['items'] = array_values($items);
 
-        // safe summation using integer paise to avoid float drift (sum item->line_total)
+        // recalc total using paise integer math
         $totalInPaise = collect($this->data['items'] ?? [])
             ->reduce(function ($carry, $item) {
                 $line = isset($item['line_total_amount']) ? (float) $item['line_total_amount'] : 0.0;
-
                 if (! is_numeric($line)) {
                     return $carry;
                 }
-
-                return $carry + (int) round($line * 100); // convert to paise
+                return $carry + (int) round($line * 100);
             }, 0);
 
-        // convert back to decimal with two places
         $this->data['total_amount'] = round($totalInPaise / 100, 2);
 
-        // optional: dispatch to clear child search
+        // signal to clear search child results if needed
         $this->dispatch('clear-results');
     }
 }

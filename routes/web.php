@@ -1,5 +1,6 @@
 <?php
 
+use App\Livewire\Pages\Purchase\PurchaseEdit;
 use App\Models\Tax;
 
 use App\Livewire\Pages\Dashboard;
@@ -93,6 +94,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/medicines/purchases/view/{purchase}', PurchaseCreate::class)
         ->middleware('can:manage-medicines')
         ->name('medicines.purchases.view');
+
+    Route::get('/medicines/purchases/edit/{purchase}', PurchaseEdit::class)
+        ->middleware('can:manage-medicines')
+        ->name('medicines.purchases.edit');
 });
 
 Route::view('/style-guide', 'style-guide')->name('style.guide');

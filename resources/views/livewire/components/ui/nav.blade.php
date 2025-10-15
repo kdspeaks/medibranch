@@ -18,16 +18,16 @@
      <div class="px-3 py-3 lg:px-5 lg:pl-3">
          <div class="flex items-center justify-between">
              <div class="flex items-center justify-start">
-                 <button id="toggleSidebar" aria-expanded="true" aria-controls="sidebar"
+                 <button x-on:click="showSidebar = !showSidebar" aria-expanded="true" aria-controls="sidebar"
                      class="hidden p-2 mr-3 text-text rounded-sm cursor-pointer lg:inline hover:text-text hover:bg-surface focus:ring-2 focus:ring-border dark:text-text-dark dark:hover:text-text-dark dark:hover:bg-surface-dark dark:focus:ring-border-dark">
                      <x-icon name="fas-bars-staggered" class="w-6 h-6" />
                  </button>
 
-                 <button id="toggleSidebarMobile" aria-expanded="true" aria-controls="sidebar"
+                 <button aria-expanded="true" aria-controls="sidebar"
                      class="p-2 mr-2 text-text rounded-sm cursor-pointer lg:hidden hover:text-text hover:bg-surface focus:bg-surface focus:ring-2 focus:ring-border dark:text-text-dark dark:hover:text-text-dark dark:hover:bg-surface-dark dark:focus:bg-surface-dark dark:focus:ring-border-dark">
 
-                     <x-icon name="fas-bars-staggered" id="toggleSidebarMobileHamburger" class="w-6 h-6" />
-                     <x-icon name="fas-xmark" id="toggleSidebarMobileClose" class="hidden w-6 h-6" />
+                     <x-icon name="fas-bars-staggered" x-on:click="showSidebar = !showSidebar" class="w-6 h-6" />
+                     {{-- <x-icon name="fas-xmark" x-on:click="showSidebar = false" class="hidden w-6 h-6" /> --}}
                  </button>
 
                  <a href="{{route('dashboard')}}" class="flex mr-14 flex-col relative">

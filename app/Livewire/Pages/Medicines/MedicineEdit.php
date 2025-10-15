@@ -2,22 +2,15 @@
 
 namespace App\Livewire\Pages\Medicines;
 
-use Filament\Schemas\Schema;
-use App\Livewire\Pages\Medicines\Concerns\HasMedicineForm;
 use Livewire\Component;
-// use Filament\Actions\Action;
 use App\Models\Medicine;
-use Filament\Forms\Components\Grid;
-use Illuminate\Contracts\View\View;
-use Filament\Forms\Components\Group;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Section;
+use Filament\Schemas\Schema;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
-use Filament\Forms\Components\Actions\Action;
-use Filament\Forms\Components\MarkdownEditor;
-use Filament\Forms\Concerns\InteractsWithForms;;
+use Filament\Forms\Concerns\InteractsWithForms;
+use App\Livewire\Pages\Medicines\Concerns\HasMedicineForm;
+
+
 
 class MedicineEdit extends Component implements HasForms
 {
@@ -29,6 +22,7 @@ class MedicineEdit extends Component implements HasForms
     {
         // $this->medicine = Medicine::findOrFail($id);
         $this->medicine = $medicine;
+        // dd($this->medicine);
         $this->setMedicine($this->medicine); // Pass to trait
         $this->form->fill($this->medicine->toArray());
     }
@@ -81,8 +75,8 @@ class MedicineEdit extends Component implements HasForms
 
     public function form(Schema $schema): Schema
     {
-        return $schema
-            ->components($this->medicineFormSchema())
+        return $this->medicineFormSchema($schema)
+            // ->components($this->medicineFormSchema($schema))
             ->statePath('data');
     }
 

@@ -12,10 +12,13 @@ class PurchaseItem extends Model
         'inventory_batch_id',
         'quantity',
         'unit_purchase_price',
-        'unit_selling_price',
+        'margin',
         'batch_number',
+        'mfg_date',
         'expiry_date',
-        'total_amount',
+        'tax_id',
+        'tax_amount',
+        'line_total_amount',
         'status',
     ];
 

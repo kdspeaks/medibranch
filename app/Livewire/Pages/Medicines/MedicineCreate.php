@@ -2,12 +2,11 @@
 
 namespace App\Livewire\Pages\Medicines;
 
-use Filament\Schemas\Schema;
-use App\Livewire\Pages\Medicines\Concerns\HasMedicineForm;
-use Livewire\Attributes\On;
 use Livewire\Component;
-// use Filament\Actions\Action;
 use App\Models\Medicine;
+use Livewire\Attributes\On;
+use Filament\Schemas\Schema;
+// use Filament\Actions\Action;
 use Filament\Forms\Components\Grid;
 use Illuminate\Contracts\View\View;
 use Filament\Forms\Components\Group;
@@ -16,14 +15,17 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
+use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\MarkdownEditor;
 use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Actions\Concerns\InteractsWithActions;
+use App\Livewire\Pages\Medicines\Concerns\HasMedicineForm;
 
-class MedicineCreate extends Component implements HasForms
+class MedicineCreate extends Component implements HasForms, HasActions
 {
 
-    use InteractsWithForms, HasMedicineForm;
+    use InteractsWithForms, HasMedicineForm, InteractsWithActions;
     public ?array $data = [];
 
     public function mount(): void
@@ -64,8 +66,7 @@ class MedicineCreate extends Component implements HasForms
 
     public function form(Schema $schema): Schema
     {
-        return $schema
-            ->components($this->medicineFormSchema())
+        return $this->medicineFormSchema($schema)
             ->statePath('data');
     }
 
