@@ -49,14 +49,14 @@ trait HasMedicineForm
     public function computeAndSetSku(callable $get, callable $set): void
     {
         $name = $get('name') ?? '';
-        $potency = $get('potency') ?? '';
+        $potency = $get('potency') ? $get('potency') . '-' : '';
         $form = $get('form') ?? '';
         $packingQuantity = $get('packing_quantity') ?? '';
         $packingUnit = $get('packing_unit') ?? '';
         $formShort = $form ? substr($form, 0, 3) : '';
         $slugName = $name ? strtolower(preg_replace('/[^A-Za-z0-9]/', '_', $name)) : '';
         $unitCode = Medicine::packingUnitCodeMap()[$packingUnit] ?? strtoupper($packingUnit);
-        $sku = "{$slugName}-{$potency}-{$formShort}-{$packingQuantity}{$unitCode}";
+        $sku = "{$slugName}-{$potency}{$formShort}-{$packingQuantity}{$unitCode}";
         $set('sku', strtoupper(trim($sku, '-')));
     }
 
@@ -95,10 +95,10 @@ trait HasMedicineForm
                                 ->tooltip('Generate Barcode')
                                 ->action(function (\Filament\Schemas\Components\Utilities\Set $set) {
                                     // dd($set);
-                                    $set('barcode', 'MED'.rand(1000000000, 9999999999));
+                                    $set('barcode', rand(1000000000, 9999999999));
                                 });
                         }),
-                ])->reactive(),
+                ])->live(debounce: 500),
                 // ->extraAttributes(['x-data' => '{ barcode: $wire.entangle("data.barcode") }']),
                 Select::make('manufacturer_id')
                     ->label('Manufacturer')
@@ -198,38 +198,14 @@ trait HasMedicineForm
 
                         return $manufacturer->id;
                     }),
-                // Select::make('shop_customer_id')
-                //     ->relationship('customer', 'name')
-                //     ->searchable()
-                //     ->required()
-                //     ->createOptionForm([
-                //         TextInput::make('name')
-                //             ->required()
-                //             ->maxLength(255),
-
-                //         TextInput::make('email')
-                //             ->label('Email address')
-                //             ->required()
-                //             ->email()
-                //             ->maxLength(255)
-                //             ->unique(),
-
-                //         TextInput::make('phone')
-                //             ->maxLength(255),
-                //     ])
-                //     ->createOptionAction(function (Action $action) {
-                //         return $action
-                //             ->modalHeading('Create customer')
-                //             ->modalSubmitActionLabel('Create customer')
-                //             ->modalWidth('lg');
-                //     }),
             ]),
 
             Section::make()->columns(['sm' => 2])->schema([
                 TextInput::make('potency')
                     ->label('Potency')
-                    ->required()
+                    // ->required()
                     ->maxLength(50)
+                    ->live(debounce: 500)
                     ->afterStateUpdated(fn ($get, $set) => $this->computeAndSetSku($get, $set)),
 
                 Select::make('form')
@@ -238,6 +214,7 @@ trait HasMedicineForm
                     ->native(false)
                     ->searchable()
                     ->required()
+                    ->live(debounce: 500)
                     ->afterStateUpdated(fn ($get, $set) => $this->computeAndSetSku($get, $set)),
 
                 TextInput::make('packing_quantity')
@@ -245,6 +222,7 @@ trait HasMedicineForm
                     ->numeric()
                     ->minValue(1)
                     ->required()
+                    ->live(debounce: 500)
                     ->afterStateUpdated(fn ($get, $set) => $this->computeAndSetSku($get, $set)),
 
                 Select::make('packing_unit')
@@ -258,7 +236,7 @@ trait HasMedicineForm
                     ->native(false)
                     ->default(fn ($get) => Medicine::packingUnits()[$get('form')][0] ?? null)
                     ->searchable()
-                    ->reactive()
+                    ->live(debounce: 500)
                     ->afterStateUpdated(fn ($get, $set) => $this->computeAndSetSku($get, $set)),
             ]),
 
