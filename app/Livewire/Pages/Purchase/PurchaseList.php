@@ -130,7 +130,8 @@ class PurchaseList extends Component implements HasForms, HasActions, HasTable
             ->defaultPaginationPageOption(20)
             ->recordUrl(
                 fn(Purchase $record) => route('medicines.purchases.edit', ['purchase' => $record])
-            );
+            )
+            ->striped();
     }
 
     public function render()
