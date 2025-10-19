@@ -22,7 +22,11 @@ class Medicine extends Model
         'packing_quantity',
         'packing_unit',
         'purchase_price',
-        'selling_price',
+        'tax_id',
+        'is_tax_inclusive',
+        'margin',
+        'sale_price',
+        'discount_on_sale',
         'description',
         'is_active',
     ];

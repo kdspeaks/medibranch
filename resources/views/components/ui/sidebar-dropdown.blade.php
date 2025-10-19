@@ -10,7 +10,6 @@
 @endphp
 <li {{-- x-data="{ isExpanded: {{ json_encode((bool) $isActive) }} }" --}} x-data="{
     isExpanded: false,
-    test: 'kunal',
     checkActive() {
         const current = window.location.pathname.replace(/\/+$/, '');
 

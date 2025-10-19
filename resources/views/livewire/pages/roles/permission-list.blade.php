@@ -6,7 +6,7 @@
         {{ $this->createAction }}
     </x-slot>
 
-    <div class="md:mt-5">
+    <div class="md:my-5">
         {{ $this->table }}
     </div>
 

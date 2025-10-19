@@ -6,37 +6,49 @@
         <div class="flex overflow-y-auto flex-col flex-1 pt-5 pb-4">
             <div class="flex-1 px-3 space-y-1  divide-y divide-border dark:divide-border-dark">
                 <ul class="space-y-2">
+                    {{-- Dashboard --}}
                     <x-ui.sidebar-link route="dashboard" icon="fas-chart-pie">
                         Dashboard
                     </x-ui.sidebar-link>
 
-                    <x-ui.sidebar-dropdown title="Contacts" icon="fas-users-line">
+                    {{-- Contacts --}}
+                    @if (auth()->user()->can('manage-users') || auth()->user()->can('manage-suppliers'))
+                        <x-ui.sidebar-dropdown title="Contacts" icon="fas-users-line">
+                            @can('manage-suppliers')
+                                <x-ui.sidebar-subitem route="medicines.suppliers">Suppliers</x-ui.sidebar-subitem>
+                            @endcan
 
-                        <x-ui.sidebar-subitem route="medicines.suppliers">Suppliers</x-ui.sidebar-subitem>
-                        @can('manage-users')
-                        <x-ui.sidebar-subitem route="users">
-                            Users
-                        </x-ui.sidebar-subitem>
-                    @endcan
-
-                    </x-ui.sidebar-dropdown>
-
-                    @can('manage-medicines')
-                        <x-ui.sidebar-dropdown title="Medicines" icon="fas-pills">
-                            <x-ui.sidebar-subitem route="medicines.list" active-consideration="medicines.create, medicines.view, medicines.edit">Medicines</x-ui.sidebar-subitem>
-                            <x-ui.sidebar-subitem route="medicines.manufacturers">Manufacturers</x-ui.sidebar-subitem>
+                            @can('manage-users')
+                                <x-ui.sidebar-subitem route="users">Users</x-ui.sidebar-subitem>
+                            @endcan
                         </x-ui.sidebar-dropdown>
-                    @endcan
+                    @endif
 
-                    <x-ui.sidebar-dropdown title="Inventory" icon="fas-warehouse">
+                    {{-- Medicines --}}
+                    @if (auth()->user()->can('manage-medicines') || auth()->user()->can('manage-manufacturers'))
+                        <x-ui.sidebar-dropdown title="Medicines" icon="fas-pills">
+                            @can('manage-medicines')
+                                <x-ui.sidebar-subitem route="medicines.list"
+                                    active-consideration="medicines.create, medicines.view, medicines.edit">Medicines</x-ui.sidebar-subitem>
+                            @endcan
 
-                        <x-ui.sidebar-subitem route="medicines.purchases.list" active-consideration="medicines.purchases.create">Purchases</x-ui.sidebar-subitem>
+                            @can('manage-manufacturers')
+                                <x-ui.sidebar-subitem route="medicines.manufacturers">Manufacturers</x-ui.sidebar-subitem>
+                            @endcan
+                        </x-ui.sidebar-dropdown>
+                    @endif
 
-                    </x-ui.sidebar-dropdown>
+                    {{-- Inventory --}}
+                    @if (auth()->user()->can('manage-purchases'))
+                        <x-ui.sidebar-dropdown title="Inventory" icon="fas-warehouse">
+                            @can('manage-purchases')
+                                <x-ui.sidebar-subitem route="medicines.purchases.list"
+                                    active-consideration="medicines.purchases.create">Purchases</x-ui.sidebar-subitem>
+                            @endcan
+                        </x-ui.sidebar-dropdown>
+                    @endif
 
-
-                    
-
+                    {{-- Roles & Permissions --}}
                     @can('manage-roles-permission')
                         <x-ui.sidebar-dropdown title="Roles & Permissions" icon="fas-shield-halved">
                             <x-ui.sidebar-subitem route="roles">Roles</x-ui.sidebar-subitem>
@@ -50,8 +62,9 @@
                             <x-ui.sidebar-subitem route="settings.site">
                                 App Settings
                             </x-ui.sidebar-subitem>
+                            <x-ui.sidebar-subitem route="medicines.taxes">Taxes</x-ui.sidebar-subitem>
                         @endcan
-                        <x-ui.sidebar-subitem route="medicines.taxes">Taxes</x-ui.sidebar-subitem>
+
                         @can('manage-branches')
                             <x-ui.sidebar-subitem route="branches" icon="fas-store">
                                 Branches
@@ -60,11 +73,7 @@
 
                     </x-ui.sidebar-dropdown>
 
-                    {{-- @can('manage-settings')
-                        <x-ui.sidebar-link route="settings.site" icon="fas-cog">
-                            Settings
-                        </x-ui.sidebar-link>
-                    @endcan --}}
+
 
 
 

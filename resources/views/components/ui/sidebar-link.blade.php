@@ -26,13 +26,7 @@
     ]) }}>
 
     @if ($icon)
-        <x-icon :name="$icon"
-            {{ $attributes->merge([
-                'class' => 'w-5 h-5 group-hover:text-text dark:group-hover:text-text-dark ',
-                // ($active
-                //     ? 'text-text dark:text-text-dark'
-                //     : 'text-text-muted dark:text-text-muted-dark'),
-            ]) }} />
+        <x-icon :name="$icon"  x-bind:class="isActive ? 'text-text dark:text-text-dark' :'text-text-muted dark:text-text-muted-dark '" class="shrink-0 w-5 h-5 transition duration-75 group-hover:text-text dark:group-hover:text-text-dark" />
     @endif
 
     <span class="flex-1 ml-3 whitespace-nowrap leading-tight" sidebar-toggle-item>{{ $slot }}</span>

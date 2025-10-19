@@ -11,8 +11,8 @@ new #[Layout('layouts.guest')] class extends Component {
 
     public function mount()
     {
-        $this->form->email = 'kdutta494@gmail.com';
-        $this->form->password = 'password';
+        // $this->form->email = 'kdutta494@gmail.com';
+        // $this->form->password = 'password';
     }
 
     /**
@@ -43,7 +43,7 @@ new #[Layout('layouts.guest')] class extends Component {
             <x-input-error :messages="$errors->get('form.email')" class="mt-2" />
         </div> --}}
         <x-ui.input label="{{ __('messages.email') }}" name="email" type="email" icon="fas fa-envelope" :error="$errors->first('form.email')"
-            wire:model="form.email" placeholder="username@email.comm" />
+            wire:model="form.email" placeholder="username@email.com" />
 
         <!-- Password -->
         {{-- <div>

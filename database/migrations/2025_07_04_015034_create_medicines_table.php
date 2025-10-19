@@ -25,7 +25,15 @@ return new class extends Migration {
             $table->string('packing_unit');
 
             $table->decimal('purchase_price', 10, 2)->default(0.00);
+            $table->foreignId('tax_id')
+                ->nullable()
+                ->constrained('taxes')
+                ->nullOnDelete(); // optional: null if tax deleted
+            $table->boolean('is_tax_inclusive')->default(true);
             $table->decimal('margin', 10, 2)->default(0.00);
+            $table->decimal('sale_price', 10, 2)->default(0.00);
+            $table->decimal('discount_on_sale', 10, 2)->default(0.00);
+
 
             $table->text('description')->nullable();
             $table->boolean('is_active')->default(true);

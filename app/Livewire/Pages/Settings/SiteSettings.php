@@ -48,6 +48,7 @@ class SiteSettings extends Component implements HasForms
                             // ->default(setting('site_branch_id'))
                             ->searchable()
                             ->required()
+                            ->hidden(!auth()->user()->can('manage-branches'))
                     ]))
             ])
             ->statePath('data');

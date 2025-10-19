@@ -22,10 +22,13 @@ class DatabaseSeeder extends Seeder
         // Create permissions
         $permissions = [
             'manage-users',
+            'manage-suppliers',
+            'manage-medicines',
+            'manage-manufacturers',
+            'manage-purchases',
             'manage-roles-permission',
             'manage-settings',
             'manage-branches',
-            'manage-medicines',
         ];
 
         foreach ($permissions as $permission) {
@@ -36,9 +39,9 @@ class DatabaseSeeder extends Seeder
         $superAdminRole->givePermissionTo($permissions);
 
         // Create users
-        User::factory(5)->create()->each(function ($user) use ($userRole) {
-            $user->assignRole($userRole); // ✅ assign "User" role to factory-created users
-        });
+        // User::factory(5)->create()->each(function ($user) use ($userRole) {
+        //     $user->assignRole($userRole); // ✅ assign "User" role to factory-created users
+        // });
 
         // Create specific admin user
         $admin = User::factory()->create([
@@ -47,35 +50,35 @@ class DatabaseSeeder extends Seeder
         ]);
         $admin->assignRole($superAdminRole); // ✅ assign "Super Admin" role
 
-        //Branch
-        $branch = Branch::factory()->create();
+        // //Branch
+        // $branch = Branch::factory()->create();
 
-        Setting::insert([
-            [
-                'key' => 'site_name',
-                'value' => 'MediBranch',
-                'type' => 'string',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'key' => 'site_branch_id',
-                'value' => $branch->id,
-                'type' => 'integer',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-        ]);
+        // Setting::insert([
+        //     [
+        //         'key' => 'site_name',
+        //         'value' => 'MediBranch',
+        //         'type' => 'string',
+        //         'created_at' => now(),
+        //         'updated_at' => now(),
+        //     ],
+        //     [
+        //         'key' => 'site_branch_id',
+        //         'value' => $branch->id,
+        //         'type' => 'integer',
+        //         'created_at' => now(),
+        //         'updated_at' => now(),
+        //     ],
+        // ]);
 
-        $this->call([
-            ManufacturerSeeder::class,
-            TaxSeeder::class,
-        ]);
+        // $this->call([
+        //     ManufacturerSeeder::class,
+        //     TaxSeeder::class,
+        // ]);
         
-        $medicines = Medicine::factory(50)->create();
+        // $medicines = Medicine::factory(50)->create();
 
-        $this->call([
-            SupplierSeeder::class, // Add SupplierSeeder to the call
-        ]);
+        // $this->call([
+        //     SupplierSeeder::class, // Add SupplierSeeder to the call
+        // ]);
     }
 }
