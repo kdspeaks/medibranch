@@ -26,6 +26,8 @@ class PurchaseEdit extends Component implements HasForms, HasActions
      */
     public function mount(Purchase $purchase): void
     {
+        abort_unless(auth()->user()?->canAccessBranch((int) $purchase->branch_id), 403);
+
         $this->purchaseModel = $purchase->load('items');
 
         // initialize trait-level purchase and fill the form state with model + items
@@ -59,7 +61,7 @@ class PurchaseEdit extends Component implements HasForms, HasActions
             ->send();
 
         // Redirect to a view page — adjust route name as needed
-        $this->redirect(route('medicines.purchases.edit', ['purchase' => $this->purchaseModel]), navigate: true);
+        $this->redirect(route('medicines.purchases.view', ['purchase' => $this->purchaseModel]), navigate: true);
     }
 
     /**

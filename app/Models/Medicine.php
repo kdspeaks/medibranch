@@ -31,6 +31,21 @@ class Medicine extends Model
         'is_active',
     ];
 
+    protected $casts = [
+        'packing_quantity' => 'integer',
+        'purchase_price' => 'decimal:2',
+        'is_tax_inclusive' => 'boolean',
+        'margin' => 'decimal:2',
+        'sale_price' => 'decimal:2',
+        'discount_on_sale' => 'decimal:2',
+        'is_active' => 'boolean',
+    ];
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
+
     public static function forms(): array
     {
         return [

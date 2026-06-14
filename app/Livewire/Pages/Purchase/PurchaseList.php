@@ -2,33 +2,18 @@
 
 namespace App\Livewire\Pages\Purchase;
 
-use Filament\Schemas\Components\Group;
-use Filament\Actions\DeleteAction;
-use App\Models\Tax;
-use Livewire\Component;
-use App\Models\Medicine;
 use App\Models\Purchase;
-use App\Models\Supplier;
-use Filament\Tables\Table;
 use Filament\Actions\Action;
-use Livewire\Attributes\Title;
-use Filament\Actions\CreateAction;
-use Illuminate\Support\Facades\Auth;
-use Filament\Forms\Contracts\HasForms;
-use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\ViewColumn;
-use Filament\Tables\Contracts\HasTable;
-use Filament\Forms\Components\TextInput;
-use Filament\Notifications\Notification;
-use Spatie\Permission\Models\Permission;
-use Filament\Tables\Columns\ToggleColumn;
-use Filament\Actions\Contracts\HasActions;
-use Filament\Forms\Components\CheckboxList;
-use Filament\Forms\Components\ToggleButtons;
-use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Actions\Contracts\HasActions;
+use Filament\Actions\DeleteAction;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Forms\Contracts\HasForms;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Concerns\InteractsWithTable;
+use Filament\Tables\Contracts\HasTable;
+use Filament\Tables\Table;
+use Livewire\Component;
 
 class PurchaseList extends Component implements HasForms, HasActions, HasTable
 {
@@ -36,105 +21,80 @@ class PurchaseList extends Component implements HasForms, HasActions, HasTable
     use InteractsWithTable;
     use InteractsWithForms;
 
-    public function createAction(): Action
-    {
-        return CreateAction::make('create')
-            ->model(Purchase::class)
-            ->label('Create Role')
-            ->modalHeading('Create New Role')
-            ->schema([
-                Group::make([
-                    TextInput::make('name')
-                        ->unique(ignoreRecord: true)
-                        ->label('Role Name')
-                        ->required()
-                        ->maxLength(255),
-
-                    CheckboxList::make('permissions')
-                        // ->required()
-                        ->relationship('permissions', 'name')
-                        ->label('Assign Permissions')
-                        ->options(
-                            Permission::all()->pluck('name', 'id')
-                        )
-                        ->columns(2)
-
-
-
-                ])
-            ]);
-    }
-
     public function table(Table $table): Table
     {
         return $table
-            ->query(Purchase::query())
+            ->query($this->purchaseQuery())
             ->columns([
-                // ViewColumn::make('name')
-                //     ->view('components.datatable.medicine_name')
-                //     ->searchable(['name', 'sku'])
-                //     ->sortable(),
-                // // TextColumn::make('name')
-                // //     ->searchable()
-                // //     ->sortable(),
-
-                TextColumn::make('purchase_date')
-                    ->state(fn($record) => date('d M, Y', strtotime($record->purchase_date)))
-                    ->separator(', '),
-                TextColumn::make('supplier.name')
-                    ->separator(', '),
-                TextColumn::make('total_amount')
+                TextColumn::make('reference')
+                    ->label('Reference No')
+                    ->state(fn (Purchase $record) => trim(($record->ref_code_prefix ?? '') . $record->ref_code_count))
+                    ->searchable(['ref_code_prefix', 'ref_code_count'])
+                    ->sortable(),
+                TextColumn::make('invoice_number')
+                    ->label('Invoice No')
+                    ->placeholder('-')
                     ->searchable(),
-                TextColumn::make('packing_info')
-                    ->label('Packing')
-                    ->state(fn($record) => "{$record->packing_quantity}{$record->packing_unit}"),
-                TextColumn::make('price_info')
-                    ->label('Last Updated Price')
-                    ->view('components.datatable.medicine_price'),
-                TextColumn::make('tax.name')
-                    ->separator(', '),
-                ToggleColumn::make('is_active')
-                    ->label('Active')
-                    ->onIcon('heroicon-m-check-circle')
-                    ->offIcon('heroicon-m-x-circle')
-                    ->toggleable()
-                    ->sortable()
-                    ->visible(Auth::user()?->can('manage_medicines'))
-                    ->afterStateUpdated(function ($record, $state) {
-                        // Runs after the state is saved to the database.
-                        Notification::make()
-                            ->title('Medicine Updated')
-                            ->body('Medicine has been successfully updated.')
-                            ->success()
-                            ->send();
-                    }),
-
-            ])
-            ->filters([
-                // ...
+                TextColumn::make('branch.name')
+                    ->label('Branch')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('supplier.name')
+                    ->label('Supplier')
+                    ->placeholder('Walk-in')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('purchase_date')
+                    ->label('Date')
+                    ->date('d M, Y')
+                    ->sortable(),
+                TextColumn::make('status')
+                    ->badge()
+                    ->colors([
+                        'gray' => 'draft',
+                        'success' => 'received',
+                        'danger' => 'cancelled',
+                    ])
+                    ->sortable(),
+                TextColumn::make('total_amount')
+                    ->label('Total')
+                    ->money('INR')
+                    ->sortable(),
             ])
             ->recordActions([
+                Action::make('view')
+                    ->icon('heroicon-m-eye')
+                    ->url(fn (Purchase $record) => route('medicines.purchases.view', ['purchase' => $record]))
+                    ->extraAttributes(['wire:navigate' => 'true']),
                 Action::make('edit')
                     ->icon('heroicon-m-pencil-square')
-                    ->url(fn(Purchase $record) => route('medicines.purchases.edit', ['purchase' => $record]))
+                    ->visible(fn (Purchase $record) => $record->status !== 'received')
+                    ->url(fn (Purchase $record) => route('medicines.purchases.edit', ['purchase' => $record]))
                     ->extraAttributes(['wire:navigate' => 'true']),
                 DeleteAction::make()
-                    ->visible(fn($record) => $record->name !== 'Super Admin')
-                    ->requiresConfirmation()
+                    ->visible(fn (Purchase $record) => $record->status !== 'received')
+                    ->requiresConfirmation(),
             ])
-            ->toolbarActions([
-                // ...
-            ])
-            ->headerActions([])
             ->paginated([10, 20, 50, 100, 'all'])
             ->defaultPaginationPageOption(20)
-            ->recordUrl(
-                fn(Purchase $record) => route('medicines.purchases.edit', ['purchase' => $record])
-            );
+            ->recordUrl(fn (Purchase $record) => route('medicines.purchases.view', ['purchase' => $record]));
     }
 
     public function render()
     {
         return view('livewire.pages.purchase.purchase-list');
+    }
+
+    private function purchaseQuery()
+    {
+        $query = Purchase::query()->with(['branch', 'supplier']);
+        $branch = activeBranch();
+        $user = auth()->user();
+
+        if ($branch && $user && ! $user->hasRole('Super Admin')) {
+            $query->forBranch($branch->id);
+        }
+
+        return $query;
     }
 }

@@ -9,10 +9,8 @@
         <form wire:submit.prevent="formSubmit" id="edit-purchase-form">
             {{ $this->form }}
             <div class="flex gap-2">
-                <x-filament::button type="submit" class="mt-4" wire:target="formSubmit">Save
-                    Medicine</x-filament::button>
-                <x-filament::button class="mt-4" wire:click="submitAndCreate">Save & Create
-                    another</x-filament::button>
+                <x-filament::button type="submit" class="mt-4" wire:target="formSubmit">Update
+                    Purchase</x-filament::button>
                 <x-filament::button class="mt-4" color="danger" wire:click="resetForm">Reset</x-filament::button>
             </div>
         </form>

@@ -16,6 +16,16 @@ class InventoryBatch extends Model
         'batch_number',
         'mfg_date',
         'expiry_date',
+        'status',
+    ];
+
+    protected $casts = [
+        'quantity' => 'integer',
+        'available_quantity' => 'integer',
+        'unit_purchase_price' => 'decimal:2',
+        'margin' => 'decimal:2',
+        'mfg_date' => 'date',
+        'expiry_date' => 'date',
     ];
 
     public function inventory()
@@ -27,5 +37,17 @@ class InventoryBatch extends Model
     {
         return $this->hasMany(InventoryLog::class);
     }
-}
 
+    public function scopeAvailable($query)
+    {
+        return $query->where('available_quantity', '>', 0);
+    }
+
+    public function scopeNotExpired($query)
+    {
+        return $query->where(function ($query) {
+            $query->whereNull('expiry_date')
+                ->orWhere('expiry_date', '>=', now()->toDateString());
+        });
+    }
+}

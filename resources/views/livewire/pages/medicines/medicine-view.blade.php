@@ -49,7 +49,7 @@
                     <div>
                         <p class="text-sm text-text-muted dark:text-text-muted-dark">Selling Price</p>
                         <p class="font-medium text-info dark:text-info-dark">
-                            ₹{{ number_format($medicine->selling_price, 2) }}</p>
+                            ₹{{ number_format($medicine->sale_price, 2) }}</p>
                     </div>
 
                     <div>

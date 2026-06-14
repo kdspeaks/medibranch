@@ -6,10 +6,22 @@ use Illuminate\Database\Eloquent\Model;
 
 class InventoryLog extends Model
 {
-    protected $fillable = ['inventory_id', 'type', 'quantity', 'reason'];
+    protected $fillable = [
+        'inventory_batch_id',
+        'type',
+        'quantity',
+        'reason',
+        'source_type',
+        'source_id',
+    ];
 
-    public function inventory()
+    public function batch()
     {
-        return $this->belongsTo(Inventory::class);
+        return $this->belongsTo(InventoryBatch::class, 'inventory_batch_id');
+    }
+
+    public function source()
+    {
+        return $this->morphTo();
     }
 }

@@ -26,7 +26,7 @@ return new class extends Migration {
             $table->date('purchase_date')->default(now());
 
             $table->decimal('total_amount', 12, 2)->default(0.00);
-            $table->string('status')->default('pending'); // pending, completed, cancelled
+            $table->string('status')->default('draft'); // draft, received, cancelled
             $table->text('notes')->nullable();
 
             $table->timestamps();

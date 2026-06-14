@@ -21,6 +21,16 @@ class Purchase extends Model
         
     ];
 
+    protected $casts = [
+        'purchase_date' => 'date',
+        'total_amount' => 'decimal:2',
+    ];
+
+    public function scopeForBranch($query, int $branchId)
+    {
+        return $query->where('branch_id', $branchId);
+    }
+
     public function branch()
     {
         return $this->belongsTo(Branch::class);

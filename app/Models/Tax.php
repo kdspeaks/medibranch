@@ -12,6 +12,11 @@ class Tax extends Model
     use SoftDeletes;
     protected $fillable = ['name', 'rate', 'is_active'];
 
+    protected $casts = [
+        'rate' => 'decimal:2',
+        'is_active' => 'boolean',
+    ];
+
     public function medicines()
     {
         return $this->hasMany(Medicine::class);

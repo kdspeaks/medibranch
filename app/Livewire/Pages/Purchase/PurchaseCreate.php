@@ -46,8 +46,8 @@ class PurchaseCreate extends Component implements HasForms, HasActions
         $this->savePurchase();
 
         Notification::make()
-            ->title('Medicine Created')
-            ->body('Medicines have been successfully created.')
+            ->title('Purchase saved')
+            ->body('Purchase has been successfully saved.')
             ->success()
             ->send();
     }
@@ -62,7 +62,8 @@ class PurchaseCreate extends Component implements HasForms, HasActions
     {
         $this->submit();
 
-        $this->form->fill(); // Reset the form for creating another medicine
+        $this->cPurchase = new Purchase();
+        $this->form->fill(); // Reset the form for creating another purchase
         $this->dispatch('scroll-to-top');
     }
 

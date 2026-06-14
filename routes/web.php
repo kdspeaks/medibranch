@@ -12,6 +12,7 @@ use App\Livewire\Pages\Medicines\TaxList;
 use App\Livewire\Pages\Branches\BranchList;
 use App\Livewire\Pages\Roles\PermissionList;
 use App\Livewire\Pages\Purchase\PurchaseList;
+use App\Livewire\Pages\Purchase\PurchaseView;
 use App\Livewire\Pages\Settings\SiteSettings;
 use App\Livewire\Pages\Supplier\SupplierList;
 use App\Livewire\Pages\Medicines\MedicineEdit;
@@ -164,7 +165,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::prefix('purchases')->middleware('can:manage-purchases')->group(function () {
             Route::get('/list', PurchaseList::class)->name('medicines.purchases.list');
             Route::get('/create', PurchaseCreate::class)->name('medicines.purchases.create');
-            Route::get('/view/{purchase}', PurchaseCreate::class)->name('medicines.purchases.view');
+            Route::get('/view/{purchase}', PurchaseView::class)->name('medicines.purchases.view');
             Route::get('/edit/{purchase}', PurchaseEdit::class)->name('medicines.purchases.edit');
         });
     });

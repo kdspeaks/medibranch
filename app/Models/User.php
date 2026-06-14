@@ -43,4 +43,18 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    public function branches()
+    {
+        return $this->belongsToMany(Branch::class)->withTimestamps();
+    }
+
+    public function canAccessBranch(int $branchId): bool
+    {
+        if ($this->hasRole('Super Admin')) {
+            return true;
+        }
+
+        return $this->branches()->whereKey($branchId)->exists();
+    }
 }

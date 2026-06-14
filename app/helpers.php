@@ -15,6 +15,12 @@ if (!function_exists('setting')) {
 if (! function_exists('activeBranch')) {
     function activeBranch(): ?Branch
     {
+        $user = auth()->user();
+
+        if ($user && ! $user->hasRole('Super Admin')) {
+            return $user->branches()->where('is_active', true)->first();
+        }
+
         return Cache::rememberForever('branch', function () {
             $branchId = setting('site_branch_id'); // or however you're storing this
             return Branch::find($branchId);

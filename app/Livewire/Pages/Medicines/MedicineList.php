@@ -59,8 +59,8 @@ class MedicineList extends Component implements HasForms, HasActions, HasTable
     {
         return CreateAction::make('create')
             ->model(Medicine::class)
-            ->label('Create Role')
-            ->modalHeading('Create New Role')
+            ->label('Create Medicine')
+            ->modalHeading('Create New Medicine')
             ->schema([
                 Group::make([
                     TextInput::make('name')
@@ -118,7 +118,7 @@ class MedicineList extends Component implements HasForms, HasActions, HasTable
                     ->offIcon('heroicon-m-x-circle')
                     ->toggleable()
                     ->sortable()
-                    ->visible(Auth::user()?->can('manage_medicines'))
+                    ->visible(Auth::user()?->can('manage-medicines'))
                     ->afterStateUpdated(function ($record, $state) {
                         // Runs after the state is saved to the database.
                         Notification::make()

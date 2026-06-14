@@ -20,6 +20,10 @@ class Manufacturer extends Model
         'is_active'
     ];
 
+    protected $casts = [
+        'is_active' => 'boolean',
+    ];
+
     protected $dates = ['deleted_at'];  // Indicates 'deleted_at' is a date column
 
     public function medicines()
