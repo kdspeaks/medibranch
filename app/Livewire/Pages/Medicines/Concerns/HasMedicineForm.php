@@ -63,7 +63,7 @@ trait HasMedicineForm
     public function saveMedicine(): Medicine
     {
         $validated = $this->form->getState();
-        // dd($validated);
+        $validated['created_by'] = auth()->id();
 
         $medicine = Medicine::create($validated);
 

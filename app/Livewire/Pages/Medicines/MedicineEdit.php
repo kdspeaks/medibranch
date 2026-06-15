@@ -36,6 +36,8 @@ class MedicineEdit extends Component implements HasForms
     {
         $validated = $this->form->getState();
 
+        $validated['last_updated_by'] = auth()->id();
+
         $this->medicine->update($validated);
 
         Notification::make()

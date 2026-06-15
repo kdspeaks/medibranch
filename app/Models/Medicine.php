@@ -29,6 +29,8 @@ class Medicine extends Model
         'discount_on_sale',
         'description',
         'is_active',
+        'created_by',
+        'last_updated_by',
     ];
 
     protected $casts = [
