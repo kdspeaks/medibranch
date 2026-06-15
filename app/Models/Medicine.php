@@ -112,4 +112,26 @@ class Medicine extends Model
     {
         return $this->belongsTo(Tax::class);
     }
+
+    public function inventories()
+    {
+        return $this->hasMany(Inventory::class);
+    }
+
+    public function inventoryBatches()
+    {
+        return $this->hasManyThrough(
+            InventoryBatch::class,
+            Inventory::class,
+            'medicine_id',
+            'inventory_id',
+            'id',
+            'id',
+        );
+    }
+
+    public function purchaseItems()
+    {
+        return $this->hasMany(PurchaseItem::class);
+    }
 }

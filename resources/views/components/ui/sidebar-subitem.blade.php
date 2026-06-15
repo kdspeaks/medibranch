@@ -1,24 +1,36 @@
 @props(['route'])
 
 @php
+    $routePath = function (string $routeName): string {
+        if (! Route::has($routeName)) {
+            return '/' . ltrim($routeName, '/');
+        }
+
+        $uri = Route::getRoutes()->getByName($routeName)?->uri() ?? $routeName;
+        $baseUri = preg_replace('/\{[^}]+\}/', '', $uri);
+
+        return '/' . trim($baseUri, '/');
+    };
+
     $href = Route::has($route) ? route($route) : '/' . ltrim($route, '/');
 
-    // read 'active-consideration' attribute (kebab-case) and build an array of real URLs
+    // Build route path prefixes instead of concrete URLs so parameterized routes
+    // like medicines.view/{medicine} still match the current pathname.
     $rawConsider = $attributes->get('active-consideration', '') ?: '';
 
     $considerRoutes = collect(explode(',', $rawConsider))
         ->map(fn($r) => trim($r))
         ->filter()
-        ->map(fn($r) => Route::has($r) ? route($r, 1) : '/' . ltrim($r, '/'))
-        // ->map(fn($r) => Route::has($r) ? route($r) : '/' . ltrim($r, '/'))
-        // ->values()
+        ->map(fn($r) => $routePath($r))
         ->all();
+
+    $targetPath = $routePath($route);
     // dd($considerRoutes);
 @endphp
 
 <li data-href="{{ $href }}" x-data="{
     isActive: false,
-    target: '{{ $href }}',
+    target: '{{ $targetPath }}',
     consideredTargets: {{ json_encode($considerRoutes) }},
 
     normalize(path) {

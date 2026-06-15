@@ -62,7 +62,10 @@ class ManufacturerSeeder extends Seeder
         ];
 
         foreach ($manufacturers as $data) {
-            Manufacturer::create($data);
+            Manufacturer::updateOrCreate(
+                ['name' => $data['name']],
+                $data,
+            );
         }
     }
 }

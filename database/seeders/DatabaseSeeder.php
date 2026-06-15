@@ -2,24 +2,19 @@
 
 namespace Database\Seeders;
 
-use App\Models\Setting;
 use App\Models\Branch;
-use App\Models\Medicine;
 use App\Models\User;
-use Database\Factories\MedicineFactory;
 use Illuminate\Database\Seeder;
-use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // Create roles
         $superAdminRole = Role::firstOrCreate(['name' => 'Super Admin']);
-        $userRole = Role::firstOrCreate(['name' => 'User']); // 🔁 prevent "RoleDoesNotExist" error
+        $userRole = Role::firstOrCreate(['name' => 'User']);
 
-        // Create permissions
         $permissions = [
             'manage-users',
             'manage-suppliers',
@@ -35,50 +30,42 @@ class DatabaseSeeder extends Seeder
             Permission::firstOrCreate(['name' => $permission]);
         }
 
-        // Assign all permissions to Super Admin
-        $superAdminRole->givePermissionTo($permissions);
+        $superAdminRole->syncPermissions($permissions);
 
-        // Create users
-        // User::factory(5)->create()->each(function ($user) use ($userRole) {
-        //     $user->assignRole($userRole); // ✅ assign "User" role to factory-created users
-        // });
-
-        // Create specific admin user
-        $admin = User::factory()->create([
-            'name' => 'Kunal Dutta',
-            'email' => 'kdutta494@gmail.com',
+        $this->call([
+            BranchSeeder::class,
+            SettingSeeder::class,
+            ManufacturerSeeder::class,
+            SupplierSeeder::class,
+            TaxSeeder::class,
+            MedicineSeeder::class,
         ]);
-        $admin->assignRole($superAdminRole); // ✅ assign "Super Admin" role
 
-        // //Branch
-        // $branch = Branch::factory()->create();
+        $branches = Branch::query()->where('is_active', true)->get();
 
-        // Setting::insert([
-        //     [
-        //         'key' => 'site_name',
-        //         'value' => 'MediBranch',
-        //         'type' => 'string',
-        //         'created_at' => now(),
-        //         'updated_at' => now(),
-        //     ],
-        //     [
-        //         'key' => 'site_branch_id',
-        //         'value' => $branch->id,
-        //         'type' => 'integer',
-        //         'created_at' => now(),
-        //         'updated_at' => now(),
-        //     ],
-        // ]);
+        $admin = User::query()->firstOrCreate(
+            ['email' => 'kdutta494@gmail.com'],
+            [
+                'name' => 'Kunal Dutta',
+                'password' => bcrypt('password'),
+                'email_verified_at' => now(),
+            ],
+        );
+        $admin->syncRoles([$superAdminRole]);
+        $admin->branches()->syncWithoutDetaching($branches->pluck('id')->all());
 
-        // $this->call([
-        //     ManufacturerSeeder::class,
-        //     TaxSeeder::class,
-        // ]);
-        
-        // $medicines = Medicine::factory(50)->create();
+        $staffUsers = User::factory(3)->create();
 
-        // $this->call([
-        //     SupplierSeeder::class, // Add SupplierSeeder to the call
-        // ]);
+        foreach ($staffUsers as $index => $user) {
+            $user->syncRoles([$userRole]);
+
+            if ($branch = $branches->get($index % max($branches->count(), 1))) {
+                $user->branches()->syncWithoutDetaching([$branch->id]);
+            }
+        }
+
+        $this->call([
+            PurchaseSeeder::class,
+        ]);
     }
 }
