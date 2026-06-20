@@ -3,9 +3,12 @@
         {{-- <x-ui.button icon="heroicon-o-plus" class="w-full" @click="$dispatch('create-permission')">
              Create Permission
          </x-ui.button> --}}
-        <x-filament::button wire:navigate href="{{route('medicines.create')}}" tag="a">
-            Create Medicine
-        </x-filament::button>
+        <div class="flex gap-2">
+            {{ $this->importAction }}
+            <x-filament::button wire:navigate href="{{route('medicines.create')}}" tag="a">
+                Create Medicine
+            </x-filament::button>
+        </div>
     </x-slot>
     <div class="my-5">
         {{ $this->table }}

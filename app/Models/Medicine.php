@@ -18,6 +18,7 @@ class Medicine extends Model
         'sku', // Unique identifier for scanning
         'manufacturer_id',
         'potency',
+        'stored_location',
         'medicine_form_id',
         'packing_quantity',
         'medicine_unit_id',
