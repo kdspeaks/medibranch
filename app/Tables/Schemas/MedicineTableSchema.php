@@ -56,7 +56,7 @@ class MedicineTableSchema
                 \Filament\Actions\Action::make('edit')
                     ->icon('heroicon-m-pencil-square')
                     ->url(fn(Medicine $record) => route('medicines.edit', ['medicine' => $record]))
-                    ->extraAttributes(['wire:navigate' => 'true']),
+                    ->extraAttributes(['wire:navigate' => true]),
                 \Filament\Actions\DeleteAction::make()
                     ->visible(fn($record) => $record->name !== 'Super Admin')
                     ->requiresConfirmation()

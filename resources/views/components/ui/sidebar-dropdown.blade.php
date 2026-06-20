@@ -34,7 +34,7 @@
 
         <span class="flex-1 ml-4 text-left whitespace-nowrap" sidebar-toggle-item>{{ $title }}</span>
 
-        <x-icon name="fwb-o-angle-down" class="w-3 h-3 transition-transform duration-200 transform"
+        <x-icon name="heroicon-o-chevron-down" class="w-3 h-3 transition-transform duration-200 transform"
             x-bind:class="isExpanded ? 'rotate-180' : ''" />
     </button>
 

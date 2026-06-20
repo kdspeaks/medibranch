@@ -1,6 +1,6 @@
 <x-page-layout title="Purchases">
     <x-slot name="actionButton">
-        {{-- <x-ui.button icon="fas-plus" class="w-full" @click="$dispatch('create-permission')">
+        {{-- <x-ui.button icon="heroicon-o-plus" class="w-full" @click="$dispatch('create-permission')">
              Create Permission
          </x-ui.button> --}}
         <x-filament::button wire:navigate href="{{route('medicines.purchases.create')}}" tag="a">

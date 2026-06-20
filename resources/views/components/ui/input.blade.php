@@ -28,7 +28,7 @@
     <div class="relative" x-data="{ show: false }">
         @if ($icon)
             <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                <i class="{{ $icon }} text-input-placeholder dark:text-input-placeholder text-sm"></i>
+                <x-icon :name="$icon" class="w-5 h-5 text-input-placeholder dark:text-input-placeholder" />
             </div>
         @endif
 
@@ -59,8 +59,8 @@
 
         @if ($isPassword)
             <div class="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer text-input-placeholder dark:text-input-placeholder" @click="show = !show">
-                <i x-show="!show" class="fas fa-eye text-sm"></i>
-                <i x-show="show" class="fas fa-eye-slash text-sm"></i>
+                <x-icon name="heroicon-o-eye" x-show="!show" class="w-5 h-5" />
+                <x-icon name="heroicon-o-eye-slash" x-show="show" class="w-5 h-5" />
             </div>
         @endif
     </div>

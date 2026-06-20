@@ -20,14 +20,14 @@
              <div class="flex items-center justify-start">
                  <button x-on:click="showSidebar = !showSidebar" aria-expanded="true" aria-controls="sidebar"
                      class="hidden p-2 mr-3 text-text rounded-sm cursor-pointer lg:inline hover:text-text hover:bg-surface focus:ring-2 focus:ring-border dark:text-text-dark dark:hover:text-text-dark dark:hover:bg-surface-dark dark:focus:ring-border-dark">
-                     <x-icon name="fas-bars-staggered" class="w-6 h-6" />
+                     <x-icon name="heroicon-o-bars-3-bottom-right" class="w-6 h-6" />
                  </button>
 
                  <button aria-expanded="true" aria-controls="sidebar"
                      class="p-2 mr-2 text-text rounded-sm cursor-pointer lg:hidden hover:text-text hover:bg-surface focus:bg-surface focus:ring-2 focus:ring-border dark:text-text-dark dark:hover:text-text-dark dark:hover:bg-surface-dark dark:focus:bg-surface-dark dark:focus:ring-border-dark">
 
-                     <x-icon name="fas-bars-staggered" x-on:click="showSidebar = !showSidebar" class="w-6 h-6" />
-                     {{-- <x-icon name="fas-xmark" x-on:click="showSidebar = false" class="hidden w-6 h-6" /> --}}
+                     <x-icon name="heroicon-o-bars-3-bottom-right" x-on:click="showSidebar = !showSidebar" class="w-6 h-6" />
+                     {{-- <x-icon name="heroicon-o-x-mark" x-on:click="showSidebar = false" class="hidden w-6 h-6" /> --}}
                  </button>
 
                  <a href="{{route('dashboard')}}" class="flex mr-14 flex-col relative">
@@ -71,65 +71,67 @@
                              ];
                          @endphp
 
-                         <div x-data="avatarComponent(@js(auth()->user()->name), @js($colors))" x-on:profile-updated.window="update($event.detail.name)"
-                             class="flex items-center">
-                             <button type="button"
-                                 class="flex items-center justify-center w-8 h-8 text-sm text-white rounded-full focus:ring-4 focus:ring-primary/30 dark:focus:ring-primary/50"
-                                 :class="bgColor" id="user-menu-button-2" aria-expanded="false"
-                                 data-dropdown-toggle="dropdown-2">
-                                 <span class="sr-only">Open user menu</span>
-                                 <span x-text="initials"></span>
-                             </button>
+                          <div x-data="avatarComponent(@js(auth()->user()->name), @js($colors))" x-on:profile-updated.window="update($event.detail.name)">
+                             <div class="flex items-center relative" x-data="{ open: false }" @click.outside="open = false">
+                                 <button type="button"
+                                     @click="open = !open"
+                                     class="flex items-center justify-center w-8 h-8 text-sm text-white rounded-full focus:ring-4 focus:ring-primary/30 dark:focus:ring-primary/50"
+                                     :class="bgColor" id="user-menu-button-2" :aria-expanded="open.toString()">
+                                     <span class="sr-only">Open user menu</span>
+                                     <span x-text="initials"></span>
+                                 </button>
+    
+                                 <div x-show="open"
+                                     x-transition:enter="transition ease-out duration-100"
+                                     x-transition:enter-start="transform opacity-0 scale-95"
+                                     x-transition:enter-end="transform opacity-100 scale-100"
+                                     x-transition:leave="transition ease-in duration-75"
+                                     x-transition:leave-start="transform opacity-100 scale-100"
+                                     x-transition:leave-end="transform opacity-0 scale-95"
+                                     style="display: none;"
+                                     class="absolute right-0 top-10 z-50 my-4 text-base list-none bg-surface divide-y divide-border rounded-sm shadow-sm dark:bg-surface-dark dark:divide-border-dark w-48"
+                                     id="dropdown-2">
+                                     <div class="px-4 py-3" role="none">
+                                         <p class="text-sm text-text dark:text-text-dark" role="none">
+                                             <span x-data="{{ json_encode(['name' => auth()->user()->name]) }}" x-text="name"
+                                                 x-on:profile-updated.window="name = $event.detail.name"></span>
+                                         </p>
+                                         <p class="text-sm font-medium text-text/80 truncate dark:text-text-dark/80" role="none">
+                                             <span x-data="{{ json_encode(['email' => auth()->user()->email]) }}" x-text="email"
+                                                 x-on:profile-updated.window="email = $event.detail.email"></span>
+                                         </p>
+                                         @foreach (auth()->user()->getRoleNames() as $role)
+                                             <span
+                                                 class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-primary/10 text-primary dark:bg-primary-dark/10 dark:text-primary-dark mr-1">
+                                                 {{ $role }}
+                                             </span>
+                                         @endforeach
+                                     </div>
+                                     <ul class="py-1" role="none">
+                                         <li>
+                                             <a href="#"
+                                                 class="block px-4 py-2 text-sm text-text/80 hover:bg-surface-dark/10 dark:text-text-dark/80 dark:hover:bg-surface/10 dark:hover:text-text-dark"
+                                                 role="menuitem">Dashboard</a>
+                                         </li>
+                                         <li>
+                                             <a href="{{ route('profile') }}" wire:navigate
+                                                 class="block px-4 py-2 text-sm text-text/80 hover:bg-surface-dark/10 dark:text-text-dark/80 dark:hover:bg-surface/10 dark:hover:text-text-dark"
+                                                 role="menuitem">Profile</a>
+                                         </li>
+                                         <li>
+                                             <a href="#"
+                                                 class="block px-4 py-2 text-sm text-text/80 hover:bg-surface-dark/10 dark:text-text-dark/80 dark:hover:bg-surface/10 dark:hover:text-text-dark"
+                                                 role="menuitem">Earnings</a>
+                                         </li>
+                                         <li>
+                                             <a wire:click="logout"
+                                                 class="block cursor-pointer px-4 py-2 text-sm text-text/80 hover:bg-surface-dark/10 dark:text-text-dark/80 dark:hover:bg-surface/10 dark:hover:text-text-dark"
+                                                 role="menuitem">Sign out</a>
+                                         </li>
+                                     </ul>
+                                 </div>
+                             </div>
                          </div>
-
-
-
-
-                     </div>
-
-                     <div class="z-50 hidden my-4 text-base list-none bg-surface divide-y divide-border rounded-sm shadow-sm dark:bg-surface-dark dark:divide-border-dark"
-                         id="dropdown-2">
-                         <div class="px-4 py-3" role="none">
-                             <p class="text-sm text-text dark:text-text-dark" role="none">
-                                 <span x-data="{{ json_encode(['name' => auth()->user()->name]) }}" x-text="name"
-                                     x-on:profile-updated.window="name = $event.detail.name"></span>
-                             </p>
-                             <p class="text-sm font-medium text-text/80 truncate dark:text-text-dark/80" role="none">
-                                 <span x-data="{{ json_encode(['email' => auth()->user()->email]) }}" x-text="email"
-                                     x-on:profile-updated.window="email = $event.detail.email"></span>
-                             </p>
-                             @foreach (auth()->user()->getRoleNames() as $role)
-                                 <span
-                                     class="inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-medium bg-primary/10 text-primary dark:bg-primary-dark/10 dark:text-primary-dark mr-1">
-                                     {{ $role }}
-                                 </span>
-                             @endforeach
-
-
-                         </div>
-                         <ul class="py-1" role="none">
-                             <li>
-                                 <a href="#"
-                                     class="block px-4 py-2 text-sm text-text/80 hover:bg-surface-dark/10 dark:text-text-dark/80 dark:hover:bg-surface/10 dark:hover:text-text-dark"
-                                     role="menuitem">Dashboard</a>
-                             </li>
-                             <li>
-                                 <a href="{{ route('profile') }}" wire:navigate
-                                     class="block px-4 py-2 text-sm text-text/80 hover:bg-surface-dark/10 dark:text-text-dark/80 dark:hover:bg-surface/10 dark:hover:text-text-dark"
-                                     role="menuitem">Profile</a>
-                             </li>
-                             <li>
-                                 <a href="#"
-                                     class="block px-4 py-2 text-sm text-text/80 hover:bg-surface-dark/10 dark:text-text-dark/80 dark:hover:bg-surface/10 dark:hover:text-text-dark"
-                                     role="menuitem">Earnings</a>
-                             </li>
-                             <li>
-                                 <a wire:click="logout"
-                                     class="block cursor-pointer px-4 py-2 text-sm text-text/80 hover:bg-surface-dark/10 dark:text-text-dark/80 dark:hover:bg-surface/10 dark:hover:text-text-dark"
-                                     role="menuitem">Sign out</a>
-                             </li>
-                         </ul>
-                     </div>
 
                  </div>
              </div>

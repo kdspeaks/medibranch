@@ -2,12 +2,12 @@
     <x-slot name="actionButton">
         <div class="flex gap-2">
             @if ($purchase->status !== 'received')
-                <x-ui.button icon="fas-pen" variant="primary" wire:navigate
+                <x-ui.button icon="heroicon-o-pencil" variant="primary" wire:navigate
                     href="{{ route('medicines.purchases.edit', ['purchase' => $purchase]) }}">
                     Edit Purchase
                 </x-ui.button>
             @endif
-            <x-ui.button icon="fas-list" variant="outline" wire:navigate href="{{ route('medicines.purchases.list') }}">
+            <x-ui.button icon="heroicon-o-list-bullet" variant="outline" wire:navigate href="{{ route('medicines.purchases.list') }}">
                 Back to Purchases
             </x-ui.button>
         </div>

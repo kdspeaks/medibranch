@@ -7,13 +7,13 @@
             <div class="flex-1 px-3 space-y-1  divide-y divide-border dark:divide-border-dark">
                 <ul class="space-y-2">
                     {{-- Dashboard --}}
-                    <x-ui.sidebar-link route="dashboard" icon="fas-chart-pie">
+                    <x-ui.sidebar-link route="dashboard" icon="heroicon-o-chart-pie">
                         Dashboard
                     </x-ui.sidebar-link>
 
                     {{-- Contacts --}}
                     @if (auth()->user()->can('manage-users') || auth()->user()->can('manage-suppliers'))
-                        <x-ui.sidebar-dropdown title="Contacts" icon="fas-users-line">
+                        <x-ui.sidebar-dropdown title="Contacts" icon="heroicon-o-users">
                             @can('manage-suppliers')
                                 <x-ui.sidebar-subitem route="medicines.suppliers">Suppliers</x-ui.sidebar-subitem>
                             @endcan
@@ -26,7 +26,7 @@
 
                     {{-- Medicines --}}
                     @if (auth()->user()->can('manage-medicines') || auth()->user()->can('manage-manufacturers'))
-                        <x-ui.sidebar-dropdown title="Medicines" icon="fas-pills">
+                        <x-ui.sidebar-dropdown title="Medicines" icon="heroicon-o-beaker">
                             @can('manage-medicines')
                                 <x-ui.sidebar-subitem route="medicines.list"
                                     active-consideration="medicines.create, medicines.view, medicines.edit">Medicines</x-ui.sidebar-subitem>
@@ -40,7 +40,7 @@
 
                     {{-- Inventory --}}
                     @if (auth()->user()->can('manage-purchases'))
-                        <x-ui.sidebar-dropdown title="Inventory" icon="fas-warehouse">
+                        <x-ui.sidebar-dropdown title="Inventory" icon="heroicon-o-archive-box">
                             @can('manage-purchases')
                                 <x-ui.sidebar-subitem route="medicines.purchases.list"
                                     active-consideration="medicines.purchases.create">Purchases</x-ui.sidebar-subitem>
@@ -50,14 +50,14 @@
 
                     {{-- Roles & Permissions --}}
                     @can('manage-roles-permission')
-                        <x-ui.sidebar-dropdown title="Roles & Permissions" icon="fas-shield-halved">
+                        <x-ui.sidebar-dropdown title="Roles & Permissions" icon="heroicon-o-shield-check">
                             <x-ui.sidebar-subitem route="roles">Roles</x-ui.sidebar-subitem>
                             <x-ui.sidebar-subitem route="permissions">Permissions</x-ui.sidebar-subitem>
                         </x-ui.sidebar-dropdown>
                     @endcan
 
 
-                    <x-ui.sidebar-dropdown title="Settings" icon="fas-cogs">
+                    <x-ui.sidebar-dropdown title="Settings" icon="heroicon-o-cog-8-tooth">
                         @can('manage-settings')
                             <x-ui.sidebar-subitem route="settings.site">
                                 App Settings
@@ -66,7 +66,7 @@
                         @endcan
 
                         @can('manage-branches')
-                            <x-ui.sidebar-subitem route="branches" icon="fas-store">
+                            <x-ui.sidebar-subitem route="branches" icon="heroicon-o-building-storefront">
                                 Branches
                             </x-ui.sidebar-subitem>
                         @endcan

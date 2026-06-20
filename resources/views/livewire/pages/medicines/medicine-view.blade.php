@@ -1,6 +1,6 @@
 <x-page-layout title="Medicine View {{ $medicine->name }}">
     <x-slot name="actionButton">
-        <x-ui.button icon="fas-pen" variant="primary" class="w-full" wire:navigate
+        <x-ui.button icon="heroicon-o-pencil" variant="primary" class="w-full" wire:navigate
             href="{{ route('medicines.edit', ['medicine' => $medicine]) }}">
             Edit Medicine
         </x-ui.button>

@@ -1,6 +1,6 @@
 <x-page-layout title="Edit Purchase">
     <x-slot name="actionButton">
-        <x-ui.button icon="fas-plus" variant="outline" class="w-full" wire:navigate
+        <x-ui.button icon="heroicon-o-plus" variant="outline" class="w-full" wire:navigate
             href="{{ route('medicines.purchases.list') }}">
             Back to Purchases
         </x-ui.button>

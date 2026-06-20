@@ -48,7 +48,7 @@ class extends Component {
                    class="w-full mt-1 border-gray-300 rounded-sm form-input" required autofocus autocomplete="username">
             <x-input-error :messages="$errors->get('form.email')" class="mt-2" />
         </div> --}}
-        <x-ui.input label="{{ __('messages.email') }}" name="email" type="email" icon="fas fa-envelope" :error="$errors->first('form.email')"
+        <x-ui.input label="{{ __('messages.email') }}" name="email" type="email" icon="heroicon-o-envelope" :error="$errors->first('form.email')"
             wire:model="form.email" placeholder="username@email.com" />
 
         <!-- Password -->
@@ -58,7 +58,7 @@ class extends Component {
                 class="w-full mt-1 border-gray-300 rounded-sm form-input" required autocomplete="current-password">
             <x-input-error :messages="$errors->get('form.password')" class="mt-2" />
         </div> --}}
-        <x-ui.input label="{{ __('messages.password') }}" name="password" type="password" icon="fas fa-lock" required
+        <x-ui.input label="{{ __('messages.password') }}" name="password" type="password" icon="heroicon-o-lock-closed" required
             wire:model="form.password" placeholder="Password" :error="$errors->first('form.password')" />
         <!-- Remember Me -->
         <div class="flex items-center justify-between">

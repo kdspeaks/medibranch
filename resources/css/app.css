@@ -1,4 +1,3 @@
-@import "@fortawesome/fontawesome-free/css/all.min.css" layer(base);
 /*resources/css/app.css*/
 
 /* @import './../../vendor/power-components/livewire-powergrid/dist/tailwind.css'; */
@@ -32,9 +31,7 @@
 
 @plugin '@tailwindcss/forms';
 @plugin '@tailwindcss/typography';
-@plugin 'flowbite/plugin';
 
-@source '../../node_modules/flowbite/**/*.js';
 @source '../../vendor/power-components/livewire-powergrid/resources/views/**/*.php';
 @source '../../vendor/power-components/livewire-powergrid/src/Themes/Tailwind.php';
 @source '../../vendor/filament/**/*.blade.php';

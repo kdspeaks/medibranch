@@ -1,6 +1,6 @@
 <x-page-layout title="Edit Medicine">
     <x-slot name="actionButton">
-        <x-ui.button icon="fas-plus" variant="outline" class="w-full" wire:navigate href="{{ route('medicines.list') }}">
+        <x-ui.button icon="heroicon-o-plus" variant="outline" class="w-full" wire:navigate href="{{ route('medicines.list') }}">
             Back to Medicines
         </x-ui.button>
     </x-slot>

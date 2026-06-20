@@ -15,10 +15,10 @@
             }"
         >
             <template x-if="!dark">
-                <i class="fas fa-sun text-surface text-sm relative z-10 transition-colors duration-300"></i>
+                <x-icon name="heroicon-o-sun" class="w-4 h-4 text-surface relative z-10 transition-colors duration-300" />
             </template>
             <template x-if="dark">
-                <i class="fas fa-moon text-text-muted-dark text-sm relative z-10 transition-colors duration-300"></i>
+                <x-icon name="heroicon-o-moon" class="w-4 h-4 text-text-muted-dark relative z-10 transition-colors duration-300" />
             </template>
             <span class="sr-only">Toggle Theme</span>
         </button>
