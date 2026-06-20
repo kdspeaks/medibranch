@@ -158,6 +158,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         // Medicine submodules
         Route::get('/manufacturers', ManufacturerList::class)->middleware('can:manage-manufacturers')->name('medicines.manufacturers');
+        Route::get('/forms', \App\Livewire\Pages\Medicines\MedicineFormList::class)->middleware('can:manage-settings')->name('medicines.forms');
         Route::get('/taxes', TaxList::class)->middleware('can:manage-settings')->name('medicines.taxes');
         Route::get('/suppliers', SupplierList::class)->middleware('can:manage-suppliers')->name('medicines.suppliers');
 

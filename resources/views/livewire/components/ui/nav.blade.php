@@ -30,7 +30,7 @@
                      {{-- <x-icon name="heroicon-o-x-mark" x-on:click="showSidebar = false" class="hidden w-6 h-6" /> --}}
                  </button>
 
-                 <a href="{{route('dashboard')}}" class="flex mr-14 flex-col relative">
+                 <a href="{{route('dashboard')}}" wire:navigate class="flex mr-14 flex-col relative">
                      <div class="flex">
                          <img src="{{ asset('images/logo.svg') }}" class="h-8 mr-3" alt="Logo" />
                          <span class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white"

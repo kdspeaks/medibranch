@@ -15,6 +15,8 @@ class MedicineFactory extends Factory
     public function definition(): array
     {
         $name = $this->faker->unique()->word() . ' ' . $this->faker->randomElement(['Album', 'Tincture', 'Plus', 'Mix']);
+        $form = \App\Models\MedicineForm::inRandomOrder()->first();
+        $unit = $form ? $form->units()->inRandomOrder()->first() : null;
 
         return [
             'name' => $name,
@@ -25,10 +27,10 @@ class MedicineFactory extends Factory
             'tax_id' => Tax::inRandomOrder()->value('id') ?? null,
 
             'potency' => $this->faker->randomElement(['30CH', '200CH', '1M', '10M']),
-            'form' => $this->faker->randomElement(['Dilution', 'Tablet', 'Syrup', 'Ointment']),
+            'medicine_form_id' => $form?->id,
 
             'packing_quantity' => $this->faker->numberBetween(10, 100),
-            'packing_unit' => $this->faker->randomElement(['ml', 'g', 'pcs', 'bottle']),
+            'medicine_unit_id' => $unit?->id,
 
             'purchase_price' => $this->faker->randomFloat(2, 5, 500),
             'margin' => $this->faker->randomFloat(2, 2, 20),

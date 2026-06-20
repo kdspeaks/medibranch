@@ -18,9 +18,9 @@ class Medicine extends Model
         'sku', // Unique identifier for scanning
         'manufacturer_id',
         'potency',
-        'form',
+        'medicine_form_id',
         'packing_quantity',
-        'packing_unit',
+        'medicine_unit_id',
         'purchase_price',
         'tax_id',
         'is_tax_inclusive',
@@ -48,56 +48,15 @@ class Medicine extends Model
         return $query->where('is_active', true);
     }
 
-    public static function forms(): array
+    public function medicineForm()
     {
-        return [
-            'Dilution' => 'Dilution',
-            'Mother Tincture' => 'Mother Tincture',
-            'Tablet' => 'Tablet',
-            'Syrup' => 'Syrup',
-            'Trituration' => 'Trituration',
-            'Cream' => 'Cream',
-            'Ointment' => 'Ointment',
-            'Gel' => 'Gel',
-            'Drops' => 'Drops',
-            'Globules' => 'Globules',
-            'Pellets' => 'Pellets',
-            'Spray' => 'Spray',
-            'Oil' => 'Oil',
-        ];
+        return $this->belongsTo(MedicineForm::class);
     }
 
-    public static function packingUnits(): array
+    public function medicineUnit()
     {
-        return [
-            'Dilution' => ['ml'],
-            'Mother Tincture' => ['ml'],
-            'Tablet' => ['tablets / strip', 'tablets / container'],
-            'Trituration' => ['g'],
-            'Syrup' => ['ml'],
-            'Cream' => ['g'],
-            'Ointment' => ['g'],
-            'Gel' => ['g'],
-            'Drops' => ['ml'],
-            'Globules' => ['drams', 'g'],
-            'Pellets' => ['drams', 'g'],
-            'Spray' => ['ml'],
-            'Oil' => ['ml'],
-        ];
+        return $this->belongsTo(MedicineUnit::class);
     }
-
-    public static function packingUnitCodeMap(): array
-    {
-        return [
-            'ml' => 'ML',
-            'g' => 'G',
-            'drams' => 'DRM',
-            'tablets / strip' => '-TAB-STRIP',
-            'tablets / container' => '-TAB-CONTR',
-        ];
-    }
-
-
     protected $dates = ['deleted_at']; // Optional: This tells Laravel that `deleted_at` is a date field.
 
     public function manufacturer()
@@ -107,7 +66,8 @@ class Medicine extends Model
 
     public function getPackingLabelAttribute(): string
     {
-        return "{$this->packing_quantity} {$this->packing_unit}";
+        $unitName = $this->medicineUnit ? $this->medicineUnit->name : '';
+        return "{$this->packing_quantity} {$unitName}";
     }
 
     public function tax()

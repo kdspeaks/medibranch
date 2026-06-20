@@ -108,6 +108,22 @@ class MedicineSeeder extends Seeder
         ];
 
         foreach ($medicines as $medicine) {
+            $formName = $medicine['form'];
+            $unitName = $medicine['packing_unit'];
+            
+            unset($medicine['form'], $medicine['packing_unit']);
+            
+            $form = \App\Models\MedicineForm::firstOrCreate(['name' => $formName]);
+            $unit = \App\Models\MedicineUnit::firstOrCreate(['name' => $unitName]);
+            
+            // Sync pivot table
+            if (!$form->units()->where('medicine_unit_id', $unit->id)->exists()) {
+                $form->units()->attach($unit->id);
+            }
+            
+            $medicine['medicine_form_id'] = $form->id;
+            $medicine['medicine_unit_id'] = $unit->id;
+
             Medicine::updateOrCreate(
                 ['barcode' => $medicine['barcode']],
                 $medicine,

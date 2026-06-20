@@ -82,21 +82,29 @@
                     <x-filament::card>
                         <h2 class="text-lg font-medium mb-4 text-text dark:text-text-dark">Medicine Details</h2>
                         <div class="space-y-4">
-                            <div>
+                            <!-- <div>
                                 <span class="text-sm text-text-muted dark:text-text-muted-dark">Name</span>
                                 <div class="font-medium text-text dark:text-text-dark">{{ $medicine->name }}</div>
-                            </div>
+                            </div> -->
                             <div>
-                                <span class="text-sm text-text-muted dark:text-text-muted-dark">Brand</span>
-                                <div class="font-medium text-text dark:text-text-dark">{{ $medicine->brand?->name ?? '-' }}</div>
+                                <span class="text-sm text-text-muted dark:text-text-muted-dark">Manufacturer</span>
+                                <div class="font-medium text-text dark:text-text-dark">{{ $medicine->manufacturer?->name ?? '-' }}</div>
                             </div>
-                            <div>
+                            <!-- <div>
                                 <span class="text-sm text-text-muted dark:text-text-muted-dark">Category</span>
                                 <div class="font-medium text-text dark:text-text-dark">{{ $medicine->category?->name ?? '-' }}</div>
+                            </div> -->
+                            <div>
+                                <span class="text-sm text-text-muted dark:text-text-muted-dark">Potency</span>
+                                <div class="font-medium text-text dark:text-text-dark">{{ $medicine->potency ?? '-' }}</div>
                             </div>
                             <div>
                                 <span class="text-sm text-text-muted dark:text-text-muted-dark">Form</span>
-                                <div class="font-medium text-text dark:text-text-dark">{{ $medicine->form }}</div>
+                                <div class="font-medium text-text dark:text-text-dark">{{ $medicine->medicineForm?->name ?? '-' }}</div>
+                            </div>
+                            <div>
+                                <span class="text-sm text-text-muted dark:text-text-muted-dark">Packing</span>
+                                <div class="font-medium text-text dark:text-text-dark">{{ $medicine->packing_quantity }} {{ $medicine->medicineUnit?->name ?? '-' }}</div>
                             </div>
                         </div>
                     </x-filament::card>
@@ -112,14 +120,11 @@
                                 <span class="text-sm text-text-muted dark:text-text-muted-dark">Barcode</span>
                                 <div class="font-medium text-text dark:text-text-dark">{{ $medicine->barcode ?? '-' }}</div>
                             </div>
-                            <div>
+                            <!-- <div>
                                 <span class="text-sm text-text-muted dark:text-text-muted-dark">Generic Name</span>
                                 <div class="font-medium text-text dark:text-text-dark">{{ $medicine->generic_name ?? '-' }}</div>
-                            </div>
-                            <div>
-                                <span class="text-sm text-text-muted dark:text-text-muted-dark">Strength</span>
-                                <div class="font-medium text-text dark:text-text-dark">{{ $medicine->strength ?? '-' }}</div>
-                            </div>
+                            </div> -->
+                            
                         </div>
                     </x-filament::card>
 

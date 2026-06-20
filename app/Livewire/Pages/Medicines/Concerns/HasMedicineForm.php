@@ -22,9 +22,9 @@ trait HasMedicineForm
         $sku = app(MedicineService::class)->generateSku(
             $get('name') ?? '',
             $get('potency') ?? null,
-            $get('form') ?? '',
+            (int) ($get('medicine_form_id') ?? 0),
             (int) ($get('packing_quantity') ?? 0),
-            $get('packing_unit') ?? ''
+            (int) ($get('medicine_unit_id') ?? 0)
         );
         $set('sku', $sku);
     }

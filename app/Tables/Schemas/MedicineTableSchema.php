@@ -24,14 +24,16 @@ class MedicineTableSchema
 
                 TextColumn::make('potency')
                     ->separator(', '),
-                TextColumn::make('form')
-                    ->separator(', '),
+                TextColumn::make('medicineForm.name')
+                    ->label('Form')
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('barcode')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('packing_info')
                     ->label('Packing')
-                    ->state(fn($record) => "{$record->packing_quantity}{$record->packing_unit}"),
+                    ->state(fn($record) => "{$record->packing_quantity} {$record->medicineUnit?->name}"),
                 TextColumn::make('price_info')
                     ->label('Last Updated Price')
                     ->view('components.datatable.medicine_price'),

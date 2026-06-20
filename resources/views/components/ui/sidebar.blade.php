@@ -63,6 +63,7 @@
                                 App Settings
                             </x-ui.sidebar-subitem>
                             <x-ui.sidebar-subitem route="medicines.taxes">Taxes</x-ui.sidebar-subitem>
+                            <x-ui.sidebar-subitem route="medicines.forms">Forms & Units</x-ui.sidebar-subitem>
                         @endcan
 
                         @can('manage-branches')

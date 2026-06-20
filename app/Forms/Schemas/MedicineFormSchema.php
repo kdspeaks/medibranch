@@ -20,13 +20,22 @@ class MedicineFormSchema
 {
     public static function schema($livewire = null): array
     {
+        $afterStateUpdatedSku = function ($get, $set) use ($livewire) {
+            if ($livewire && $livewire->cMedicine && $livewire->cMedicine->exists) {
+                return; // Lock SKU regeneration on edit
+            }
+            if ($livewire) {
+                $livewire->computeAndSetSku($get, $set);
+            }
+        };
+
         return [
             Section::make()->columns(['sm' => 3])->schema([
                 TextInput::make('name')
                     ->label('Medicine Name')
                     ->required()
                     ->maxLength(255)
-                    ->afterStateUpdated(fn ($get, $set) => $livewire ? $livewire->computeAndSetSku($get, $set) : null),
+                    ->afterStateUpdated($afterStateUpdatedSku),
 
                 Group::make([
                     TextInput::make('barcode')
@@ -97,16 +106,16 @@ class MedicineFormSchema
                     ->label('Potency')
                     ->maxLength(50)
                     ->live(debounce: 500)
-                    ->afterStateUpdated(fn ($get, $set) => $livewire ? $livewire->computeAndSetSku($get, $set) : null),
+                    ->afterStateUpdated($afterStateUpdatedSku),
 
-                Select::make('form')
-                    ->options(Medicine::forms())
+                Select::make('medicine_form_id')
+                    ->options(\App\Models\MedicineForm::where('is_active', true)->pluck('name', 'id'))
                     ->label('Form')
                     ->native(false)
                     ->searchable()
                     ->required()
                     ->live(debounce: 500)
-                    ->afterStateUpdated(fn ($get, $set) => $livewire ? $livewire->computeAndSetSku($get, $set) : null),
+                    ->afterStateUpdated($afterStateUpdatedSku),
 
                 TextInput::make('packing_quantity')
                     ->label('Packing Quantity')
@@ -114,21 +123,21 @@ class MedicineFormSchema
                     ->minValue(1)
                     ->required()
                     ->live(debounce: 500)
-                    ->afterStateUpdated(fn ($get, $set) => $livewire ? $livewire->computeAndSetSku($get, $set) : null),
+                    ->afterStateUpdated($afterStateUpdatedSku),
 
-                Select::make('packing_unit')
+                Select::make('medicine_unit_id')
                     ->label('Unit')
                     ->required()
-                    ->options(fn () => collect(Medicine::packingUnits())
-                        ->flatten()
-                        ->unique()
-                        ->mapWithKeys(fn ($unit) => [$unit => $unit])
-                        ->toArray())
+                    ->options(function ($get) {
+                        $formId = $get('medicine_form_id');
+                        if (!$formId) return [];
+                        $form = \App\Models\MedicineForm::find($formId);
+                        return $form ? $form->units()->where('medicine_units.is_active', true)->pluck('medicine_units.name', 'medicine_units.id') : [];
+                    })
                     ->native(false)
-                    ->default(fn ($get) => Medicine::packingUnits()[$get('form')][0] ?? null)
                     ->searchable()
                     ->live(debounce: 500)
-                    ->afterStateUpdated(fn ($get, $set) => $livewire ? $livewire->computeAndSetSku($get, $set) : null),
+                    ->afterStateUpdated($afterStateUpdatedSku),
             ]),
 
             Section::make()->columns(['sm' => 4])->schema([

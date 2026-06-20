@@ -12,9 +12,9 @@ class MedicineService
         $sku = $this->generateSku(
             $data->name,
             $data->potency,
-            $data->form,
+            $data->medicineFormId,
             $data->packingQuantity,
-            $data->packingUnit
+            $data->medicineUnitId
         );
 
         $payload = [
@@ -23,9 +23,9 @@ class MedicineService
             'sku' => $sku,
             'manufacturer_id' => $data->manufacturerId,
             'potency' => $data->potency,
-            'form' => $data->form,
+            'medicine_form_id' => $data->medicineFormId,
             'packing_quantity' => $data->packingQuantity,
-            'packing_unit' => $data->packingUnit,
+            'medicine_unit_id' => $data->medicineUnitId,
             'purchase_price' => $data->purchasePrice,
             'tax_id' => $data->taxId,
             'is_tax_inclusive' => $data->isTaxInclusive,
@@ -49,14 +49,19 @@ class MedicineService
     public function generateSku(
         string $name,
         ?string $potency,
-        string $form,
+        int $medicineFormId,
         int $packingQuantity,
-        string $packingUnit
+        int $medicineUnitId
     ): string {
         $potencyStr = $potency ? $potency . '-' : '';
-        $formShort = $form ? substr($form, 0, 3) : '';
+        
+        $form = \App\Models\MedicineForm::find($medicineFormId);
+        $unit = \App\Models\MedicineUnit::find($medicineUnitId);
+        
+        $formName = $form ? $form->name : '';
+        $formShort = $formName ? substr($formName, 0, 3) : '';
         $slugName = $name ? strtolower(preg_replace('/[^A-Za-z0-9]/', '_', $name)) : '';
-        $unitCode = Medicine::packingUnitCodeMap()[$packingUnit] ?? strtoupper($packingUnit);
+        $unitCode = $unit && $unit->short_code ? $unit->short_code : ($unit ? strtoupper($unit->name) : '');
         
         $sku = "{$slugName}-{$potencyStr}{$formShort}-{$packingQuantity}{$unitCode}";
         
