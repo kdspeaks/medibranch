@@ -30,7 +30,7 @@ class FoundationCleanupTest extends TestCase
             'sale_price' => 120,
         ]);
 
-        $purchase = app(PurchaseService::class)->save([
+        $purchase = app(PurchaseService::class)->save(\App\DTOs\PurchaseData::fromArray([
             'branch_id' => $branch->id,
             'ref_code_prefix' => 'PO/',
             'ref_code_count' => '1',
@@ -46,7 +46,7 @@ class FoundationCleanupTest extends TestCase
                 'expiry_date' => '2027-01-01',
                 'tax_id' => $tax->id,
             ]],
-        ]);
+        ]));
 
         $item = $purchase->items()->first();
         $batch = $item->inventoryBatch;

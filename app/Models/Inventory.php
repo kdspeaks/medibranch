@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Inventory extends Model
 {
     use SoftDeletes;
+    use \App\Models\Concerns\BelongsToBranch;
+
 
     protected $fillable = [
         'branch_id',

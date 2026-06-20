@@ -26,7 +26,7 @@ class MedicineViewTest extends TestCase
             'sku' => 'ARS-30CH',
         ]);
 
-        app(PurchaseService::class)->save([
+        app(PurchaseService::class)->save(\App\DTOs\PurchaseData::fromArray([
             'branch_id' => $branch->id,
             'supplier_id' => $supplier->id,
             'ref_code_prefix' => 'PO/',
@@ -42,7 +42,7 @@ class MedicineViewTest extends TestCase
                 'mfg_date' => '2026-01-01',
                 'expiry_date' => '2026-12-31',
             ]],
-        ]);
+        ]));
 
         $user = User::factory()->create(['email_verified_at' => now()]);
         $permission = Permission::firstOrCreate(['name' => 'manage-medicines']);

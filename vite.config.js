@@ -8,15 +8,15 @@ export default defineConfig({
     host: '0.0.0.0',   // ✅ allows Vite to be accessed from outside
     port: 5173,
     hmr: {
-      host: 'medibranch.local',  // ✅ your domain (must match hosts file)
+      host: 'medibranch.test',  // ✅ your domain (must match hosts file)
     },
   },
   plugins: [
     laravel({
-            input: ['resources/css/app.css', 'resources/js/app.js'],
-            refresh: true,
-        }),
-        tailwindcss(),
+      input: ['resources/css/app.css', 'resources/js/app.js'],
+      refresh: true,
+    }),
+    tailwindcss(),
   ],
 });
 

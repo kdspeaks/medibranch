@@ -7,6 +7,7 @@ use App\Models\Medicine;
 use App\Models\Purchase;
 use App\Models\Supplier;
 use App\Services\PurchaseService;
+use App\DTOs\PurchaseData;
 use Illuminate\Database\Seeder;
 
 class PurchaseSeeder extends Seeder
@@ -43,7 +44,7 @@ class PurchaseSeeder extends Seeder
                 ];
             }
 
-            $this->purchaseService->save([
+            $this->purchaseService->save(PurchaseData::fromArray([
                 'branch_id' => $branch->id,
                 'supplier_id' => $suppliers->get($branchIndex % max($suppliers->count(), 1))?->id,
                 'ref_code_prefix' => 'PO/',
@@ -53,7 +54,7 @@ class PurchaseSeeder extends Seeder
                 'status' => 'received',
                 'notes' => 'Seeder generated purchase.',
                 'items' => $items,
-            ]);
+            ]));
         }
     }
 }

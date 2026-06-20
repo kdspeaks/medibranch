@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class Purchase extends Model
 {
     use HasFactory;
+    use \App\Models\Concerns\BelongsToBranch;
+
     protected $fillable = [
         'branch_id',
         'supplier_id',

@@ -11,7 +11,7 @@ class PurchaseView extends Component
 
     public function mount(Purchase $purchase): void
     {
-        abort_unless(auth()->user()?->canAccessBranch((int) $purchase->branch_id), 403);
+        \Illuminate\Support\Facades\Gate::authorize('view', $purchase);
 
         $this->purchase = $purchase->load([
             'branch',

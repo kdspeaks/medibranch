@@ -7,6 +7,8 @@ use App\Models\PurchaseItem;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use App\DTOs\PurchaseData;
+use App\DTOs\PurchaseItemData;
 
 class PurchaseService
 {
@@ -16,24 +18,40 @@ class PurchaseService
     ) {
     }
 
-    public function save(array $data, ?Purchase $purchase = null): Purchase
+    public function save(PurchaseData $data, ?Purchase $purchase = null): Purchase
     {
-        $items = $data['items'] ?? [];
-        unset($data['items']);
+        $totalAmount = $this->pricingService->totalFromItems(array_map(function (PurchaseItemData $item) {
+            return [
+                'quantity' => $item->quantity,
+                'unit_purchase_price' => $item->unitPurchasePrice,
+                'tax_id' => $item->taxId,
+            ];
+        }, $data->items));
 
-        $data['status'] = $this->normalizeStatus($data['status'] ?? 'draft');
-        $items = $this->normalizeItems($items);
-        $data['total_amount'] = $this->pricingService->totalFromItems($items);
+        $purchaseDataArray = [
+            'branch_id' => $data->branchId,
+            'supplier_id' => $data->supplierId,
+            'invoice_number' => $data->invoiceNumber,
+            'purchase_date' => $data->purchaseDate,
+            'status' => $data->status,
+            'notes' => $data->notes,
+            'ref_code_prefix' => $data->refCodePrefix,
+            'ref_code_count' => $data->refCodeCount,
+            'total_amount' => $totalAmount,
+        ];
 
-        return DB::transaction(function () use ($data, $items, $purchase): Purchase {
+        return DB::transaction(function () use ($purchaseDataArray, $data, $purchase): Purchase {
             if ($purchase?->exists) {
-                return $this->update($purchase, $data, $items);
+                return $this->update($purchase, $purchaseDataArray, $data->items);
             }
 
-            return $this->create($data, $items);
+            return $this->create($purchaseDataArray, $data->items);
         });
     }
 
+    /**
+     * @param PurchaseItemData[] $items
+     */
     private function create(array $data, array $items): Purchase
     {
         $purchase = Purchase::create($data);
@@ -46,6 +64,9 @@ class PurchaseService
         return $purchase->fresh(['items.inventoryBatch', 'branch', 'supplier']);
     }
 
+    /**
+     * @param PurchaseItemData[] $items
+     */
     private function update(Purchase $purchase, array $data, array $items): Purchase
     {
         if ($purchase->status === 'received' || $purchase->items()->where('status', 'stocked')->exists()) {
@@ -65,10 +86,27 @@ class PurchaseService
         return $purchase->fresh(['items.inventoryBatch', 'branch', 'supplier']);
     }
 
+    /**
+     * @param PurchaseItemData[] $items
+     */
     private function replaceItems(Purchase $purchase, array $items): void
     {
         foreach ($items as $item) {
-            $purchase->items()->create($item);
+            $pricing = $this->pricingService->lineWithTax($item->quantity, $item->unitPurchasePrice, $item->taxId);
+            
+            $purchase->items()->create([
+                'medicine_id' => $item->medicineId,
+                'quantity' => $item->quantity,
+                'unit_purchase_price' => $item->unitPurchasePrice,
+                'margin' => $item->margin,
+                'batch_number' => $item->batchNumber,
+                'mfg_date' => $item->mfgDate,
+                'expiry_date' => $item->expiryDate,
+                'tax_id' => $item->taxId,
+                'tax_amount' => $pricing['tax_amount'],
+                'line_total_amount' => $pricing['line_total_amount'],
+                'status' => $item->status,
+            ]);
         }
     }
 
@@ -101,45 +139,5 @@ class PurchaseService
         }
     }
 
-    private function normalizeItems(array $items): array
-    {
-        return collect($items)
-            ->filter(fn (array $item) => ! empty($item['medicine_id']) && (int) ($item['quantity'] ?? 0) > 0)
-            ->map(function (array $item): array {
-                $quantity = (int) $item['quantity'];
-                $unitPrice = (float) ($item['unit_purchase_price'] ?? 0);
-                $taxId = filled($item['tax_id'] ?? null) ? (int) $item['tax_id'] : null;
-                $pricing = $this->pricingService->lineWithTax($quantity, $unitPrice, $taxId);
 
-                return [
-                    'medicine_id' => (int) $item['medicine_id'],
-                    'quantity' => $quantity,
-                    'unit_purchase_price' => $this->pricingService->money($unitPrice),
-                    'margin' => $this->pricingService->money((float) ($item['margin'] ?? 0)),
-                    'batch_number' => filled($item['batch_number'] ?? null) ? $item['batch_number'] : null,
-                    'mfg_date' => $item['mfg_date'] ?? null,
-                    'expiry_date' => $item['expiry_date'] ?? null,
-                    'tax_id' => $taxId,
-                    'tax_amount' => $pricing['tax_amount'],
-                    'line_total_amount' => $pricing['line_total_amount'],
-                    'status' => $this->normalizeItemStatus($item),
-                ];
-            })
-            ->values()
-            ->all();
-    }
-
-    private function normalizeStatus(string $status): string
-    {
-        return match ($status) {
-            'pending' => 'draft',
-            'completed' => 'received',
-            default => $status,
-        };
-    }
-
-    private function normalizeItemStatus(array $item): string
-    {
-        return Arr::get($item, 'status') === 'stocked' ? 'stocked' : 'pending';
-    }
 }

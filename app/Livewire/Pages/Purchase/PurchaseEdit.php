@@ -26,7 +26,7 @@ class PurchaseEdit extends Component implements HasForms, HasActions
      */
     public function mount(Purchase $purchase): void
     {
-        abort_unless(auth()->user()?->canAccessBranch((int) $purchase->branch_id), 403);
+        \Illuminate\Support\Facades\Gate::authorize('update', $purchase);
 
         $this->purchaseModel = $purchase->load('items');
 
