@@ -107,7 +107,6 @@ class MedicinesImport implements ToCollection, WithHeadingRow
                 'medicine_form_id' => $formId,
                 'packing_quantity' => floatval($row['packing_quantity'] ?? 1),
                 'medicine_unit_id' => $unitId,
-                'stored_location' => trim($row['stored_location'] ?? ''),
                 'purchase_price' => $purchasePrice,
                 'tax_id' => $taxId,
                 'is_tax_inclusive' => strtolower(trim($row['is_tax_incl_in_price'] ?? 'yes')) === 'yes',

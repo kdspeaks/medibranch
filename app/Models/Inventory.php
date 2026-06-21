@@ -15,6 +15,7 @@ class Inventory extends Model
     protected $fillable = [
         'branch_id',
         'medicine_id',
+        'stored_location',
     ];
 
     public function branch()

@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Inventory;
 use App\Models\InventoryBatch;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
 class InventoryService
@@ -70,40 +71,50 @@ class InventoryService
         ?int $preferredBatchId = null,
         ?Model $source = null,
     ): ?Inventory {
-        $inventory = Inventory::query()
-            ->forBranch($branchId)
-            ->where('medicine_id', $medicineId)
-            ->first();
+        return DB::transaction(function () use (
+            $branchId,
+            $medicineId,
+            $quantity,
+            $reason,
+            $preferredBatchId,
+            $source
+        ) {
+            $inventory = Inventory::query()
+                ->forBranch($branchId)
+                ->where('medicine_id', $medicineId)
+                ->lockForUpdate()
+                ->first();
 
-        if (! $inventory) {
-            return null;
-        }
-
-        if ($inventory->quantity < $quantity) {
-            throw new RuntimeException('Insufficient stock in inventory.');
-        }
-
-        $remaining = $quantity;
-
-        $batches = $this->deductionBatches($inventory, $preferredBatchId);
-
-        foreach ($batches as $batch) {
-            if ($remaining <= 0) {
-                break;
+            if (! $inventory) {
+                return null;
             }
 
-            $deductQuantity = min($batch->available_quantity, $remaining);
-            $batch->decrement('available_quantity', $deductQuantity);
-            $this->log($batch, 'out', $deductQuantity, $reason, $source);
+            if ($inventory->quantity < $quantity) {
+                throw new RuntimeException('Insufficient stock in inventory.');
+            }
 
-            $remaining -= $deductQuantity;
-        }
+            $remaining = $quantity;
 
-        if ($remaining > 0) {
-            throw new RuntimeException('Insufficient stock in selected batch.');
-        }
+            $batches = $this->deductionBatches($inventory, $preferredBatchId);
 
-        return $inventory->fresh();
+            foreach ($batches as $batch) {
+                if ($remaining <= 0) {
+                    break;
+                }
+
+                $deductQuantity = min($batch->available_quantity, $remaining);
+                $batch->decrement('available_quantity', $deductQuantity);
+                $this->log($batch, 'out', $deductQuantity, $reason, $source);
+
+                $remaining -= $deductQuantity;
+            }
+
+            if ($remaining > 0) {
+                throw new RuntimeException('Insufficient stock in selected batch.');
+            }
+
+            return $inventory->fresh();
+        });
     }
 
     private function deductionBatches(Inventory $inventory, ?int $preferredBatchId)
@@ -111,7 +122,8 @@ class InventoryService
         $query = $inventory->batches()
             ->available()
             ->orderByRaw('CASE WHEN expiry_date IS NULL THEN 1 ELSE 0 END, expiry_date ASC')
-            ->orderBy('created_at', 'ASC');
+            ->orderBy('created_at', 'ASC')
+            ->lockForUpdate();
 
         if ($preferredBatchId) {
             $query->orderByRaw('CASE WHEN id = ? THEN 0 ELSE 1 END', [$preferredBatchId]);
