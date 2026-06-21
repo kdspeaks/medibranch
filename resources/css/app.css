@@ -38,6 +38,7 @@
 
 @custom-variant dark (&:is(.dark *));
 
+
 @theme {
     --color-test: #1976d2;
 
@@ -164,7 +165,7 @@
     --font-sans: Inter, ui-sans-serif, system-ui, sans-serif,
         "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
         "Noto Color Emoji";
-    --font-bengali: Anek Bangla, sans-serif;
+    --font-bengali: 'Hind Siliguri', sans-serif;
 
     --text-base: 16px;
     --text-xxs: 10px;
@@ -194,6 +195,7 @@
   color utility to any element that depends on these defaults.
 */
 @layer base {
+
     *,
     ::after,
     ::before,
@@ -207,63 +209,75 @@
     & .text-xs {
         font-size: 14px !important;
     }
+
     & .text-sm {
         font-size: 16px !important;
     }
+
     & .text-base {
         font-size: 18px !important;
     }
+
     & .text-lg {
         font-size: 20px !important;
     }
+
     & .text-xl {
         font-size: 22px !important;
     }
+
     & .text-2xl {
         font-size: 26px !important;
     }
+
     & .text-3xl {
         font-size: 32px !important;
     }
 }
+
 @utility text-xs {
     .font-bengali & {
         font-size: 14px !important;
     }
 }
+
 @utility text-sm {
     .font-bengali & {
         font-size: 16px !important;
     }
 }
+
 @utility text-base {
     .font-bengali & {
         font-size: 18px !important;
     }
 }
+
 @utility text-lg {
     .font-bengali & {
         font-size: 20px !important;
     }
 }
+
 @utility text-xl {
     .font-bengali & {
         font-size: 22px !important;
     }
 }
+
 @utility text-2xl {
     .font-bengali & {
         font-size: 26px !important;
     }
 }
+
 @utility text-3xl {
     .font-bengali & {
         font-size: 32px !important;
     }
 }
 
-@layer utilities {
-}
+@layer utilities {}
 
 @layer utilities {
     [x-cloak] {
@@ -274,6 +288,7 @@
 .fi-ta-table {
     @apply divide-border;
 }
+
 .dark .fi-ta-table {
     @apply divide-border-dark;
 }
@@ -290,6 +305,7 @@
 .fi-ta-ctn {
     @apply bg-surface rounded-xs divide-border;
 }
+
 .dark .fi-ta-ctn {
     @apply bg-surface-dark rounded-xs divide-border-dark;
 }
@@ -298,6 +314,7 @@
 .fi-section {
     @apply bg-surface;
 }
+
 .dark .fi-modal-window,
 .dark .fi-section {
     @apply bg-surface-dark;
@@ -306,6 +323,7 @@
 .fi-no-notification {
     @apply bg-surface ring-border;
 }
+
 .dark .fi-no-notification {
     @apply bg-surface-dark ring-border-dark;
 }
@@ -343,15 +361,10 @@
     @apply bg-[#35383E];
 }
 
-.dark
-    .fi-sc-fused-group
-    .fi-sc
-    .fi-sc-component
-    .fi-fo-field
-    .fi-input-wrp
-    .fi-input-wrp-prefix {
+.dark .fi-sc-fused-group .fi-sc .fi-sc-component .fi-fo-field .fi-input-wrp .fi-input-wrp-prefix {
     @apply bg-surface-dark;
 }
+
 /* .dark .fi-sc-fused-group .fi-sc .fi-sc-component, .fi-sc-fused-group .fi-sc .fi-sc-component .fi-fo-field, .fi-sc-fused-group .fi-sc .fi-sc-component .fi-input {
   @apply bg-surface-dark;
 } */

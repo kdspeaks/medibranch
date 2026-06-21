@@ -25,22 +25,22 @@ class MedicineTableSchema
                 TextColumn::make('potency')
                     ->separator(', '),
                 TextColumn::make('medicineForm.name')
-                    ->label('Form')
+                    ->label(__('messages.form'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('barcode')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('packing_info')
-                    ->label('Packing')
+                    ->label(__('messages.packing'))
                     ->state(fn($record) => "{$record->packing_quantity} {$record->medicineUnit?->name}"),
                 TextColumn::make('price_info')
-                    ->label('Last Updated Price')
+                    ->label(__('messages.last_updated_price'))
                     ->view('components.datatable.medicine_price'),
                 TextColumn::make('tax.name')
                     ->separator(', '),
                 ToggleColumn::make('is_active')
-                    ->label('Active')
+                    ->label(__('messages.active_question'))
                     ->onIcon('heroicon-m-check-circle')
                     ->offIcon('heroicon-m-x-circle')
                     ->toggleable()
@@ -48,8 +48,8 @@ class MedicineTableSchema
                     ->visible(Auth::user()?->can('manage-medicines'))
                     ->afterStateUpdated(function ($record, $state) {
                         Notification::make()
-                            ->title('Medicine Updated')
-                            ->body('Medicine has been successfully updated.')
+                            ->title(__('messages.medicine_updated'))
+                            ->body(__('messages.medicine_updated_body'))
                             ->success()
                             ->send();
                     }),

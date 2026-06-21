@@ -36,26 +36,26 @@ class TaxList extends Component implements HasForms, HasActions, HasTable
     public function createAction(): Action
     {
         return CreateAction::make('create')
-            ->modalHeading("Create New Tax")
+            ->modalHeading(__('messages.create_new_tax'))
             ->model(Tax::class)
-            ->label('Create Tax')
+            ->label(__('messages.create_tax'))
             ->schema([
                 Group::make()
                     ->schema([
                         TextInput::make('name')
-                            ->label('Name')
+                            ->label(__('messages.name'))
                             ->required()
                             ->maxLength(255),
 
                         TextInput::make('rate')
-                            ->label('Rate')
+                            ->label(__('messages.rate'))
                             ->required()
                             ->maxLength(255),
 
 
 
                         ToggleButtons::make('is_active')
-                            ->label('Active')
+                            ->label(__('messages.is_active'))
                             ->boolean()
                             ->grouped()
                             ->default(true),
@@ -72,13 +72,15 @@ class TaxList extends Component implements HasForms, HasActions, HasTable
 
             ->columns([
                 TextColumn::make('name')
+                    ->label(__('messages.name'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('rate')
+                    ->label(__('messages.rate'))
                     ->searchable()
                     ->sortable(),
                 ToggleColumn::make('is_active')
-                    ->label('Active')
+                    ->label(__('messages.is_active'))
                     ->onIcon('heroicon-m-check-circle')
                     ->offIcon('heroicon-m-x-circle')
                     ->toggleable()
@@ -89,24 +91,24 @@ class TaxList extends Component implements HasForms, HasActions, HasTable
             ])
             ->recordActions([
                 EditAction::make()
-                    ->modalHeading('Edit Tax')
+                    ->modalHeading(__('messages.edit_tax'))
                     ->schema([
                         Group::make()
                             ->schema([
                                 TextInput::make('name')
-                                    ->label('Name')
+                                    ->label(__('messages.name'))
                                     ->required()
                                     ->maxLength(255),
 
                                 TextInput::make('rate')
-                                    ->label('Rate')
+                                    ->label(__('messages.rate'))
                                     ->required()
                                     ->maxLength(255),
 
 
 
                                 ToggleButtons::make('is_active')
-                                    ->label('Active')
+                                    ->label(__('messages.is_active'))
                                     ->boolean()
                                     ->grouped()
                                     ->default(true),

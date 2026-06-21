@@ -27,19 +27,19 @@ class PurchaseFormSchema
     public static function schema($livewire = null): array
     {
         return [
-            Section::make('Purchase Details')
+            Section::make(__('messages.purchase_details'))
                 ->columns(3)
                 ->collapsible()
                 ->schema([
                     Select::make('branch_id')
-                        ->label('Branch')
+                        ->label(__('messages.branch'))
                         ->required()
                         ->searchable()
                         ->options(fn() => $livewire ? $livewire->branchOptions() : Branch::pluck('name', 'id')->toArray())
                         ->default(fn() => activeBranch()?->id ?? null),
 
                     Select::make('supplier_id')
-                        ->label('Supplier')
+                        ->label(__('messages.supplier'))
                         ->nullable()
                         ->searchable()
                         ->options(fn() => Supplier::pluck('name', 'id')->toArray())
@@ -90,15 +90,15 @@ class PurchaseFormSchema
                         TextInput::make('ref_code_count')
                             ->prefixIcon(Heroicon::Hashtag)
                             ->default(fn () => (Purchase::max('ref_code_count') ?? 0) + 1),
-                    ])->label('Reference No')->columns(2),
+                    ])->label(__('messages.reference_no'))->columns(2),
 
                     TextInput::make('invoice_number')
-                        ->label('Invoice No.')
+                        ->label(__('messages.invoice_no'))
                         ->maxLength(255)
                         ->prefixIcon(Heroicon::DocumentText),
 
                     DatePicker::make('purchase_date')
-                        ->label('Purchase Date')
+                        ->label(__('messages.purchase_date'))
                         ->default(now())
                         ->displayFormat('d/m/Y')
                         ->native(false)
@@ -106,7 +106,7 @@ class PurchaseFormSchema
                         ->prefixIcon(Heroicon::Calendar),
 
                     TextInput::make('total_amount')
-                        ->label('Total Amount')
+                        ->label(__('messages.total_amount'))
                         ->prefix('₹')
                         ->readOnly()
                         ->numeric()
@@ -114,17 +114,17 @@ class PurchaseFormSchema
                         ->default(0.00),
 
                     Select::make('status')
-                        ->label('Status')
+                        ->label(__('messages.status'))
                         ->required()
                         ->options([
-                            'draft' => 'Draft',
-                            'received' => 'Received',
-                            'cancelled' => 'Cancelled',
+                            'draft' => __('messages.draft'),
+                            'received' => __('messages.received'),
+                            'cancelled' => __('messages.cancelled'),
                         ])
                         ->default('draft'),
                 ]),
 
-            Section::make('Line Items')
+            Section::make(__('messages.line_items'))
                 ->schema([
                     Livewire::make(MedicineSearch::class)->key('medicine-search'),
                     Repeater::make('items')
@@ -135,7 +135,7 @@ class PurchaseFormSchema
                         ->schema([
                             Hidden::make('medicine_id'),
                             TextInput::make('quantity')
-                                ->label('Quantity')
+                                ->label(__('messages.quantity'))
                                 ->numeric()
                                 ->required()
                                 ->minValue(1)
@@ -144,7 +144,7 @@ class PurchaseFormSchema
 
                             TextInput::make('unit_purchase_price')
                                 ->prefix('₹')
-                                ->label('Purchase Price')
+                                ->label(__('messages.purchase_price'))
                                 ->numeric()
                                 ->required()
                                 ->minValue(0)
@@ -152,19 +152,19 @@ class PurchaseFormSchema
                                 ->afterStateUpdated(fn($state, $set, $get) => $livewire ? $livewire->setLinePrices($state, $set, $get) : null),
 
                             TextInput::make('margin')
-                                ->label('Margin')
+                                ->label(__('messages.margin_percentage'))
                                 ->prefix('%')
                                 ->numeric()
                                 ->required()
                                 ->minValue(0),
 
                             TextInput::make('batch_number')
-                                ->label('Batch No.')
+                                ->label(__('messages.batch_no'))
                                 ->maxLength(255)
                                 ->nullable(),
 
                             DatePicker::make('mfg_date')
-                                ->label('Mfg Date')
+                                ->label(__('messages.mfg_date'))
                                 ->native(false)
                                 ->displayFormat('d/m/Y')
                                 ->nullable(),
@@ -172,11 +172,11 @@ class PurchaseFormSchema
                             DatePicker::make('expiry_date')
                                 ->native(false)
                                 ->displayFormat('d/m/Y')
-                                ->label('Expiry Date')
+                                ->label(__('messages.expiry_date'))
                                 ->nullable(),
 
                             Select::make('tax_id')
-                                ->label('Tax')
+                                ->label(__('messages.tax'))
                                 ->nullable()
                                 ->options(fn() => Tax::pluck('name', 'id')->toArray())
                                 ->native(true)
@@ -185,7 +185,7 @@ class PurchaseFormSchema
 
                             TextInput::make('tax_amount')
                                 ->prefix('₹')
-                                ->label('Tax Amount')
+                                ->label(__('messages.tax_amount'))
                                 ->numeric()
                                 ->readOnly()
                                 ->default(0.00)
@@ -193,7 +193,7 @@ class PurchaseFormSchema
 
                             TextInput::make('line_total_amount')
                                 ->prefix('₹')
-                                ->label('Total')
+                                ->label(__('messages.total'))
                                 ->numeric()
                                 ->readOnly()
                                 ->default(0.00)
@@ -223,10 +223,10 @@ class PurchaseFormSchema
                         }),
                 ]),
 
-            Section::make('Additional Notes')
+            Section::make(__('messages.additional_notes'))
                 ->schema([
                     Textarea::make('notes')
-                        ->label('Notes')
+                        ->label(__('messages.notes'))
                         ->rows(3)
                         ->maxLength(65535)
                 ])

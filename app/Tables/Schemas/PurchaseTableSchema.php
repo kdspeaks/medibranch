@@ -16,25 +16,25 @@ class PurchaseTableSchema
             ->query($queryBuilder ?? Purchase::query()->with(['branch', 'supplier']))
             ->columns([
                 TextColumn::make('reference')
-                    ->label('Reference No')
+                    ->label(__('messages.reference_no'))
                     ->state(fn (Purchase $record) => trim(($record->ref_code_prefix ?? '') . $record->ref_code_count))
                     ->searchable(['ref_code_prefix', 'ref_code_count'])
                     ->sortable(),
                 TextColumn::make('invoice_number')
-                    ->label('Invoice No')
+                    ->label(__('messages.invoice_no'))
                     ->placeholder('-')
                     ->searchable(),
                 TextColumn::make('branch.name')
-                    ->label('Branch')
+                    ->label(__('messages.branch'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('supplier.name')
-                    ->label('Supplier')
-                    ->placeholder('Walk-in')
+                    ->label(__('messages.supplier'))
+                    ->placeholder(__('messages.walk_in'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('purchase_date')
-                    ->label('Date')
+                    ->label(__('messages.date'))
                     ->date('d M, Y')
                     ->sortable(),
                 TextColumn::make('status')
@@ -46,7 +46,7 @@ class PurchaseTableSchema
                     ])
                     ->sortable(),
                 TextColumn::make('total_amount')
-                    ->label('Total')
+                    ->label(__('messages.total'))
                     ->money('INR')
                     ->sortable(),
             ])

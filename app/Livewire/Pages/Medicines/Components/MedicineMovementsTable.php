@@ -38,11 +38,11 @@ class MedicineMovementsTable extends Component implements HasForms, HasTable, Ha
             ->defaultSort('created_at', 'desc')
             ->columns([
                 TextColumn::make('created_at')
-                    ->label('Date')
+                    ->label(__('messages.date'))
                     ->dateTime('d M, Y H:i')
                     ->sortable(),
                 TextColumn::make('batch.inventory.branch.name')
-                    ->label('Branch')
+                    ->label(__('messages.branch'))
                     ->sortable()
                     ->searchable(),
                 TextColumn::make('type')
@@ -54,15 +54,17 @@ class MedicineMovementsTable extends Component implements HasForms, HasTable, Ha
                         default => 'gray',
                     }),
                 TextColumn::make('batch.batch_number')
-                    ->label('Batch')
+                    ->label(__('messages.batch'))
                     ->fontFamily('mono')
                     ->searchable(),
                 TextColumn::make('quantity')
+                    ->label(__('messages.quantity'))
                     ->numeric()
                     ->sortable(),
-                TextColumn::make('reason'),
+                TextColumn::make('reason')
+                    ->label(__('messages.reason')),
                 TextColumn::make('source_label')
-                    ->label('Source')
+                    ->label(__('messages.source'))
                     ->state(function (InventoryLog $record) {
                         if (! $record->source) return 'System';
                         if ($record->source instanceof PurchaseItem) {
@@ -75,8 +77,8 @@ class MedicineMovementsTable extends Component implements HasForms, HasTable, Ha
             ])
             ->paginated([5, 10, 25])
             ->defaultPaginationPageOption(5)
-            ->heading('Stock Transactions')
-            ->description('Inventory movement history for this medicine.');
+            ->heading(__('messages.stock_transactions'))
+            ->description(__('messages.transactions_description'));
     }
 
     public function render()

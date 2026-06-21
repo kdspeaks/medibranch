@@ -111,22 +111,22 @@
                                          <li>
                                              <a href="#"
                                                  class="block px-4 py-2 text-sm text-text/80 hover:bg-surface-dark/10 dark:text-text-dark/80 dark:hover:bg-surface/10 dark:hover:text-text-dark"
-                                                 role="menuitem">Dashboard</a>
+                                                 role="menuitem">{{ __('messages.dashboard') }}</a>
                                          </li>
                                          <li>
                                              <a href="{{ route('profile') }}" wire:navigate
                                                  class="block px-4 py-2 text-sm text-text/80 hover:bg-surface-dark/10 dark:text-text-dark/80 dark:hover:bg-surface/10 dark:hover:text-text-dark"
-                                                 role="menuitem">Profile</a>
+                                                 role="menuitem">{{ __('messages.profile') }}</a>
                                          </li>
                                          <li>
                                              <a href="#"
                                                  class="block px-4 py-2 text-sm text-text/80 hover:bg-surface-dark/10 dark:text-text-dark/80 dark:hover:bg-surface/10 dark:hover:text-text-dark"
-                                                 role="menuitem">Earnings</a>
+                                                 role="menuitem">{{ __('messages.earnings') }}</a>
                                          </li>
                                          <li>
                                              <a wire:click="logout"
                                                  class="block cursor-pointer px-4 py-2 text-sm text-text/80 hover:bg-surface-dark/10 dark:text-text-dark/80 dark:hover:bg-surface/10 dark:hover:text-text-dark"
-                                                 role="menuitem">Sign out</a>
+                                                 role="menuitem">{{ __('messages.sign_out') }}</a>
                                          </li>
                                      </ul>
                                  </div>

@@ -54,6 +54,7 @@
   - `app/Livewire/Pages/Purchase/Concerns/HasPurchaseForm.php`
 - Reuse existing Filament components and patterns before inventing new UI structure.
 - Sidebar active-state handling for parameterized routes was fixed via route URI matching; be careful not to regress it.
+- **Localization Requirement**: Any page, component, or menu created going forward MUST support Bengali localization. Do not use hardcoded strings; always use `__('messages.key')` and add the corresponding keys to both `resources/lang/en/messages.php` and `resources/lang/bn/messages.php`.
 
 ## Known Legacy / Cleanup Areas
 - Root `README.md` is still default Laravel boilerplate and does not describe this app.

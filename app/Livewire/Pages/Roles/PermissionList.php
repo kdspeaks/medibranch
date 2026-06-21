@@ -33,11 +33,12 @@ class PermissionList extends Component implements HasForms, HasActions, HasTable
     public function createAction(): Action
     {
        return CreateAction::make('create')
-       ->modalHeading("Create New Permission")
+       ->modalHeading(__('messages.create_new_permission'))
         ->model(Permission::class)
-        ->label('Create Permission')
+        ->label(__('messages.create_permission'))
         ->schema([
                     TextInput::make('name')
+                        ->label(__('messages.name'))
                     ->model(Permission::class)
                         ->required()
                         ->maxLength(255),
@@ -52,6 +53,7 @@ class PermissionList extends Component implements HasForms, HasActions, HasTable
             
             ->columns([
                 TextColumn::make('name')
+                ->label(__('messages.name'))
                 ->searchable()
                 ->sortable(),
             ])
@@ -60,9 +62,10 @@ class PermissionList extends Component implements HasForms, HasActions, HasTable
             ])
             ->recordActions([
                 EditAction::make()
-                ->modalHeading('Edit Permission')
+                ->modalHeading(__('messages.edit_permission'))
                 ->schema([
                     TextInput::make('name')
+                        ->label(__('messages.name'))
                         ->required()
                         ->maxLength(255),
                     // ...

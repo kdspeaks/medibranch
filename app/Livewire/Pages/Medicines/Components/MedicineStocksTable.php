@@ -34,25 +34,25 @@ class MedicineStocksTable extends Component implements HasForms, HasTable, HasAc
             )
             ->columns([
                 TextColumn::make('branch.name')
-                    ->label('Branch')
+                    ->label(__('messages.branch'))
                     ->sortable()
                     ->searchable(),
                 TextColumn::make('branch.code')
-                    ->label('Code')
+                    ->label(__('messages.code'))
                     ->fontFamily('mono')
                     ->size('TextColumn::SIZE_XS'),
                 TextColumn::make('quantity')
-                    ->label('Available')
+                    ->label(__('messages.available'))
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('batches_count')
-                    ->label('Batches')
+                    ->label(__('messages.batches'))
                     ->state(fn (Inventory $record) => $record->batches->count()),
             ])
             ->paginated([5, 10, 25])
             ->defaultPaginationPageOption(5)
-            ->heading('Current Stock')
-            ->description('Branch-wise available stock for this medicine.');
+            ->heading(__('messages.current_stock'))
+            ->description(__('messages.stock_description'));
     }
 
     public function render()

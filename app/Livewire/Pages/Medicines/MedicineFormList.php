@@ -33,8 +33,8 @@ class MedicineFormList extends Component implements HasForms, HasActions, HasTab
     {
         return CreateAction::make('create')
             ->model(MedicineForm::class)
-            ->label('Create Form & Units')
-            ->modalHeading('Create New Form')
+            ->label(__('messages.create_form_and_units'))
+            ->modalHeading(__('messages.create_new_form'))
             ->schema($this->getFormSchema());
     }
 
@@ -44,16 +44,16 @@ class MedicineFormList extends Component implements HasForms, HasActions, HasTab
             ->query(MedicineForm::query())
             ->columns([
                 TextColumn::make('name')
-                    ->label('Form Name')
+                    ->label(__('messages.form_name'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('units.name')
-                    ->label('Associated Units')
+                    ->label(__('messages.associated_units'))
                     ->badge()
                     ->separator(',')
                     ->searchable(),
                 ToggleColumn::make('is_active')
-                    ->label('Active')
+                    ->label(__('messages.is_active'))
                     ->onIcon('heroicon-m-check-circle')
                     ->offIcon('heroicon-m-x-circle')
                     ->toggleable()
@@ -62,7 +62,7 @@ class MedicineFormList extends Component implements HasForms, HasActions, HasTab
             ])
             ->recordActions([
                 EditAction::make()
-                    ->modalHeading('Edit Form & Units')
+                    ->modalHeading(__('messages.edit_form_and_units'))
                     ->schema($this->getFormSchema()),
                 DeleteAction::make()
                     ->requiresConfirmation()
@@ -78,33 +78,33 @@ class MedicineFormList extends Component implements HasForms, HasActions, HasTab
             Group::make()
                 ->schema([
                     TextInput::make('name')
-                        ->label('Form Name')
+                        ->label(__('messages.form_name'))
                         ->required()
                         ->unique(ignoreRecord: true)
                         ->maxLength(255),
                     
                     ToggleButtons::make('is_active')
-                        ->label('Active')
+                        ->label(__('messages.is_active'))
                         ->boolean()
                         ->inline()
                         ->default(true),
 
                     Select::make('units')
-                        ->label('Units')
+                        ->label(__('messages.units'))
                         ->multiple()
                         ->relationship('units', 'name')
                         ->preload()
                         ->createOptionForm([
                             TextInput::make('name')
-                                ->label('Unit Name (e.g. ml, g, strip)')
+                                ->label(__('messages.unit_name_example'))
                                 ->required()
                                 ->unique(table: 'medicine_units', column: 'name')
                                 ->maxLength(255),
                             TextInput::make('short_code')
-                                ->label('Short Code (SKU suffix)')
+                                ->label(__('messages.short_code_sku'))
                                 ->maxLength(255),
                             ToggleButtons::make('is_active')
-                                ->label('Active')
+                                ->label(__('messages.is_active'))
                                 ->boolean()
                                 ->inline()
                                 ->default(true),

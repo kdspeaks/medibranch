@@ -31,12 +31,12 @@ class MedicineList extends Component implements HasForms, HasActions, HasTable
     public function importAction(): Action
     {
         return Action::make('import')
-            ->label('Import Medicines')
+            ->label(__('messages.import_medicines'))
             ->icon('heroicon-o-arrow-down-tray')
             ->color('success')
             ->form([
                 FileUpload::make('file')
-                    ->label('Excel File (.xlsx)')
+                    ->label(__('messages.excel_file'))
                     ->acceptedFileTypes(['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel', 'text/csv'])
                     ->required()
             ])
@@ -48,8 +48,11 @@ class MedicineList extends Component implements HasForms, HasActions, HasTable
                 Excel::import($import, $filePath);
 
                 Notification::make()
-                    ->title('Import Successful')
-                    ->body("Imported {$import->importedCount} new medicines and updated {$import->updatedCount} existing medicines.")
+                    ->title(__('messages.import_successful'))
+                    ->body(__('messages.import_successful_body', [
+                        'new' => $import->importedCount,
+                        'updated' => $import->updatedCount,
+                    ]))
                     ->success()
                     ->send();
             });

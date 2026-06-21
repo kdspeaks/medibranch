@@ -37,12 +37,12 @@ class SiteSettings extends Component implements HasForms
                     ->columns(2)
                     ->schema(([
                         TextInput::make('site_name')
-                            ->label('Site Name')
+                            ->label(__('messages.site_name'))
                             ->required()
                             ->minLength(3)
                             ->maxLength(255),
                         Select::make('site_branch_id')
-                            ->label('Site Branch')
+                            ->label(__('messages.site_branch'))
 
                             ->options(fn() => Branch::pluck('name', 'id')->toArray())
                             // ->default(setting('site_branch_id'))
@@ -71,8 +71,8 @@ class SiteSettings extends Component implements HasForms
 
 
         Notification::make()
-            ->title('Settings Updated')
-            ->body('Site settings have been successfully updated.')
+            ->title(__('messages.settings_updated'))
+            ->body(__('messages.settings_updated_body'))
             ->success()
             ->send();
 

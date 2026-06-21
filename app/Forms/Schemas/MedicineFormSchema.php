@@ -32,14 +32,14 @@ class MedicineFormSchema
         return [
             Section::make()->columns(['sm' => 3])->schema([
                 TextInput::make('name')
-                    ->label('Medicine Name')
+                    ->label(__('messages.medicine_name'))
                     ->required()
                     ->maxLength(255)
                     ->afterStateUpdated($afterStateUpdatedSku),
 
                 Group::make([
                     TextInput::make('barcode')
-                        ->label('Barcode')
+                        ->label(__('messages.barcode'))
                         ->required()
                         ->rules([
                             Rule::unique('medicines', 'barcode')->ignore($livewire?->cMedicine?->id ?? null),
@@ -48,7 +48,7 @@ class MedicineFormSchema
                         ->suffixAction(function () {
                             return Action::make('generateBarcode')
                                 ->icon('heroicon-m-sparkles')
-                                ->tooltip('Generate Barcode')
+                                ->tooltip(__('messages.generate_barcode'))
                                 ->action(function (\Filament\Schemas\Components\Utilities\Set $set) {
                                     $set('barcode', rand(1000000000, 9999999999));
                                 });
@@ -56,7 +56,7 @@ class MedicineFormSchema
                 ])->live(debounce: 500),
 
                 Select::make('manufacturer_id')
-                    ->label('Manufacturer')
+                    ->label(__('messages.manufacturer'))
                     ->options(fn () => Manufacturer::pluck('name', 'id')->toArray())
                     ->searchable()
                     ->required()
@@ -103,14 +103,14 @@ class MedicineFormSchema
 
             Section::make()->columns(['sm' => 2])->schema([
                 TextInput::make('potency')
-                    ->label('Potency')
+                    ->label(__('messages.potency'))
                     ->maxLength(50)
                     ->live(debounce: 500)
                     ->afterStateUpdated($afterStateUpdatedSku),
 
                 Select::make('medicine_form_id')
                     ->options(\App\Models\MedicineForm::where('is_active', true)->pluck('name', 'id'))
-                    ->label('Form')
+                    ->label(__('messages.form'))
                     ->native(false)
                     ->searchable()
                     ->required()
@@ -118,7 +118,7 @@ class MedicineFormSchema
                     ->afterStateUpdated($afterStateUpdatedSku),
 
                 TextInput::make('packing_quantity')
-                    ->label('Packing Quantity')
+                    ->label(__('messages.packing_quantity'))
                     ->numeric()
                     ->minValue(1)
                     ->required()
@@ -126,7 +126,7 @@ class MedicineFormSchema
                     ->afterStateUpdated($afterStateUpdatedSku),
 
                 Select::make('medicine_unit_id')
-                    ->label('Unit')
+                    ->label(__('messages.unit'))
                     ->required()
                     ->options(function ($get) {
                         $formId = $get('medicine_form_id');
@@ -142,12 +142,12 @@ class MedicineFormSchema
 
             Section::make()->columns(['sm' => 4])->schema([
                 TextInput::make('purchase_price')
-                    ->label('Purchase Price')
+                    ->label(__('messages.purchase_price'))
                     ->numeric()
                     ->default(0.00)
                     ->required(),
                 TextInput::make('margin')
-                    ->label('Margin (%)')
+                    ->label(__('messages.margin_percentage'))
                     ->numeric()
                     ->default(0.00)
                     ->required()
@@ -160,7 +160,7 @@ class MedicineFormSchema
                         $set('sale_price', round($sale, 2));
                     }),
                 Select::make('tax_id')
-                    ->label('Tax')
+                    ->label(__('messages.tax'))
                     ->options(fn () => Tax::where('is_active', true)->pluck('name', 'id'))
                     ->searchable()
                     ->preload()
@@ -185,13 +185,13 @@ class MedicineFormSchema
                     })
                     ->createOptionAction(fn (Action $action) => $action->modalHeading('Create tax')->modalWidth('xl')),
                 ToggleButtons::make('is_tax_inclusive')
-                    ->label('Tax Included?')
+                    ->label(__('messages.tax_included'))
                     ->boolean()
                     ->grouped()
                     ->default(true)
                     ->columns(2),
                 TextInput::make('sale_price')
-                    ->label('Sale Price')
+                    ->label(__('messages.sale_price'))
                     ->numeric()
                     ->live(debounce: 500)
                     ->default(0.00)
@@ -204,7 +204,7 @@ class MedicineFormSchema
                         $set('margin', round($margin, 2));
                     }),
                 TextInput::make('discount_on_sale')
-                    ->label('Discount on Sale')
+                    ->label(__('messages.discount_on_sale'))
                     ->numeric()
                     ->default(0.00)
                     ->required(),
@@ -212,7 +212,7 @@ class MedicineFormSchema
 
             Section::make()->schema([
                 RichEditor::make('description')
-                    ->label('Description')
+                    ->label(__('messages.description'))
                     ->nullable()
                     ->columnSpanFull()
                     ->maxLength(5000),
@@ -221,7 +221,7 @@ class MedicineFormSchema
                 ->columns(['sm' => 3])
                 ->schema([
                     TextInput::make('sku')
-                        ->label('SKU')
+                        ->label(__('messages.sku'))
                         ->disabled()
                         ->rules([
                             Rule::unique('medicines', 'sku')->ignore($livewire?->cMedicine?->id ?? null),
@@ -229,7 +229,7 @@ class MedicineFormSchema
                         ->dehydrated()
                         ->maxLength(255),
                     ToggleButtons::make('is_active')
-                        ->label('Active?')
+                        ->label(__('messages.active_question'))
                         ->boolean()
                         ->grouped()
                         ->default(true),

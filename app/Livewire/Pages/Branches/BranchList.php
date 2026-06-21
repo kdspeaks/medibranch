@@ -45,8 +45,8 @@ class BranchList extends Component  implements HasForms, HasActions, HasTable
         $id = 4;
         return CreateAction::make('create')
             ->model(Branch::class)
-            ->label('Create Branch')
-            ->modalHeading('Create New Branch')
+            ->label(__('messages.create_branch'))
+            ->modalHeading(__('messages.create_new_branch'))
             ->schema([
                 Group::make([
                     Section::make()
@@ -56,13 +56,13 @@ class BranchList extends Component  implements HasForms, HasActions, HasTable
                         ->schema([
                             TextInput::make('name')
                                 ->unique(ignoreRecord: true)
-                                ->label('Branch Name')
+                                ->label(__('messages.branch_name'))
                                 ->required()
                                 ->maxLength(255),
 
                             TextInput::make('code')
                                 ->unique(ignoreRecord: true)
-                                ->label('Branch Code')
+                                ->label(__('messages.branch_code'))
                                 ->required()
                                 ->default(fn() => "MEDB/{$id}" ?? "MEDB/1")
                                 ->maxLength(255),
@@ -73,18 +73,18 @@ class BranchList extends Component  implements HasForms, HasActions, HasTable
                         ])
                         ->schema([
                             Textarea::make('address')
-                                ->label('Address')
+                                ->label(__('messages.address'))
                                 ->maxLength(255)
                                 ->columnSpan(2),
                             TextInput::make('phone')
-                                ->label('Phone')
+                                ->label(__('messages.phone'))
                                 ->maxLength(20),
                             TextInput::make('email')
-                                ->label('Email')
+                                ->label(__('messages.email'))
                                 ->email()
                                 ->maxLength(255),
                             Radio::make('is_active')
-                                ->label('Is Active')
+                                ->label(__('messages.is_active'))
                                 ->boolean()
                                 ->default(true)
                                 ->inline()
@@ -104,14 +104,18 @@ class BranchList extends Component  implements HasForms, HasActions, HasTable
             ->columns([
 
                 TextColumn::make('code')
+                    ->label(__('messages.branch_code'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('name')
+                    ->label(__('messages.branch_name'))
                     ->searchable()
                     ->sortable(),
                 IconColumn::make('is_active')
+                    ->label(__('messages.is_active'))
                     ->boolean(),
                 TextColumn::make('phone')
+                    ->label(__('messages.phone'))
                     ->searchable()
             ])
             ->filters([
@@ -119,7 +123,7 @@ class BranchList extends Component  implements HasForms, HasActions, HasTable
             ])
             ->recordActions([
                 EditAction::make()
-                    ->modalHeading('Edit Permission')
+                    ->modalHeading(__('messages.edit_branch'))
                     ->visible(fn($record) => $record->name !== 'Super Admin')
                     ->schema([
                         Group::make([
@@ -130,13 +134,13 @@ class BranchList extends Component  implements HasForms, HasActions, HasTable
                                 ->schema([
                                     TextInput::make('name')
                                         ->unique(ignoreRecord: true)
-                                        ->label('Branch Name')
+                                        ->label(__('messages.branch_name'))
                                         ->required()
                                         ->maxLength(255),
 
                                     TextInput::make('code')
                                         ->unique(ignoreRecord: true)
-                                        ->label('Branch Code')
+                                        ->label(__('messages.branch_code'))
                                         ->required()
                                         // ->default(fn() => 'MEDB/' . $this->lastBranch?->id + 1 ?? 'MEDB/1')
                                         ->maxLength(255),
@@ -147,18 +151,18 @@ class BranchList extends Component  implements HasForms, HasActions, HasTable
                                 ])
                                 ->schema([
                                     Textarea::make('address')
-                                        ->label('Address')
+                                        ->label(__('messages.address'))
                                         ->maxLength(255)
                                         ->columnSpan(2),
                                     TextInput::make('phone')
-                                        ->label('Phone')
+                                        ->label(__('messages.phone'))
                                         ->maxLength(20),
                                     TextInput::make('email')
-                                        ->label('Email')
+                                        ->label(__('messages.email'))
                                         ->email()
                                         ->maxLength(255),
                                     Radio::make('is_active')
-                                        ->label('Is Active')
+                                        ->label(__('messages.is_active'))
                                         ->boolean()
                                         ->default(true)
                                         ->inline()

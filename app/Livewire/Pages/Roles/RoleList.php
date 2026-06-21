@@ -55,20 +55,20 @@ class RoleList extends Component implements HasForms, HasActions, HasTable
     {
         return CreateAction::make('create')
             ->model(Role::class)
-            ->label('Create Role')
-            ->modalHeading('Create New Role')
+            ->label(__('messages.create_role'))
+            ->modalHeading(__('messages.create_new_role'))
             ->schema([
                 Group::make([
                     TextInput::make('name')
                         ->unique(ignoreRecord: true)
-                        ->label('Role Name')
+                        ->label(__('messages.role_name'))
                         ->required()
                         ->maxLength(255),
 
                     CheckboxList::make('permissions')
                         // ->required()
                         ->relationship('permissions', 'name')
-                        ->label('Assign Permissions')
+                        ->label(__('messages.assign_permissions'))
                         ->options(
                             Permission::all()->pluck('name', 'id')
                         )
@@ -87,9 +87,11 @@ class RoleList extends Component implements HasForms, HasActions, HasTable
 
             ->columns([
                 TextColumn::make('name')
+                    ->label(__('messages.name'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('permissions.name')
+                    ->label(__('messages.permissions'))
                     ->separator(', ')
             ])
             ->filters([
@@ -97,16 +99,17 @@ class RoleList extends Component implements HasForms, HasActions, HasTable
             ])
             ->recordActions([
                 EditAction::make()
-                    ->modalHeading('Edit Permission')
+                    ->modalHeading(__('messages.edit_role'))
                     ->visible(fn($record) => $record->name !== 'Super Admin')
                     ->schema([
                         TextInput::make('name')
+                            ->label(__('messages.role_name'))
                             ->required()
                             ->unique(ignoreRecord: true)
                             ->maxLength(255),
                         CheckboxList::make('permissions')
                             ->relationship('permissions', 'name')
-                            ->label('Assign Permissions')
+                            ->label(__('messages.assign_permissions'))
                             // ->required()
                             ->columns(4),
                     ]),

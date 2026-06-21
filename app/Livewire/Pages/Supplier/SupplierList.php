@@ -33,59 +33,59 @@ class SupplierList extends Component implements HasForms, HasActions, HasTable
     public function createAction(): Action
     {
         return CreateAction::make('create')
-            ->modalHeading("Create New Supplier")
+            ->modalHeading(__('messages.create_new_supplier'))
             ->model(Supplier::class)
-            ->label('Create Supplier')
+            ->label(__('messages.create_supplier'))
             ->schema([
                 Group::make()
                     ->columns(2)
                     ->schema([
                         TextInput::make('name')
-                            ->label('Supplier Name')
+                            ->label(__('messages.supplier_name'))
                             ->required()
                             ->maxLength(255)
-                            ->placeholder('Enter supplier name'),
+                            ->placeholder(__('messages.enter_supplier_name')),
 
                         TextInput::make('contact_person')
-                            ->label('Contact Person')
+                            ->label(__('messages.contact_person'))
                             ->maxLength(255)
-                            ->placeholder('Enter contact person name'),
+                            ->placeholder(__('messages.enter_contact_person')),
 
                         TextInput::make('email')
-                            ->label('Email')
+                            ->label(__('messages.email'))
                             ->email()
                             ->maxLength(255)
-                            ->placeholder('Enter email address'),
+                            ->placeholder(__('messages.enter_email_address')),
 
                         TextInput::make('phone')
-                            ->label('Phone')
+                            ->label(__('messages.phone'))
                             ->tel()
                             ->maxLength(20)
-                            ->placeholder('Enter phone number'),
+                            ->placeholder(__('messages.enter_phone_number')),
                     ]),
 
                 Group::make()
                     ->columns(2)
                     ->schema([
                         TextInput::make('address')
-                            ->label('Address')
+                            ->label(__('messages.address'))
                             ->maxLength(255)
-                            ->placeholder('Street address'),
+                            ->placeholder(__('messages.street_address')),
 
                         TextInput::make('city')
-                            ->label('City')
+                            ->label(__('messages.city'))
                             ->maxLength(255),
 
                         TextInput::make('state')
-                            ->label('State')
+                            ->label(__('messages.state'))
                             ->maxLength(255),
 
                         TextInput::make('country')
-                            ->label('Country')
+                            ->label(__('messages.country'))
                             ->maxLength(255),
 
                         TextInput::make('postal_code')
-                            ->label('Postal Code')
+                            ->label(__('messages.postal_code'))
                             ->maxLength(20),
                     ]),
             ]);
@@ -98,15 +98,19 @@ class SupplierList extends Component implements HasForms, HasActions, HasTable
 
             ->columns([
                 TextColumn::make('name')
+                    ->label(__('messages.supplier_name'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('contact_person')
+                    ->label(__('messages.contact_person'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('email')
+                    ->label(__('messages.email'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('phone')
+                    ->label(__('messages.phone'))
                     ->searchable()
                     ->sortable(),
 
@@ -116,57 +120,57 @@ class SupplierList extends Component implements HasForms, HasActions, HasTable
             ])
             ->recordActions([
                 EditAction::make()
-                    ->modalHeading('Edit Supplier')
+                    ->modalHeading(__('messages.edit_supplier'))
                     ->schema([
                         Group::make()
                             ->columns(2)
                             ->schema([
                                 TextInput::make('name')
-                                    ->label('Supplier Name')
+                                    ->label(__('messages.supplier_name'))
                                     ->required()
                                     ->maxLength(255)
-                                    ->placeholder('Enter supplier name'),
+                                    ->placeholder(__('messages.enter_supplier_name')),
 
                                 TextInput::make('contact_person')
-                                    ->label('Contact Person')
+                                    ->label(__('messages.contact_person'))
                                     ->maxLength(255)
-                                    ->placeholder('Enter contact person name'),
+                                    ->placeholder(__('messages.enter_contact_person')),
 
                                 TextInput::make('email')
-                                    ->label('Email')
+                                    ->label(__('messages.email'))
                                     ->email()
                                     ->maxLength(255)
-                                    ->placeholder('Enter email address'),
+                                    ->placeholder(__('messages.enter_email_address')),
 
                                 TextInput::make('phone')
-                                    ->label('Phone')
+                                    ->label(__('messages.phone'))
                                     ->tel()
                                     ->maxLength(20)
-                                    ->placeholder('Enter phone number'),
+                                    ->placeholder(__('messages.enter_phone_number')),
                             ]),
 
                         Group::make()
                             ->columns(2)
                             ->schema([
                                 TextInput::make('address')
-                                    ->label('Address')
+                                    ->label(__('messages.address'))
                                     ->maxLength(255)
-                                    ->placeholder('Street address'),
+                                    ->placeholder(__('messages.street_address')),
 
                                 TextInput::make('city')
-                                    ->label('City')
+                                    ->label(__('messages.city'))
                                     ->maxLength(255),
 
                                 TextInput::make('state')
-                                    ->label('State')
+                                    ->label(__('messages.state'))
                                     ->maxLength(255),
 
                                 TextInput::make('country')
-                                    ->label('Country')
+                                    ->label(__('messages.country'))
                                     ->maxLength(255),
 
                                 TextInput::make('postal_code')
-                                    ->label('Postal Code')
+                                    ->label(__('messages.postal_code'))
                                     ->maxLength(20),
                             ]),
                     ]),

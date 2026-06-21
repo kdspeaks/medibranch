@@ -57,12 +57,12 @@ class UserList extends Component implements HasForms, HasActions, HasTable
     {
         return CreateAction::make('create')
             ->model(User::class)
-            ->label('Create User')
-            ->modalHeading('Create New User')
+            ->label(__('messages.create_user'))
+            ->modalHeading(__('messages.create_new_user'))
             ->schema([
                 Group::make([
                     TextInput::make('name')
-                        ->label('Name')
+                        ->label(__('messages.name'))
                         ->required()
                         ->maxLength(255),
                     TextInput::make('email')
@@ -76,11 +76,11 @@ class UserList extends Component implements HasForms, HasActions, HasTable
                         ->revealable(),
 
                     Select::make('roles')
-                        ->required()
                         ->relationship('roles', 'name')
-                        ->label('Role')
+                        ->multiple()
+                        ->preload()
+                        ->label(__('messages.roles'))
                         ->required()
-                        ->columns(4)
                         ->native(false),
 
 
@@ -96,11 +96,14 @@ class UserList extends Component implements HasForms, HasActions, HasTable
 
             ->columns([
                 ViewColumn::make('name')
+                    ->label(__('messages.name'))
                     ->view('components.datatable.user_name')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('email'),
+                TextColumn::make('email')
+                    ->label(__('messages.email')),
                 TextColumn::make('roles.name')
+                    ->label(__('messages.roles'))
                     ->sortable()
 
             ])
@@ -109,12 +112,12 @@ class UserList extends Component implements HasForms, HasActions, HasTable
             ])
             ->recordActions([
                 EditAction::make()
-                    ->modalHeading('Edit User')
+                    ->modalHeading(__('messages.edit_user'))
                     ->visible(fn($record) => !$record->roles->contains('name', 'Super Admin'))
                     ->schema([
                         Group::make([
                             TextInput::make('name')
-                                ->label('Name')
+                                ->label(__('messages.name'))
                                 ->required()
                                 ->maxLength(255),
                             TextInput::make('email')
@@ -122,17 +125,17 @@ class UserList extends Component implements HasForms, HasActions, HasTable
                                 ->required()
                                 ->maxLength(255),
                             TextInput::make('password')
-                                ->required()
                                 ->maxLength(255)
                                 ->password()
-                                ->revealable(),
+                                ->revealable()
+                                ->dehydrated(fn ($state) => filled($state)),
 
                             Select::make('roles')
-                                ->required()
                                 ->relationship('roles', 'name')
-                                ->label('Role')
+                                ->multiple()
+                                ->preload()
+                                ->label(__('messages.roles'))
                                 ->required()
-                                ->columns(4)
                                 ->native(false),
 
 

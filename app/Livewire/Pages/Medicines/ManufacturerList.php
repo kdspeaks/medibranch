@@ -61,51 +61,51 @@ class ManufacturerList extends Component implements HasForms, HasActions, HasTab
     {
         return CreateAction::make('create')
             ->model(Manufacturer::class)
-            ->label('Create Manufacturer')
-            ->modalHeading('Create New Manufacturer')
+            ->label(__('messages.create_manufacturer'))
+            ->modalHeading(__('messages.create_new_manufacturer'))
             ->schema([
                 Group::make()
                     ->schema([
                         TextInput::make('name')
-                            ->label('Manufacturer Name')
+                            ->label(__('messages.manufacturer_name'))
                             ->required()
                             ->maxLength(255),
 
                         TextInput::make('contact_name')
-                            ->label('Contact Person')
+                            ->label(__('messages.contact_person'))
                             ->maxLength(255),
 
                         TextInput::make('phone')
-                            ->label('Phone')
+                            ->label(__('messages.phone'))
                             ->tel()
                             ->maxLength(20),
 
                         TextInput::make('email')
-                            ->label('Email')
+                            ->label(__('messages.email'))
                             ->email()
                             ->maxLength(255),
 
                         TextInput::make('address')
-                            ->label('Address')
+                            ->label(__('messages.address'))
                             ->maxLength(255),
 
                         TextInput::make('website')
-                            ->label('Website')
+                            ->label(__('messages.website'))
                             ->url()
                             ->maxLength(255),
 
                         Select::make('country')
-                            ->label('Country')
+                            ->label(__('messages.country'))
                             ->options(
                                 collect(Countries::getNames('en'))->sort()->toArray()
                             )
                             ->searchable()
                             ->preload()
-                            ->placeholder('Select Country')
+                            ->placeholder(__('messages.select_country'))
                             ->nullable(),
 
                         ToggleButtons::make('is_active')
-                            ->label('Active')
+                            ->label(__('messages.is_active'))
                             ->boolean()
                             ->inline()
                             ->default(true),
@@ -122,18 +122,20 @@ class ManufacturerList extends Component implements HasForms, HasActions, HasTab
 
             ->columns([
                 TextColumn::make('name')
+                    ->label(__('messages.manufacturer_name'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('contact_name')
+                    ->label(__('messages.contact_person'))
                     ->searchable(),
                 TextColumn::make('phone')
+                    ->label(__('messages.phone'))
                     ->searchable(),
                 TextColumn::make('email')
-                    ->searchable(),
-                TextColumn::make('contact_name')
+                    ->label(__('messages.email'))
                     ->searchable(),
                 ToggleColumn::make('is_active')
-                    ->label('Active')
+                    ->label(__('messages.is_active'))
                     ->onIcon('heroicon-m-check-circle')
                     ->offIcon('heroicon-m-x-circle')
                     ->toggleable()
@@ -145,50 +147,50 @@ class ManufacturerList extends Component implements HasForms, HasActions, HasTab
             ])
             ->recordActions([
                 EditAction::make()
-                    ->modalHeading('Edit Manufacturer')
+                    ->modalHeading(__('messages.edit_manufacturer'))
                     ->schema([
                         Group::make()
                             ->schema([
                                 TextInput::make('name')
-                                    ->label('Manufacturer Name')
+                                    ->label(__('messages.manufacturer_name'))
                                     ->required()
                                     ->maxLength(255),
 
                                 TextInput::make('contact_name')
-                                    ->label('Contact Person')
+                                    ->label(__('messages.contact_person'))
                                     ->maxLength(255),
 
                                 TextInput::make('phone')
-                                    ->label('Phone')
+                                    ->label(__('messages.phone'))
                                     ->tel()
                                     ->maxLength(20),
 
                                 TextInput::make('email')
-                                    ->label('Email')
+                                    ->label(__('messages.email'))
                                     ->email()
                                     ->maxLength(255),
 
                                 TextInput::make('address')
-                                    ->label('Address')
+                                    ->label(__('messages.address'))
                                     ->maxLength(255),
 
                                 TextInput::make('website')
-                                    ->label('Website')
+                                    ->label(__('messages.website'))
                                     ->url()
                                     ->maxLength(255),
 
                                 Select::make('country')
-                                    ->label('Country')
+                                    ->label(__('messages.country'))
                                     ->options(
                                         collect(Countries::getNames('en'))->sort()->toArray()
                                     )
                                     ->searchable()
                                     ->preload()
-                                    ->placeholder('Select Country')
+                                    ->placeholder(__('messages.select_country'))
                                     ->nullable(),
 
                                 ToggleButtons::make('is_active')
-                                    ->label('Active')
+                                    ->label(__('messages.is_active'))
                                     ->boolean()
                                     ->inline()
                                     ->default(true),

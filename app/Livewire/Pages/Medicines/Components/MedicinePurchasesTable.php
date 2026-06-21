@@ -35,34 +35,35 @@ class MedicinePurchasesTable extends Component implements HasForms, HasTable, Ha
             ->defaultSort('created_at', 'desc')
             ->columns([
                 TextColumn::make('purchase_ref')
-                    ->label('Purchase')
+                    ->label(__('messages.purchase'))
                     ->fontFamily('mono')
                     ->size('TextColumn::SIZE_XS')
                     ->state(fn (PurchaseItem $record) => trim(($record->purchase?->ref_code_prefix ?? '') . ($record->purchase?->ref_code_count ?? '')) ?: '-'),
                 TextColumn::make('purchase.purchase_date')
-                    ->label('Date')
+                    ->label(__('messages.date'))
                     ->date('d M, Y')
                     ->sortable(),
                 TextColumn::make('purchase.branch.name')
-                    ->label('Branch')
+                    ->label(__('messages.branch'))
                     ->sortable(),
                 TextColumn::make('purchase.supplier.name')
-                    ->label('Supplier')
-                    ->default('Walk-in')
+                    ->label(__('messages.supplier'))
+                    ->default(__('messages.walk_in'))
                     ->sortable(),
                 TextColumn::make('batch_number')
-                    ->label('Batch')
+                    ->label(__('messages.batch'))
                     ->fontFamily('mono')
                     ->searchable()
                     ->default('-'),
                 TextColumn::make('quantity')
+                    ->label(__('messages.quantity'))
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('unit_purchase_price')
-                    ->label('Unit Price')
+                    ->label(__('messages.unit_price'))
                     ->money('INR'),
                 TextColumn::make('line_total_amount')
-                    ->label('Total')
+                    ->label(__('messages.total'))
                     ->money('INR'),
                 TextColumn::make('status')
                     ->badge()
@@ -73,8 +74,8 @@ class MedicinePurchasesTable extends Component implements HasForms, HasTable, Ha
             ])
             ->paginated([5, 10, 25])
             ->defaultPaginationPageOption(5)
-            ->heading('Purchase History')
-            ->description('Purchases that introduced this medicine into stock.');
+            ->heading(__('messages.purchase_history'))
+            ->description(__('messages.purchase_history_desc'));
     }
 
     public function render()

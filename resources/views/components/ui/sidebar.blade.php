@@ -8,67 +8,67 @@
                 <ul class="space-y-2">
                     {{-- Dashboard --}}
                     <x-ui.sidebar-link route="dashboard" icon="heroicon-o-chart-pie">
-                        Dashboard
+                        {{ __('messages.dashboard') }}
                     </x-ui.sidebar-link>
 
                     {{-- Contacts --}}
                     @if (auth()->user()->can('manage-users') || auth()->user()->can('manage-suppliers'))
-                        <x-ui.sidebar-dropdown title="Contacts" icon="heroicon-o-users">
+                        <x-ui.sidebar-dropdown :title="__('messages.contacts')" icon="heroicon-o-users">
                             @can('manage-suppliers')
-                                <x-ui.sidebar-subitem route="medicines.suppliers">Suppliers</x-ui.sidebar-subitem>
+                                <x-ui.sidebar-subitem route="medicines.suppliers">{{ __('messages.suppliers') }}</x-ui.sidebar-subitem>
                             @endcan
 
                             @can('manage-users')
-                                <x-ui.sidebar-subitem route="users">Users</x-ui.sidebar-subitem>
+                                <x-ui.sidebar-subitem route="users">{{ __('messages.users') }}</x-ui.sidebar-subitem>
                             @endcan
                         </x-ui.sidebar-dropdown>
                     @endif
 
                     {{-- Medicines --}}
                     @if (auth()->user()->can('manage-medicines') || auth()->user()->can('manage-manufacturers'))
-                        <x-ui.sidebar-dropdown title="Medicines" icon="heroicon-o-beaker">
+                        <x-ui.sidebar-dropdown :title="__('messages.medicines')" icon="heroicon-o-beaker">
                             @can('manage-medicines')
                                 <x-ui.sidebar-subitem route="medicines.list"
-                                    active-consideration="medicines.create, medicines.view, medicines.edit">Medicines</x-ui.sidebar-subitem>
+                                    active-consideration="medicines.create, medicines.view, medicines.edit">{{ __('messages.medicines') }}</x-ui.sidebar-subitem>
                             @endcan
 
                             @can('manage-manufacturers')
-                                <x-ui.sidebar-subitem route="medicines.manufacturers">Manufacturers</x-ui.sidebar-subitem>
+                                <x-ui.sidebar-subitem route="medicines.manufacturers">{{ __('messages.manufacturers') }}</x-ui.sidebar-subitem>
                             @endcan
                         </x-ui.sidebar-dropdown>
                     @endif
 
                     {{-- Inventory --}}
                     @if (auth()->user()->can('manage-purchases'))
-                        <x-ui.sidebar-dropdown title="Inventory" icon="heroicon-o-archive-box">
+                        <x-ui.sidebar-dropdown :title="__('messages.inventory')" icon="heroicon-o-archive-box">
                             @can('manage-purchases')
                                 <x-ui.sidebar-subitem route="medicines.purchases.list"
-                                    active-consideration="medicines.purchases.create">Purchases</x-ui.sidebar-subitem>
+                                    active-consideration="medicines.purchases.create">{{ __('messages.purchases') }}</x-ui.sidebar-subitem>
                             @endcan
                         </x-ui.sidebar-dropdown>
                     @endif
 
                     {{-- Roles & Permissions --}}
                     @can('manage-roles-permission')
-                        <x-ui.sidebar-dropdown title="Roles & Permissions" icon="heroicon-o-shield-check">
-                            <x-ui.sidebar-subitem route="roles">Roles</x-ui.sidebar-subitem>
-                            <x-ui.sidebar-subitem route="permissions">Permissions</x-ui.sidebar-subitem>
+                        <x-ui.sidebar-dropdown :title="__('messages.roles_permissions')" icon="heroicon-o-shield-check">
+                            <x-ui.sidebar-subitem route="roles">{{ __('messages.roles') }}</x-ui.sidebar-subitem>
+                            <x-ui.sidebar-subitem route="permissions">{{ __('messages.permissions') }}</x-ui.sidebar-subitem>
                         </x-ui.sidebar-dropdown>
                     @endcan
 
 
-                    <x-ui.sidebar-dropdown title="Settings" icon="heroicon-o-cog-8-tooth">
+                    <x-ui.sidebar-dropdown :title="__('messages.settings')" icon="heroicon-o-cog-8-tooth">
                         @can('manage-settings')
                             <x-ui.sidebar-subitem route="settings.site">
-                                App Settings
+                                {{ __('messages.app_settings') }}
                             </x-ui.sidebar-subitem>
-                            <x-ui.sidebar-subitem route="medicines.taxes">Taxes</x-ui.sidebar-subitem>
-                            <x-ui.sidebar-subitem route="medicines.forms">Forms & Units</x-ui.sidebar-subitem>
+                            <x-ui.sidebar-subitem route="medicines.taxes">{{ __('messages.taxes') }}</x-ui.sidebar-subitem>
+                            <x-ui.sidebar-subitem route="medicines.forms">{{ __('messages.forms_units') }}</x-ui.sidebar-subitem>
                         @endcan
 
                         @can('manage-branches')
                             <x-ui.sidebar-subitem route="branches" icon="heroicon-o-building-storefront">
-                                Branches
+                                {{ __('messages.branches') }}
                             </x-ui.sidebar-subitem>
                         @endcan
 

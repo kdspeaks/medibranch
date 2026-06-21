@@ -34,34 +34,34 @@ class MedicineBatchesTable extends Component implements HasForms, HasTable, HasA
             ->defaultSort('created_at', 'desc')
             ->columns([
                 TextColumn::make('inventory.branch.name')
-                    ->label('Branch')
+                    ->label(__('messages.branch'))
                     ->sortable()
                     ->searchable(),
                 TextColumn::make('batch_number')
-                    ->label('Batch')
+                    ->label(__('messages.batch'))
                     ->fontFamily('mono')
                     ->searchable(),
                 TextColumn::make('available_quantity')
-                    ->label('Available')
+                    ->label(__('messages.available'))
                     ->numeric()
                     ->sortable()
                     ->weight('bold'),
                 TextColumn::make('quantity')
-                    ->label('Total')
+                    ->label(__('messages.total'))
                     ->numeric(),
                 TextColumn::make('unit_purchase_price')
-                    ->label('Purchase')
+                    ->label(__('messages.purchase'))
                     ->money('INR'),
                 TextColumn::make('margin')
-                    ->label('Margin')
+                    ->label(__('messages.margin'))
                     ->suffix('%')
                     ->numeric(),
                 TextColumn::make('mfg_date')
-                    ->label('MFG')
+                    ->label(__('messages.mfg'))
                     ->date('d M, Y')
                     ->sortable(),
                 TextColumn::make('expiry_date')
-                    ->label('Expiry')
+                    ->label(__('messages.expiry'))
                     ->date('d M, Y')
                     ->sortable()
                     ->color(fn ($record) => $record->expiry_date?->between(now(), now()->addDays(90)) ? 'warning' : null)
