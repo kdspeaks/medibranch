@@ -24,6 +24,9 @@ class DatabaseSeeder extends Seeder
             'manage-roles-permission',
             'manage-settings',
             'manage-branches',
+            'manage-pos',
+            'manage-sales',
+            'manage-customers',
         ];
 
         foreach ($permissions as $permission) {
@@ -32,16 +35,16 @@ class DatabaseSeeder extends Seeder
 
         $superAdminRole->syncPermissions($permissions);
 
-        // $this->call([
-        //     BranchSeeder::class,
-        //     SettingSeeder::class,
-        //     ManufacturerSeeder::class,
-        //     SupplierSeeder::class,
-        //     TaxSeeder::class,
-        //     MedicineSeeder::class,
-        // ]);
+        $this->call([
+            BranchSeeder::class,
+            SettingSeeder::class,
+            // ManufacturerSeeder::class,
+            // SupplierSeeder::class,
+            // TaxSeeder::class,
+            // MedicineSeeder::class,
+        ]);
 
-        // $branches = Branch::query()->where('is_active', true)->get();
+        $branches = Branch::query()->where('is_active', true)->get();
 
         $admin = User::query()->firstOrCreate(
             ['email' => 'kdutta494@gmail.com'],
@@ -52,7 +55,7 @@ class DatabaseSeeder extends Seeder
             ],
         );
         $admin->syncRoles([$superAdminRole]);
-        // $admin->branches()->syncWithoutDetaching($branches->pluck('id')->all());
+        $admin->branches()->syncWithoutDetaching($branches->pluck('id')->all());
 
         // $staffUsers = User::factory(3)->create();
 

@@ -10,6 +10,9 @@ use RuntimeException;
 
 class InventoryService
 {
+    public function __construct(
+        private readonly PricingService $pricingService
+    ) {}
     public function stockIn(
         int $branchId,
         int $medicineId,
@@ -59,6 +62,16 @@ class InventoryService
         }
 
         $this->log($batch, 'in', $quantity, $reason, $source);
+
+        $medicine = \App\Models\Medicine::find($medicineId);
+        if ($medicine) {
+            // Update medicine prices if they are zero, or if the new purchase price is different
+            $medicine->update([
+                'purchase_price' => $purchasePrice,
+                'margin' => $margin,
+                'sale_price' => $this->pricingService->salePriceFromMargin($purchasePrice, $margin)
+            ]);
+        }
 
         return $batch->fresh(['inventory', 'logs']);
     }

@@ -27,3 +27,10 @@ if (! function_exists('activeBranch')) {
         });
     }
 }
+
+if (! function_exists('currency')) {
+    function currency()
+    {
+        return setting('site_currency', '₹');
+    }
+}

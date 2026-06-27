@@ -26,6 +26,7 @@ class SiteSettings extends Component implements HasForms
         $this->form->fill([
             'site_name' => Setting::where('key', 'site_name')->value('value'),
             'site_branch_id' => Setting::where('key', 'site_branch_id')->value('value'),
+            'site_currency' => Setting::where('key', 'site_currency')->value('value') ?? '₹',
         ]);
     }
 
@@ -48,7 +49,11 @@ class SiteSettings extends Component implements HasForms
                             // ->default(setting('site_branch_id'))
                             ->searchable()
                             ->required()
-                            ->hidden(!auth()->user()->can('manage-branches'))
+                            ->hidden(!auth()->user()->can('manage-branches')),
+                        TextInput::make('site_currency')
+                            ->label(__('messages.currency') ?? 'Currency Symbol')
+                            ->required()
+                            ->maxLength(10),
                     ]))
             ])
             ->statePath('data');
@@ -64,9 +69,14 @@ class SiteSettings extends Component implements HasForms
             ['key' => 'site_branch_id'],
             ['value' => $this->data['site_branch_id']]
         );
+        Setting::updateOrCreate(
+            ['key' => 'site_currency'],
+            ['value' => $this->data['site_currency']]
+        );
 
         cache()->forget('settings.site_name', 'site-name');
         cache()->forget('settings.site_branch_id', 'site-branch-id');
+        cache()->forget('settings.site_currency');
         cache()->forget('branch', 'site-branch-id');
 
 

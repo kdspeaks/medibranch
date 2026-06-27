@@ -147,6 +147,27 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ->name('branches');
     });
 
+    // 🤝 Customers
+    Route::prefix('customers')->group(function () {
+        Route::get('/', \App\Livewire\Pages\Customers\CustomerList::class)
+            ->middleware('can:manage-customers')
+            ->name('customers');
+    });
+
+    // 🛒 POS & Sales
+    Route::get('/pos', \App\Livewire\Pages\Sales\PosTerminal::class)
+        ->middleware('can:manage-pos')
+        ->name('pos');
+        
+    Route::prefix('sales')->group(function () {
+        Route::get('/', \App\Livewire\Pages\Sales\SaleList::class)
+            ->middleware('can:manage-sales')
+            ->name('sales');
+        Route::get('/{sale}/receipt', [\App\Http\Controllers\SaleController::class, 'receipt'])
+            ->middleware('can:manage-sales')
+            ->name('sales.receipt');
+    });
+
     // 💊 Medicines
     Route::prefix('medicines')->group(function () {
 

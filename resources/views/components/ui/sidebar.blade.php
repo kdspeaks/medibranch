@@ -11,9 +11,24 @@
                         {{ __('messages.dashboard') }}
                     </x-ui.sidebar-link>
 
+                    {{-- Sales --}}
+                    @if (auth()->user()->can('manage-sales') || auth()->user()->can('manage-pos'))
+                        <x-ui.sidebar-dropdown :title="__('messages.sales')" icon="heroicon-o-shopping-cart">
+                            @can('manage-pos')
+                                <x-ui.sidebar-subitem route="pos">{{ __('messages.pos') }}</x-ui.sidebar-subitem>
+                            @endcan
+                            @can('manage-sales')
+                                <x-ui.sidebar-subitem route="sales">{{ __('messages.sales_history') }}</x-ui.sidebar-subitem>
+                            @endcan
+                        </x-ui.sidebar-dropdown>
+                    @endif
+
                     {{-- Contacts --}}
-                    @if (auth()->user()->can('manage-users') || auth()->user()->can('manage-suppliers'))
+                    @if (auth()->user()->can('manage-users') || auth()->user()->can('manage-suppliers') || auth()->user()->can('manage-customers'))
                         <x-ui.sidebar-dropdown :title="__('messages.contacts')" icon="heroicon-o-users">
+                            @can('manage-customers')
+                                <x-ui.sidebar-subitem route="customers">{{ __('messages.customers') }}</x-ui.sidebar-subitem>
+                            @endcan
                             @can('manage-suppliers')
                                 <x-ui.sidebar-subitem route="medicines.suppliers">{{ __('messages.suppliers') }}</x-ui.sidebar-subitem>
                             @endcan

@@ -145,7 +145,15 @@ class MedicineFormSchema
                     ->label(__('messages.purchase_price'))
                     ->numeric()
                     ->default(0.00)
-                    ->required(),
+                    ->required()
+                    ->live(debounce: 500)
+                    ->afterStateUpdated(function($get, $set) {
+                        $purchase = (float) ($get('purchase_price') ?? 0);
+                        if ($purchase <= 0) return;
+                        $margin = (float) ($get('margin') ?? 0);
+                        $sale = $purchase * (1 + ($margin / 100));
+                        $set('sale_price', round($sale, 2));
+                    }),
                 TextInput::make('margin')
                     ->label(__('messages.margin_percentage'))
                     ->numeric()
