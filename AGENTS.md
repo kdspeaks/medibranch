@@ -91,6 +91,7 @@
 - Prefer editing app code under `app/`, `resources/views/livewire/`, `resources/views/components/ui/`, `routes/`, `database/`, and `tests/`.
 - Avoid touching `vendor/` and `node_modules/`.
 - Be cautious with files that look like backups or obsolete copies unless the task is explicit cleanup.
+- **Filament Actions Namespace**: When adding table actions or page actions (like `Action::make('view')` or `EditAction::make()`), ALWAYS use `Filament\Actions\Action` or `Filament\Actions\EditAction`. Do NOT use `Filament\Tables\Actions\Action` as it will cause a `Class not found` error in this project's setup.
 
 ===
 

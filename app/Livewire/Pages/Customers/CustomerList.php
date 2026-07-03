@@ -51,6 +51,10 @@ class CustomerList extends Component implements HasForms, HasTable, HasActions
                 TextColumn::make('created_at')->dateTime()->sortable()->toggleable(isToggledHiddenByDefault: true),
             ])
             ->recordActions([
+                Action::make('view')
+                    ->label(__('messages.view') ?? 'View')
+                    ->icon('heroicon-o-eye')
+                    ->url(fn (Customer $record): string => route('customers.view', $record)),
                 EditAction::make()
                     ->modalHeading(__('messages.edit_customer') ?? 'Edit Customer')
                     ->form([

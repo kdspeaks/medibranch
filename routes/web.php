@@ -152,6 +152,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/', \App\Livewire\Pages\Customers\CustomerList::class)
             ->middleware('can:manage-customers')
             ->name('customers');
+            
+        Route::get('/view/{customer}', \App\Livewire\Pages\Customers\CustomerView::class)
+            ->middleware('can:manage-customers')
+            ->name('customers.view');
     });
 
     // 🛒 POS & Sales

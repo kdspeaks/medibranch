@@ -9,6 +9,7 @@ use App\Services\SaleService;
 use Filament\Notifications\Notification;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Title;
 
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -19,10 +20,12 @@ use Filament\Forms\Components\Textarea;
 use Filament\Actions\Action;
 
 #[Layout('layouts.app')]
+#[Title('POS Terminal')]
 class PosTerminal extends Component implements HasForms, HasActions
 {
     use InteractsWithForms;
     use InteractsWithActions;
+    #[Title('POS Terminal')]
     public $cart = [];
     public $search = '';
     public $medicines = [];
