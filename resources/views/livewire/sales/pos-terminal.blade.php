@@ -17,7 +17,7 @@
     <div class="flex items-center justify-between px-6 py-3 bg-white dark:bg-[#1e293b] border-b border-gray-200 dark:border-gray-800">
         <!-- Search -->
         <div class="flex items-center gap-4 flex-1">
-            <a href="{{ route('dashboard') }}" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+            <a href="{{ route('dashboard') }}" wire:navigate class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                  <x-heroicon-o-home class="w-5 h-5" />
             </a>
              <div class="relative w-full max-w-xl"
@@ -95,13 +95,7 @@
         
         <!-- Top Right Actions -->
         <div class="flex items-center gap-3">
-            <button class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-[#1e293b] border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
-                <x-heroicon-o-pause class="w-4 h-4" /> Hold Invoice
-            </button>
-            <button class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-[#1e293b] border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
-                <x-heroicon-o-document-text class="w-4 h-4" /> Drafts
-            </button>
-            <button @click="clearCart()" class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-green-700 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 dark:bg-green-900/20 dark:border-green-800 dark:text-green-400">
+            <button @click="newSale()" class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-green-700 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 dark:bg-green-900/20 dark:border-green-800 dark:text-green-400">
                 <x-heroicon-o-plus class="w-4 h-4" /> New Sale
             </button>
             
@@ -281,7 +275,7 @@
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                 <x-heroicon-o-magnifying-glass class="w-4 h-4 text-gray-400" />
                             </div>
-                            <input wire:model.live.debounce.300ms="customerSearch" type="text" placeholder="{{ __('messages.search_customer') ?? 'Search Name or Phone...' }}" class="w-full pl-9 pr-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-primary focus:border-primary text-sm transition">
+                            <input wire:model.live.debounce.300ms="customerSearch" wire:keydown.enter.prevent="handleCustomerEnter" type="text" placeholder="{{ __('messages.search_customer') ?? 'Search Name or Phone...' }}" class="w-full pl-9 pr-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-primary focus:border-primary text-sm transition">
                         </div>
                         <button wire:click="mountAction('createCustomer')" class="px-3 py-2 bg-green-50 text-green-600 border border-green-200 rounded-lg hover:bg-green-100 transition dark:bg-green-900/20 dark:border-green-800 dark:text-green-400 dark:hover:bg-green-900/40">
                             <x-heroicon-o-plus class="w-5 h-5" />
@@ -293,7 +287,12 @@
                                     @foreach($customerSearchResults as $customerResult)
                                         <li>
                                             <button wire:click="selectCustomer({{ $customerResult->id }}, '{{ addslashes($customerResult->name) }}', '{{ addslashes($customerResult->phone) }}')" class="w-full text-left px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 focus:outline-none border-b border-gray-100 dark:border-gray-800 last:border-0 transition">
-                                                <div class="font-medium">{{ $customerResult->name }}</div>
+                                                <div class="font-medium">
+                                                    {{ $customerResult->name }}
+                                                    @if(count($customerSearchResults) === 1)
+                                                        <span class="ml-2 text-xs text-blue-600 dark:text-blue-400 font-normal bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 px-1.5 py-0.5 rounded shadow-sm">(Enter ↵)</span>
+                                                    @endif
+                                                </div>
                                                 <div class="text-xs text-gray-500">{{ $customerResult->phone }}</div>
                                             </button>
                                         </li>
@@ -400,6 +399,13 @@
         <button @click="printLastInvoice()" class="flex items-center gap-2 bg-white dark:bg-[#1e293b] border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2 font-medium text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition">
             <span class="bg-gray-100 dark:bg-gray-800 text-gray-500 px-2 py-0.5 rounded text-xs border border-gray-200 dark:border-gray-700 shadow-sm">F8</span> Print Invoice
         </button>
+        <div class="border-r border-gray-300 dark:border-gray-700 mx-1"></div>
+        <button @click="holdInvoice()" class="flex items-center gap-2 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700/50 rounded-lg px-4 py-2 font-medium text-sm text-yellow-700 dark:text-yellow-500 hover:bg-yellow-100 dark:hover:bg-yellow-900/40 transition disabled:opacity-50 disabled:cursor-not-allowed" :disabled="cart.length === 0">
+            Hold Invoice
+        </button>
+        <button wire:click="mountAction('viewDrafts')" class="flex items-center gap-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700/50 rounded-lg px-4 py-2 font-medium text-sm text-blue-700 dark:text-blue-500 hover:bg-blue-100 dark:hover:bg-blue-900/40 transition">
+            Drafts
+        </button>
         <button @click="clearCart()" class="flex items-center gap-2 ml-auto bg-white dark:bg-[#1e293b] border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2 font-medium text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition">
             <span class="bg-gray-100 dark:bg-gray-800 text-gray-500 px-2 py-0.5 rounded text-xs border border-gray-200 dark:border-gray-700 shadow-sm">Esc</span> Cancel Sale
         </button>
@@ -428,6 +434,33 @@
         Alpine.data('posTerminal', () => ({
             cart: [],
             discount: 0,
+            
+            init() {
+                window.addEventListener('draft-loaded', (e) => {
+                    console.log('draft-loaded event received:', e.detail);
+                    
+                    // In Livewire 3 with named arguments, it's typically e.detail.payload
+                    // If it's an array (no named args), it might be e.detail[0].payload
+                    const payload = e.detail.payload || (e.detail[0] && e.detail[0].payload) || e.detail;
+                    const customerName = e.detail.customerName || (e.detail[0] && e.detail[0].customerName) || '';
+                    
+                    if (payload) {
+                        this.cart = payload.cart || [];
+                        this.discount = payload.discount || 0;
+                        this.notes = payload.notes || '';
+                        this.applyRoundOff = payload.applyRoundOff !== undefined ? payload.applyRoundOff : true;
+                        this.paymentMethod = payload.paymentMethod || 'cash';
+                        this.paymentReference = payload.paymentReference || '';
+                        this.customerId = payload.customerId || null;
+                        this.selectedCustomerName = customerName || '';
+                    }
+                });
+                
+                window.addEventListener('draft-saved', () => {
+                    this.clearCart();
+                });
+            },
+            
             receivedAmount: null,
             notes: '',
             applyRoundOff: true,
@@ -535,6 +568,37 @@
                     notes: this.notes,
                     customerId: this.customerId
                 }, print);
+            },
+            
+            newSale() {
+                if (this.cart.length > 0) {
+                    if (confirm("You have items in the cart. Do you want to save them as a draft?")) {
+                        this.holdInvoice();
+                    }
+                } else {
+                    this.clearCart();
+                }
+            },
+            
+            holdInvoice() {
+                if (this.cart.length === 0) return;
+                
+                let refName = prompt("Enter a reference name for this draft (optional):", this.selectedCustomerName || "");
+                if (refName === null) {
+                    // Cancelled prompt
+                    return;
+                }
+                
+                $wire.holdInvoice({
+                    cart: JSON.parse(JSON.stringify(this.cart)),
+                    discount: this.discount,
+                    paymentMethod: this.paymentMethod,
+                    paymentReference: this.paymentReference,
+                    applyRoundOff: this.applyRoundOff,
+                    notes: this.notes,
+                    customerId: this.customerId,
+                    referenceName: refName
+                });
             },
             
             printLastInvoice() {

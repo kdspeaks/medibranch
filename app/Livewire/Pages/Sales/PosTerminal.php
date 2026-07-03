@@ -4,6 +4,7 @@ namespace App\Livewire\Pages\Sales;
 
 use App\Models\Medicine;
 use App\Models\Customer;
+use App\Models\PosDraft;
 use App\Services\SaleService;
 use Filament\Notifications\Notification;
 use Livewire\Component;
@@ -264,6 +265,105 @@ class PosTerminal extends Component implements HasForms, HasActions
                 ->send();
         }
     }
+    
+    public function holdInvoice($checkoutData)
+    {
+        $cartItems = $checkoutData['cart'] ?? [];
+        if (empty($cartItems)) {
+            $this->addError('cart', 'Cart is empty.');
+            return;
+        }
+        
+        $branchId = activeBranch()->id ?? null;
+        if (!$branchId) {
+            $this->addError('cart', 'No active branch selected.');
+            return;
+        }
+        
+        // Calculate total for draft
+        $discount = (float)($checkoutData['discount'] ?? 0);
+        $subTotal = collect($cartItems)->sum(fn($item) => $item['unit_price'] * (int)($item['quantity'] ?? 0));
+        $taxAmount = collect($cartItems)->sum(function ($item) {
+            $taxRate = $item['tax_rate'] ?? 0;
+            if ($taxRate <= 0) return 0;
+            $itemTotal = $item['unit_price'] * (int)($item['quantity'] ?? 0);
+            return $itemTotal * ($taxRate / 100);
+        });
+        
+        $total = ($subTotal + $taxAmount) - $discount;
+        
+        $customerName = '';
+        if (!empty($this->customerId)) {
+            $customer = Customer::find($this->customerId);
+            if ($customer) {
+                $customerName = $customer->name;
+            }
+        }
+        
+        $referenceName = $checkoutData['referenceName'] ?? ($customerName ?: 'Draft ' . date('h:i A'));
+        
+        PosDraft::create([
+            'branch_id' => $branchId,
+            'user_id' => auth()->id(),
+            'customer_id' => empty($this->customerId) ? null : $this->customerId,
+            'reference_name' => $referenceName,
+            'cart_data' => $checkoutData,
+            'total_amount' => $total,
+        ]);
+        
+        $this->dispatch('draft-saved');
+        
+        Notification::make()
+            ->title('Invoice held successfully.')
+            ->success()
+            ->send();
+    }
+    
+    public function loadDraft($draftId)
+    {
+        $draft = PosDraft::where('branch_id', activeBranch()->id ?? null)->find($draftId);
+        if (!$draft) {
+            Notification::make()->title('Draft not found')->danger()->send();
+            return;
+        }
+        
+        $this->customerId = $draft->customer_id;
+        $this->selectedCustomerName = $draft->customer ? $draft->customer->name . ' (' . $draft->customer->phone . ')' : '';
+        
+        $this->dispatch('draft-loaded', payload: $draft->cart_data, customerName: $this->selectedCustomerName);
+        
+        // Auto delete after loading
+        $draft->delete();
+        
+        Notification::make()->title('Draft loaded')->success()->send();
+        
+        $this->unmountAction();
+    }
+    
+    public function deleteDraft($draftId)
+    {
+        $draft = PosDraft::where('branch_id', activeBranch()->id ?? null)->find($draftId);
+        if ($draft) {
+            $draft->delete();
+            Notification::make()->title('Draft deleted')->success()->send();
+        }
+    }
+    
+    public function viewDraftsAction(): Action
+    {
+        return Action::make('viewDrafts')
+            ->label(__('messages.drafts') ?? 'Drafts')
+            ->icon('heroicon-o-document-text')
+            ->modalHeading('Saved Drafts')
+            ->modalContent(fn () => view('livewire.sales.drafts-modal', [
+                'drafts' => PosDraft::where('branch_id', activeBranch()->id ?? null)
+                    ->with('customer')
+                    ->latest()
+                    ->get()
+            ]))
+            ->modalSubmitAction(false)
+            ->modalCancelActionLabel('Close');
+    }
 
     public function createCustomerAction(): Action
     {
@@ -301,6 +401,14 @@ class PosTerminal extends Component implements HasForms, HasActions
                 ->get();
         } else {
             $this->customerSearchResults = [];
+        }
+    }
+
+    public function handleCustomerEnter()
+    {
+        if (count($this->customerSearchResults) === 1) {
+            $customer = $this->customerSearchResults->first();
+            $this->selectCustomer($customer->id, $customer->name, $customer->phone);
         }
     }
 
