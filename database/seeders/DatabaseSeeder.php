@@ -38,10 +38,10 @@ class DatabaseSeeder extends Seeder
         $this->call([
             BranchSeeder::class,
             SettingSeeder::class,
-            // ManufacturerSeeder::class,
-            // SupplierSeeder::class,
-            // TaxSeeder::class,
-            // MedicineSeeder::class,
+            ManufacturerSeeder::class,
+            SupplierSeeder::class,
+            TaxSeeder::class,
+            MedicineSeeder::class,
         ]);
 
         $branches = Branch::query()->where('is_active', true)->get();
@@ -57,18 +57,18 @@ class DatabaseSeeder extends Seeder
         $admin->syncRoles([$superAdminRole]);
         $admin->branches()->syncWithoutDetaching($branches->pluck('id')->all());
 
-        // $staffUsers = User::factory(3)->create();
+        $staffUsers = User::factory(3)->create();
 
-        // foreach ($staffUsers as $index => $user) {
-        //     $user->syncRoles([$userRole]);
+        foreach ($staffUsers as $index => $user) {
+            $user->syncRoles([$userRole]);
 
-        //     if ($branch = $branches->get($index % max($branches->count(), 1))) {
-        //         $user->branches()->syncWithoutDetaching([$branch->id]);
-        //     }
-        // }
+            if ($branch = $branches->get($index % max($branches->count(), 1))) {
+                $user->branches()->syncWithoutDetaching([$branch->id]);
+            }
+        }
 
-        // $this->call([
-        //     PurchaseSeeder::class,
-        // ]);
+        $this->call([
+            PurchaseSeeder::class,
+        ]);
     }
 }

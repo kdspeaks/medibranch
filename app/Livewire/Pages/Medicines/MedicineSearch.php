@@ -15,7 +15,11 @@ class MedicineSearch extends Component
     public function updatedQuery()
     {
         $this->results = Medicine::query()
-            ->where('name', 'like', "%{$this->query}%")
+            ->where(function ($q) {
+                $q->where('name', 'like', "%{$this->query}%")
+                  ->orWhere('barcode', 'like', "%{$this->query}%")
+                  ->orWhere('sku', 'like', "%{$this->query}%");
+            })
             ->limit(10)
             ->get(['id', 'name', 'purchase_price', 'margin'])
             ->map(fn($m) => $m->toArray())

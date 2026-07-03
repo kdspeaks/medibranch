@@ -18,6 +18,7 @@ class Sale extends Model
             'sub_total' => 'decimal:2',
             'discount' => 'decimal:2',
             'tax_amount' => 'decimal:2',
+            'round_off' => 'decimal:2',
             'total_amount' => 'decimal:2',
         ];
     }

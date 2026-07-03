@@ -368,3 +368,26 @@
 /* .dark .fi-sc-fused-group .fi-sc .fi-sc-component, .fi-sc-fused-group .fi-sc .fi-sc-component .fi-fo-field, .fi-sc-fused-group .fi-sc .fi-sc-component .fi-input {
   @apply bg-surface-dark;
 } */
+
+@layer base {
+    ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+        @apply bg-gray-300 rounded-full;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        @apply bg-gray-400;
+    }
+    
+    .dark ::-webkit-scrollbar-thumb {
+        @apply bg-gray-700;
+    }
+    .dark ::-webkit-scrollbar-thumb:hover {
+        @apply bg-gray-600;
+    }
+}

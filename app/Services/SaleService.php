@@ -26,6 +26,7 @@ class SaleService
         string $paymentMethod,
         string $paymentStatus,
         ?string $paymentReference = null,
+        bool $applyRoundOff = false,
         ?string $notes = null
     ): Sale {
         return DB::transaction(function () use (
@@ -37,6 +38,7 @@ class SaleService
             $paymentMethod,
             $paymentStatus,
             $paymentReference,
+            $applyRoundOff,
             $notes
         ) {
             $branch = Branch::findOrFail($branchId);
@@ -58,6 +60,7 @@ class SaleService
                 'sub_total' => 0, // Will update below
                 'discount' => $discount,
                 'tax_amount' => 0, // Will update below
+                'round_off' => 0,
                 'total_amount' => 0, // Will update below
                 'payment_method' => $paymentMethod,
                 'payment_reference' => $paymentReference,
@@ -123,11 +126,20 @@ class SaleService
                 $taxAmount += $lineTaxAmount;
             }
 
-            $totalAmount = ($subTotal + $taxAmount) - $discount;
+            $rawTotal = ($subTotal + $taxAmount) - $discount;
+            $roundOff = 0;
+            if ($applyRoundOff) {
+                $roundedTotal = round($rawTotal);
+                $roundOff = $roundedTotal - $rawTotal;
+                $totalAmount = $roundedTotal;
+            } else {
+                $totalAmount = $rawTotal;
+            }
 
             $sale->update([
                 'sub_total' => $subTotal,
                 'tax_amount' => $taxAmount,
+                'round_off' => $roundOff,
                 'total_amount' => $totalAmount,
             ]);
 

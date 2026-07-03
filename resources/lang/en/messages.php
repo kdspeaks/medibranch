@@ -59,6 +59,7 @@ return [
     'branch_name' => 'Branch Name',
     'branch_code' => 'Branch Code',
     'address' => 'Address',
+    'gst_number' => 'GST Number',
     'phone' => 'Phone',
     'is_active' => 'Is Active',
 

@@ -46,12 +46,20 @@
             @if($sale->branch?->phone)
             <div>Tel: {{ $sale->branch->phone }}</div>
             @endif
+            @if($sale->branch?->gst_number)
+            <div>GSTIN: {{ $sale->branch->gst_number }}</div>
+            @endif
         </div>
 
         <!-- Sale Details -->
         <div class="mb-2 border-b" style="padding-bottom: 5px;">
+            @if($isEstimate ?? false)
+            <div class="text-center font-bold mb-2">ESTIMATE / QUOTATION</div>
+            <div>Date: {{ $sale->created_at->format('d/m/Y h:i A') }}</div>
+            @else
             <div>Inv: {{ $sale->invoice_number }}</div>
             <div>Date: {{ $sale->created_at->format('d/m/Y h:i A') }}</div>
+            @endif
             <div>Cashier: {{ $sale->user->name ?? 'System' }}</div>
             @if($sale->customer)
             <div>Customer: {{ $sale->customer->name }} ({{ $sale->customer->phone }})</div>
@@ -100,6 +108,15 @@
                     <td class="text-right">-{{ currency() }}{{ number_format($sale->discount, 2) }}</td>
                 </tr>
                 @endif
+                @if($sale->round_off != 0)
+                <tr>
+                    <td>Round Off:</td>
+                    <td class="text-right">
+                        @if($sale->round_off < 0) - @endif
+                        {{ currency() }}{{ number_format(abs($sale->round_off), 2) }}
+                    </td>
+                </tr>
+                @endif
                 <tr class="font-bold" style="font-size: 14px;">
                     <td style="padding-top: 5px;">Total:</td>
                     <td class="text-right" style="padding-top: 5px;">{{ currency() }}{{ number_format($sale->total_amount, 2) }}</td>
@@ -108,12 +125,14 @@
         </div>
 
         <!-- Payment Details -->
+        @if(!($isEstimate ?? false))
         <div class="mb-3">
             <div>Paid via: {{ strtoupper($sale->payment_method) }}</div>
             @if($sale->payment_reference)
             <div>Ref: {{ $sale->payment_reference }}</div>
             @endif
         </div>
+        @endif
 
         <!-- Footer -->
         <div class="text-center border-t" style="padding-top: 10px;">

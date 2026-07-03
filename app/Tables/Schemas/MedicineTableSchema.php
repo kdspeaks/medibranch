@@ -14,13 +14,41 @@ class MedicineTableSchema
 {
     public static function table(Table $table, $queryBuilder = null): Table
     {
+        $branchId = activeBranch()->id ?? null;
+        
+        $query = $queryBuilder ?? Medicine::query()->with([
+            'tax',
+            'inventories' => function ($q) use ($branchId) {
+                if ($branchId) {
+                    $q->where('branch_id', $branchId);
+                }
+            }
+        ]);
+
         return $table
-            ->query($queryBuilder ?? Medicine::query()->with('tax'))
+            ->query($query)
             ->columns([
                 ViewColumn::make('name')
                     ->view('components.datatable.medicine_name')
                     ->searchable(['name', 'sku'])
                     ->sortable(),
+                    
+                TextColumn::make('stock_available')
+                    ->label(__('messages.stock') ?? 'Stock')
+                    ->state(fn ($record) => $record->inventories->first()?->quantity ?? 0)
+                    ->badge()
+                    ->color(fn ($state) => (int)$state > 0 ? 'success' : 'danger')
+                    ->sortable(query: function (\Illuminate\Database\Eloquent\Builder $query, string $direction) use ($branchId) {
+                        if (!$branchId) return $query;
+                        return $query->orderBy(
+                            \App\Models\InventoryBatch::selectRaw('COALESCE(SUM(inventory_batches.available_quantity), 0)')
+                                ->join('inventories', 'inventories.id', '=', 'inventory_batches.inventory_id')
+                                ->whereColumn('inventories.medicine_id', 'medicines.id')
+                                ->where('inventories.branch_id', $branchId)
+                                ->whereNull('inventories.deleted_at'),
+                            $direction
+                        );
+                    }),
 
                 TextColumn::make('potency')
                     ->separator(', '),

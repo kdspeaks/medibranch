@@ -58,6 +58,7 @@ return [
     'branch_name' => 'শাখার নাম',
     'branch_code' => 'শাখা কোড',
     'address' => 'ঠিকানা',
+    'gst_number' => 'জিএসটি নম্বর',
     'phone' => 'ফোন',
     'is_active' => 'সক্রিয়?',
 

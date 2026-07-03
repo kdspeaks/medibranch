@@ -1,232 +1,409 @@
-<div class="flex h-screen overflow-hidden bg-background dark:bg-background-dark text-text dark:text-text-dark"
-    x-data
+<div class="flex flex-col h-screen bg-gray-50 dark:bg-[#0f172a] text-text dark:text-text-dark font-sans"
+    x-data="posTerminal()"
     @keydown.window.prevent.f2="document.getElementById('search').focus()"
-    @keydown.window.prevent.f4="$wire.count($wire.cart) > 0 ? $wire.set('showCheckoutModal', true) : null"
-    @keydown.window.prevent.f8="document.getElementById('customerSelect').focus()"
+    @keydown.window.prevent.f3="$wire.set('search', '')"
+    @keydown.window.prevent.f4="console.log('f4')"
+    @keydown.window.prevent.f5="console.log('f5')"
+    @keydown.window.prevent.f6="checkout(true)"
+    @keydown.window.prevent.f7="checkout(false)"
+    @keydown.window.prevent.f8="printLastInvoice()"
+    @keydown.window.prevent.escape="clearCart()"
+    @exact-match-found.window="addToCart($event.detail.payload)"
+    @customer-selected.window="customerId = $event.detail.id; selectedCustomerName = $event.detail.name"
+    @customer-cleared.window="customerId = null; selectedCustomerName = ''"
+    @checkout-successful.window="clearCart()"
 >
-    <!-- Left Pane: Product Search and Selection -->
-    <div class="flex flex-col flex-1 border-r border-border dark:border-border-dark">
-        <!-- Header / Search -->
-        <div class="p-4 bg-surface dark:bg-surface-dark border-b border-border dark:border-border-dark flex items-center justify-between">
-            <div class="flex items-center gap-4 w-full max-w-2xl">
-                <a href="{{ route('dashboard') }}" class="text-text-muted hover:text-text dark:text-text-dark/70 dark:hover:text-text-dark transition">
-                    <x-heroicon-o-arrow-left class="w-6 h-6" />
-                </a>
-                <h1 class="text-xl font-bold text-text dark:text-text-dark">{{ __('messages.pos') }}</h1>
-                <div class="flex-1 ml-4 relative">
-                    <x-ui.input 
-                        wire:model.live.debounce.300ms="search" 
-                        placeholder="{{ __('messages.search_medicine') }} (F2)" 
-                        icon="heroicon-o-magnifying-glass"
-                        name="search"
-                        id="search"
-                        autocomplete="off"
-                    />
-                    @if(count($medicines) > 0)
-                        <div class="absolute z-50 w-full mt-1 bg-surface dark:bg-surface-dark rounded-md shadow-lg border border-border dark:border-border-dark">
-                            <ul class="max-h-60 overflow-auto">
-                                @foreach($medicines as $medicine)
-                                    <li>
-                                        <button wire:click="addToCart({{ $medicine->id }})" class="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-border-dark/30 focus:outline-none focus:bg-gray-100 dark:focus:bg-border-dark/30">
-                                            <div class="font-medium text-text dark:text-text-dark">{{ $medicine->name }}</div>
-                                            <div class="text-sm text-text-muted dark:text-text-dark/70 flex justify-between">
-                                                <span>{{ $medicine->barcode ? $medicine->barcode . ' • ' : '' }}{{ currency() }}{{ number_format($medicine->sale_price, 2) }}</span>
-                                                <span class="text-xs font-semibold {{ ($medicine->inventories->first()?->quantity ?? 0) > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400' }}">
-                                                    {{ __('messages.stock') ?? 'Stock' }}: {{ $medicine->inventories->first()?->quantity ?? 0 }}
-                                                </span>
-                                            </div>
+    <!-- Top Bar -->
+    <div class="flex items-center justify-between px-6 py-3 bg-white dark:bg-[#1e293b] border-b border-gray-200 dark:border-gray-800">
+        <!-- Search -->
+        <div class="flex items-center gap-4 flex-1">
+            <a href="{{ route('dashboard') }}" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                 <x-heroicon-o-home class="w-5 h-5" />
+            </a>
+             <div class="relative w-full max-w-xl"
+                  x-data="{ 
+                      highlightedIndex: 0,
+                      focusNext() {
+                          let count = this.$el.querySelectorAll('.search-item').length;
+                          if (this.highlightedIndex < count - 1) this.highlightedIndex++;
+                      },
+                      focusPrev() {
+                          if (this.highlightedIndex > 0) this.highlightedIndex--;
+                      },
+                      selectItem() {
+                          let items = this.$el.querySelectorAll('.search-item');
+                          if (items.length > 0 && items[this.highlightedIndex]) {
+                              items[this.highlightedIndex].click();
+                          } else {
+                              $wire.handleEnter();
+                          }
+                      }
+                  }"
+                  @keydown.arrow-down.prevent="focusNext()"
+                  @keydown.arrow-up.prevent="focusPrev()"
+                  @keydown.enter.prevent="selectItem()">
+                  <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <x-heroicon-o-magnifying-glass class="w-5 h-5 text-gray-400" />
+                  </div>
+                  <input wire:model.live.debounce.300ms="search" id="search" type="text" placeholder="{{ __('messages.search_medicine') }} (F2)" class="w-full pl-10 pr-12 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-[#0f172a] focus:ring-2 focus:ring-primary focus:border-primary sm:text-sm">
+                  <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                      <span class="text-xs text-gray-400 border border-gray-300 dark:border-gray-700 rounded px-1.5 py-0.5">F2</span>
+                  </div>
+                  
+                  @if(count($medicines) > 0)
+                      <div class="absolute z-50 w-full mt-1 bg-white dark:bg-surface-dark rounded-md shadow-xl border border-gray-200 dark:border-gray-800">
+                          <ul class="max-h-60 overflow-auto">
+                              @foreach($medicines as $medicine)
+                                  @php
+                                      $firstBatch = $medicine->inventories->first()?->batches->first();
+                                      $payload = json_encode([
+                                          'id' => $medicine->id,
+                                          'name' => $medicine->name,
+                                          'price' => (float)$medicine->sale_price,
+                                          'batch_id' => $firstBatch?->id,
+                                          'batch_number' => $firstBatch?->batch_number ?? '--',
+                                          'expiry' => $firstBatch?->expiry_date ? \Carbon\Carbon::parse($firstBatch->expiry_date)->format('m/y') : '--/--',
+                                          'tax_rate' => (float)($medicine->tax?->rate ?? 0),
+                                          'tax_name' => $medicine->tax?->name ?? '0%',
+                                          'available' => $medicine->inventories->first()?->batches->sum('available_quantity') ?? 0,
+                                      ]);
+                                  @endphp
+                                  <li>
+                                      <button @click="addToCart({{ $payload }}); $wire.set('search', '')"  
+                                              class="search-item w-full text-left px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 focus:outline-none border-b border-gray-100 dark:border-gray-800 last:border-0 transition-colors"
+                                              :class="{ 'bg-gray-100 dark:bg-gray-700': highlightedIndex === {{ $loop->index }} }">
+                                          <div class="font-medium text-gray-900 dark:text-gray-100">
+                                              {{ $medicine->name }}
+                                              @if(count($medicines) === 1)
+                                                  <span class="ml-2 text-xs text-blue-600 dark:text-blue-400 font-normal bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 px-1.5 py-0.5 rounded shadow-sm">(Enter ↵)</span>
+                                              @endif
+                                          </div>
+                                          <div class="text-sm text-gray-500 dark:text-gray-400 flex justify-between mt-1">
+                                              <span>{{ $medicine->barcode ? $medicine->barcode . ' • ' : '' }}{{ currency() }}{{ number_format($medicine->sale_price, 2) }}</span>
+                                              <span class="text-xs font-semibold px-2 py-0.5 rounded-full {{ ($medicine->inventories->first()?->quantity ?? 0) > 0 ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' }}">
+                                                  {{ __('messages.stock') ?? 'Stock' }}: {{ $medicine->inventories->first()?->quantity ?? 0 }}
+                                              </span>
+                                          </div>
+                                      </button>
+                                  </li>
+                              @endforeach
+                         </ul>
+                     </div>
+                 @endif
+            </div>
+        </div>
+        
+        <!-- Top Right Actions -->
+        <div class="flex items-center gap-3">
+            <button class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-[#1e293b] border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
+                <x-heroicon-o-pause class="w-4 h-4" /> Hold Invoice
+            </button>
+            <button class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-[#1e293b] border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
+                <x-heroicon-o-document-text class="w-4 h-4" /> Drafts
+            </button>
+            <button @click="clearCart()" class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-green-700 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 dark:bg-green-900/20 dark:border-green-800 dark:text-green-400">
+                <x-heroicon-o-plus class="w-4 h-4" /> New Sale
+            </button>
+            
+            <div class="h-6 w-px bg-gray-300 dark:bg-gray-700 mx-1"></div>
+            
+            <x-ui.theme-toggle />
+            
+            <div class="flex items-center gap-2 ml-2">
+                <div class="text-right hidden md:block">
+                    <div class="text-sm font-semibold leading-none">{{ auth()->user()->name }}</div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">Cashier</div>
+                </div>
+                <button class="text-gray-400 hover:text-gray-600">
+                    <x-heroicon-o-chevron-down class="w-4 h-4" />
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="flex flex-1 overflow-hidden p-4 gap-4">
+        
+        <!-- Left Panel: Cart & Actions -->
+        <div class="flex flex-col flex-1 bg-white dark:bg-[#1e293b] rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
+            
+            <!-- Cart Header -->
+            <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-800">
+                <h2 class="text-lg font-bold">{{ __('messages.cart') ?? 'Cart' }} <span class="text-gray-500 font-normal">(<span x-text="cart.length"></span> Items)</span></h2>
+                <button @click="clearCart()" class="text-sm text-gray-500 hover:text-red-600 dark:hover:text-red-400 flex items-center gap-1 transition">
+                    <x-heroicon-o-trash class="w-4 h-4" /> Clear Cart
+                </button>
+            </div>
+            
+            <!-- Cart Table Area -->
+            <div class="flex-1 overflow-auto">
+                <table class="w-full text-left text-sm whitespace-nowrap">
+                    <thead class="sticky top-0 bg-white dark:bg-[#1e293b] text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-800 z-10">
+                        <tr>
+                            <th class="px-4 py-2 font-medium">#</th>
+                            <th class="px-4 py-2 font-medium">Medicine</th>
+                            <th class="px-4 py-2 font-medium">Batch / Expiry</th>
+                            <th class="px-4 py-2 font-medium">MRP</th>
+                            <th class="px-4 py-2 font-medium">Price</th>
+                            <th class="px-4 py-2 font-medium">Qty</th>
+                            <th class="px-4 py-2 font-medium">Tax</th>
+                            <th class="px-4 py-2 font-medium text-right">Amount</th>
+                            <th class="px-4 py-2"></th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+                        <template x-for="(item, index) in cart" :key="item.id">
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                                <td class="px-4 py-2 text-gray-500" x-text="index + 1"></td>
+                                <td class="px-4 py-2">
+                                    <div class="flex items-center gap-2">
+                                        <div class="font-bold text-gray-900 dark:text-gray-100" x-text="item.name"></div>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-2">
+                                    <div class="text-gray-900 dark:text-gray-300" x-text="item.batch_number"></div>
+                                    <div class="text-xs text-gray-500" x-text="item.expiry_date"></div>
+                                </td>
+                                <td class="px-4 py-2 text-gray-500">{{ currency() }}<span x-text="formatCurrency(item.unit_price)"></span></td>
+                                <td class="px-4 py-2 font-medium">{{ currency() }}<span x-text="formatCurrency(item.unit_price)"></span></td>
+                                <td class="px-4 py-2">
+                                    <div class="flex items-center justify-center gap-3 border border-gray-200 dark:border-gray-700 rounded-lg px-2 py-1 w-28 mx-auto bg-white dark:bg-[#1e293b]">
+                                        <button @click="updateQuantity(index, item.quantity - 1)" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
+                                            <x-heroicon-o-minus class="w-4 h-4" />
                                         </button>
-                                    </li>
-                                @endforeach
-                            </ul>
+                                        <input type="number" x-model.number="item.quantity" @change="updateQuantity(index, item.quantity)" class="font-medium w-10 text-center bg-transparent border-0 p-0 focus:ring-0 appearance-none m-0 [-moz-appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" min="1">
+                                        <button @click="updateQuantity(index, item.quantity + 1)" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
+                                            <x-heroicon-o-plus class="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-2 text-gray-600 dark:text-gray-300" x-text="item.tax_name"></td>
+                                <td class="px-4 py-2 text-right font-bold text-gray-900 dark:text-gray-100">
+                                    {{ currency() }}<span x-text="formatCurrency(item.unit_price * item.quantity)"></span>
+                                </td>
+                                <td class="px-2 py-2 text-right">
+                                    <button @click="removeFromCart(index)" class="text-gray-400 hover:text-red-500 transition">
+                                        <x-heroicon-o-x-mark class="w-5 h-5" />
+                                    </button>
+                                </td>
+                            </tr>
+                        </template>
+                        <tr x-show="cart.length === 0" x-cloak>
+                            <td colspan="9" class="px-6 py-12 text-center text-gray-500">
+                                <x-heroicon-o-shopping-bag class="w-12 h-12 mx-auto text-gray-300 mb-3" />
+                                {{ __('messages.search_medicine') }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Left Panel Footer (Totals & Actions) -->
+            <div class="border-t border-gray-200 dark:border-gray-800 p-3 flex flex-col xl:flex-row gap-4">
+                <!-- Actions Grid -->
+                <div class="flex-1 flex flex-col">
+                    <textarea x-model="notes" class="w-full h-full border border-gray-200 dark:border-gray-700 rounded-lg p-2 text-xs bg-gray-50 dark:bg-gray-800 focus:ring-primary focus:border-primary placeholder-gray-400 min-h-[50px]" placeholder="Add Note (optional)..."></textarea>
+                </div>
+                
+                <!-- Totals Breakdown -->
+                <div class="w-full xl:w-64 space-y-1">
+                    <div class="flex justify-between text-xs text-gray-600 dark:text-gray-400">
+                        <span>{{ __('messages.sub_total') }} (<span x-text="cart.length"></span> items)</span>
+                        <span class="font-medium text-gray-900 dark:text-white">{{ currency() }}<span x-text="formatCurrency(subTotal)"></span></span>
+                    </div>
+                    <div class="flex justify-between text-xs text-gray-600 dark:text-gray-400 items-center">
+                        <span>{{ __('messages.discount') }}</span>
+                        <div class="flex items-center gap-1">
+                            <span class="text-red-500 font-medium">- {{ currency() }}</span>
+                            <input type="number" step="0.01" x-model.number="discount" class="w-16 text-right px-1 py-0.5 border border-gray-300 dark:border-gray-700 rounded bg-white dark:bg-[#1e293b] focus:outline-none focus:border-primary text-red-500 font-medium">
                         </div>
-                    @endif
+                    </div>
+                    <div class="flex justify-between text-xs text-gray-600 dark:text-gray-400">
+                        <span>Tax</span>
+                        <span class="font-medium text-gray-900 dark:text-white">{{ currency() }}<span x-text="formatCurrency(taxAmount)"></span></span>
+                    </div>
+                    <div class="flex justify-between items-center text-xs text-gray-600 dark:text-gray-400">
+                        <label class="flex items-center cursor-pointer gap-1">
+                            <input type="checkbox" x-model="applyRoundOff" class="rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary h-3 w-3">
+                            <span>Round Off</span>
+                        </label>
+                        <span class="font-medium text-gray-900 dark:text-white">
+                            <span x-show="roundOffAmount < 0">-</span>{{ currency() }}<span x-text="formatCurrency(Math.abs(roundOffAmount))"></span>
+                        </span>
+                    </div>
+                    <div class="pt-1.5 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center mt-1">
+                        <span class="font-bold text-gray-900 dark:text-white text-sm">{{ __('messages.total') }}</span>
+                        <span class="text-xl font-bold text-green-600 dark:text-green-500">{{ currency() }}<span x-text="formatCurrency(total)"></span></span>
+                    </div>
                 </div>
             </div>
             
-            <div>
-                <x-ui.theme-toggle />
-            </div>
         </div>
         
-        <!-- Quick Actions / Categories (Optional) -->
-        <div class="flex-1 p-6 bg-gray-50 dark:bg-background-dark overflow-auto">
-            @if(session('success'))
-                <div class="mb-4 p-4 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100 rounded-md">
-                    {{ session('success') }}
-                </div>
-            @endif
-            @if(session('error'))
-                <div class="mb-4 p-4 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-100 rounded-md relative">
-                    {{ session('error') }}
-                </div>
-            @endif
-            @if($errors->has('checkout'))
-                <div class="mb-4 p-4 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-100 rounded-md">
-                    {{ $errors->first('checkout') }}
-                </div>
-            @endif
-
-            <!-- Placeholder for quick items or empty state -->
-            @if(count($cart) === 0 && empty($search))
-                <div class="h-full flex flex-col items-center justify-center text-text-muted dark:text-text-dark/50">
-                    <x-heroicon-o-shopping-bag class="w-16 h-16 mb-4 opacity-50 text-text-muted dark:text-text-muted-dark" />
-                    <p class="text-lg text-text-muted dark:text-text-muted-dark">{{ __('messages.search_medicine') }}</p>
-                </div>
-            @endif
-        </div>
-    </div>
-
-    <!-- Right Pane: Cart & Checkout -->
-    <div class="w-96 flex flex-col bg-surface dark:bg-surface-dark">
-        <!-- Customer Selection -->
-        <div class="p-4 border-b border-border dark:border-border-dark">
-            <div class="mb-2 font-medium flex justify-between items-center">
-                <span>{{ __('messages.customers') }} <span class="text-xs text-text-muted">(F8)</span></span>
-                {{ $this->createCustomerAction }}
-            </div>
-            <div class="relative">
-                @if($customerId)
-                    <div class="flex justify-between items-center w-full rounded-lg border bg-input-bg text-input-text border-input-border dark:bg-input-bg-dark dark:text-input-text-dark dark:border-input-border-dark sm:text-sm px-3 py-2">
-                        <span class="truncate">{{ $selectedCustomerName }}</span>
-                        <button wire:click="clearCustomer" class="text-text-muted hover:text-error dark:text-text-dark/50 dark:hover:text-error transition">
-                            <x-heroicon-o-x-mark class="w-4 h-4" />
-                        </button>
-                    </div>
-                @else
-                    <x-ui.input 
-                        wire:model.live.debounce.300ms="customerSearch" 
-                        placeholder="{{ __('messages.search_customer') ?? 'Search Name or Phone...' }}" 
-                        icon="heroicon-o-magnifying-glass"
-                        name="customerSearch"
-                        id="customerSelect"
-                        autocomplete="off"
-                    />
-                    @if(count($customerSearchResults) > 0)
-                        <div class="absolute z-50 w-full mt-1 bg-surface dark:bg-surface-dark rounded-md shadow-lg border border-border dark:border-border-dark">
-                            <ul class="max-h-60 overflow-auto">
-                                @foreach($customerSearchResults as $customerResult)
-                                    <li>
-                                        <button wire:click="selectCustomer({{ $customerResult->id }}, '{{ addslashes($customerResult->name) }}', '{{ addslashes($customerResult->phone) }}')" class="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-border-dark/30 focus:outline-none focus:bg-gray-100 dark:focus:bg-border-dark/30">
-                                            <div class="font-medium text-text dark:text-text-dark">{{ $customerResult->name }}</div>
-                                            <div class="text-sm text-text-muted dark:text-text-dark/70">{{ $customerResult->phone }}</div>
-                                        </button>
-                                    </li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    @endif
-                @endif
-            </div>
-        </div>
-        
-        <!-- Cart Items -->
-        <div class="flex-1 overflow-auto p-4 space-y-4">
-            @forelse($cart as $index => $item)
-                <div class="flex flex-col p-3 border border-border dark:border-border-dark rounded-lg relative">
-                    <div class="flex justify-between font-medium">
-                        <span>{{ $item['name'] }}</span>
-                        <span>{{ currency() }}{{ number_format($item['unit_price'] * $item['quantity'], 2) }}</span>
-                    </div>
-                    <div class="flex items-center justify-between mt-3">
-                        <div class="flex items-center gap-2">
-                            <button wire:click="updateQuantity({{ $index }}, {{ $item['quantity'] - 1 }})" class="p-1 rounded bg-gray-100 dark:bg-border-dark/30 hover:bg-gray-200 dark:hover:bg-border-dark/70 text-text dark:text-text-dark">
-                                <x-heroicon-o-minus class="w-4 h-4" />
-                            </button>
-                            <span class="w-8 text-center">{{ $item['quantity'] }}</span>
-                            <button wire:click="updateQuantity({{ $index }}, {{ $item['quantity'] + 1 }})" class="p-1 rounded bg-gray-100 dark:bg-border-dark/30 hover:bg-gray-200 dark:hover:bg-border-dark/70 text-text dark:text-text-dark">
-                                <x-heroicon-o-plus class="w-4 h-4" />
-                            </button>
-                        </div>
-                        <button wire:click="removeFromCart({{ $index }})" class="text-error hover:text-error-dark dark:text-error dark:hover:text-error-dark">
-                            <x-heroicon-o-trash class="w-5 h-5" />
-                        </button>
-                    </div>
-                </div>
-            @empty
-                <div class="text-center text-text-muted dark:text-text-dark/50 py-8">
-                    {{ __('messages.cart') }} is empty
-                </div>
-            @endforelse
-        </div>
-        
-        <!-- Totals & Checkout Button -->
-        <div class="p-4 bg-gray-50 dark:bg-background-dark border-t border-border dark:border-border-dark">
-            <div class="space-y-2 mb-4">
-                <div class="flex justify-between text-sm text-text dark:text-text-dark">
-                    <span>{{ __('messages.sub_total') }}</span>
-                    <span>{{ currency() }}{{ number_format($this->subTotal, 2) }}</span>
-                </div>
-                
-                <div class="flex justify-between items-center text-sm text-text dark:text-text-dark">
-                    <span>{{ __('messages.discount') }}</span>
-                    <input type="number" step="0.01" wire:model.live.debounce.500ms="discount" class="w-24 text-right px-2 py-1 rounded-lg border bg-input-bg text-input-text border-input-border dark:bg-input-bg-dark dark:text-input-text-dark dark:border-input-border-dark sm:text-sm focus:ring-primary focus:border-primary">
-                </div>
-                
-                <div class="flex justify-between font-bold text-lg pt-2 border-t border-border dark:border-border-dark text-text dark:text-text-dark">
-                    <span>{{ __('messages.total') }}</span>
-                    <span>{{ currency() }}{{ number_format($this->total, 2) }}</span>
-                </div>
-            </div>
+        <!-- Right Panel: Customer & Payment -->
+        <div class="w-80 flex flex-col gap-4 overflow-y-auto pr-2 pb-2">
             
-            <x-ui.button fullWidth size="lg" wire:click="$set('showCheckoutModal', true)" :disabled="count($cart) === 0">
-                {{ __('messages.checkout') }} (F4)
-            </x-ui.button>
-        </div>
-    </div>
-
-    <!-- Checkout Modal -->
-    @if($showCheckoutModal)
-    <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-        <div class="flex items-end justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-            <div class="fixed inset-0 bg-gray-500/75 dark:bg-[#121212]/80 transition-opacity" aria-hidden="true" wire:click="$set('showCheckoutModal', false)"></div>
-
-            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-
-            <div class="relative z-10 inline-block px-4 pt-5 pb-4 overflow-hidden text-left align-bottom transition-all transform bg-surface dark:bg-surface-dark rounded-lg shadow-xl sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6 border border-border dark:border-border-dark">
-                <div>
-                    <h3 class="text-lg font-medium leading-6 text-text dark:text-text-dark" id="modal-title">
-                        {{ __('messages.payment_method') }}
-                    </h3>
-                    <div class="mt-2 space-y-4">
-                        <div class="flex items-center gap-4 mt-4 text-text dark:text-text-dark">
-                            <label class="flex items-center gap-2 cursor-pointer">
-                                <input type="radio" wire:model="paymentMethod" value="cash" class="text-primary focus:ring-primary border-input-border dark:border-input-border-dark bg-input-bg dark:bg-input-bg-dark">
-                                <span>{{ __('messages.cash') }}</span>
-                            </label>
-                            <label class="flex items-center gap-2 cursor-pointer">
-                                <input type="radio" wire:model="paymentMethod" value="card" class="text-primary focus:ring-primary border-input-border dark:border-input-border-dark bg-input-bg dark:bg-input-bg-dark">
-                                <span>{{ __('messages.card') }}</span>
-                            </label>
-                            <label class="flex items-center gap-2 cursor-pointer">
-                                <input type="radio" wire:model="paymentMethod" value="upi" class="text-primary focus:ring-primary border-input-border dark:border-input-border-dark bg-input-bg dark:bg-input-bg-dark">
-                                <span>{{ __('messages.upi') }}</span>
-                            </label>
+            <!-- Customer Block -->
+            <div class="bg-white dark:bg-[#1e293b] rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-4">
+                <div class="flex items-center gap-2 mb-3 font-bold text-gray-800 dark:text-gray-200">
+                    <x-heroicon-o-user class="w-5 h-5" /> Customer
+                </div>
+                
+                <div class="relative mb-3">
+                    <template x-if="customerId">
+                        <div class="flex justify-between items-center w-full rounded-lg border border-gray-200 bg-gray-50 dark:bg-gray-800 dark:border-gray-700 px-4 py-3">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-sm font-bold dark:bg-blue-900/30 dark:text-blue-400">
+                                    <span x-text="selectedCustomerName ? selectedCustomerName.substring(0,1) : ''"></span>
+                                </div>
+                                <span class="font-medium text-sm truncate max-w-[180px]"><span x-text="selectedCustomerName"></span></span>
+                            </div>
+                            <button @click="clearCustomer()" class="text-gray-400 hover:text-red-500 transition p-1">
+                                <x-heroicon-o-x-mark class="w-5 h-5" />
+                            </button>
                         </div>
+                    </template><template x-if="!customerId">
+                        <div class="flex justify-between items-center w-full rounded-lg border border-gray-200 bg-gray-50 dark:bg-gray-800 dark:border-gray-700 px-4 py-3 cursor-pointer">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-500 flex items-center justify-center text-sm">
+                                    <x-heroicon-s-user class="w-4 h-4" />
+                                </div>
+                                <span class="font-medium text-sm">Walk-in Customer</span>
+                            </div>
+                            <x-heroicon-o-chevron-down class="w-4 h-4 text-gray-400" />
+                        </div>
+                    </template>
+                </div>
+                
+                <template x-if="!customerId">
+                    <div class="flex gap-2 relative">
+                        <div class="relative flex-1">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <x-heroicon-o-magnifying-glass class="w-4 h-4 text-gray-400" />
+                            </div>
+                            <input wire:model.live.debounce.300ms="customerSearch" type="text" placeholder="{{ __('messages.search_customer') ?? 'Search Name or Phone...' }}" class="w-full pl-9 pr-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-primary focus:border-primary text-sm transition">
+                        </div>
+                        <button wire:click="mountAction('createCustomer')" class="px-3 py-2 bg-green-50 text-green-600 border border-green-200 rounded-lg hover:bg-green-100 transition dark:bg-green-900/20 dark:border-green-800 dark:text-green-400 dark:hover:bg-green-900/40">
+                            <x-heroicon-o-plus class="w-5 h-5" />
+                        </button>
                         
-                        <div class="mt-4">
-                            <x-ui.input 
-                                wire:model="paymentReference" 
-                                name="paymentReference"
-                                label="{{ __('messages.payment_reference') }}" 
-                                placeholder="Optional" 
-                            />
+                        @if(count($customerSearchResults) > 0)
+                            <div class="absolute z-50 w-full mt-10 bg-white dark:bg-surface-dark rounded-md shadow-xl border border-gray-200 dark:border-gray-800">
+                                <ul class="max-h-60 overflow-auto">
+                                    @foreach($customerSearchResults as $customerResult)
+                                        <li>
+                                            <button wire:click="selectCustomer({{ $customerResult->id }}, '{{ addslashes($customerResult->name) }}', '{{ addslashes($customerResult->phone) }}')" class="w-full text-left px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 focus:outline-none border-b border-gray-100 dark:border-gray-800 last:border-0 transition">
+                                                <div class="font-medium">{{ $customerResult->name }}</div>
+                                                <div class="text-xs text-gray-500">{{ $customerResult->phone }}</div>
+                                            </button>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+                    </div>
+                </template>
+            </div>
+            
+            <!-- Payment Block -->
+            <div class="bg-white dark:bg-[#1e293b] rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-4 flex-1 flex flex-col">
+                <div class="flex items-center gap-2 mb-4 font-bold text-gray-800 dark:text-gray-200">
+                    <x-heroicon-o-banknotes class="w-5 h-5" /> Payment
+                </div>
+                
+                <div class="flex justify-between items-center mb-6">
+                    <span class="text-gray-600 dark:text-gray-400">Total Amount</span>
+                    <span class="text-3xl font-bold text-green-600">{{ currency() }}<span x-text="formatCurrency(total)"></span></span>
+                </div>
+                
+                <div class="flex justify-between items-center mb-4">
+                    <span class="text-gray-600 dark:text-gray-400">Received</span>
+                    <div class="relative w-32">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <span class="text-gray-500 font-medium">{{ currency() }}</span>
                         </div>
+                        <input type="number" x-model.number="receivedAmount" class="w-full pl-8 pr-3 py-2 text-right border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 focus:ring-2 focus:ring-primary focus:border-primary font-medium" placeholder="0.00">
                     </div>
                 </div>
                 
-                <div class="mt-8 sm:flex sm:flex-row-reverse gap-3">
-                    <x-ui.button wire:click="checkout" target="checkout" class="w-full sm:w-auto">
-                        {{ __('messages.pay_and_complete') }}
-                    </x-ui.button>
-                    <button type="button" wire:click="$set('showCheckoutModal', false)" class="mt-3 inline-flex w-full justify-center rounded-lg border border-border dark:border-border-dark bg-surface dark:bg-surface-dark px-4 py-2 text-base font-medium text-text dark:text-text-dark shadow-sm hover:bg-gray-50 dark:hover:bg-border-dark/30 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 sm:mt-0 sm:w-auto sm:text-sm">
-                        Cancel
+                <div class="grid grid-cols-4 gap-2 mb-6">
+                    <button @click="receivedAmount = 200" class="py-2 border font-medium rounded-lg transition" :class="receivedAmount == 200 ? 'border-green-300 bg-green-600 text-white' : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700'" font-medium rounded-lg transition">
+                        {{ currency() }}200
+                    </button>
+                    <button @click="receivedAmount = 500" class="py-2 border font-medium rounded-lg transition" :class="receivedAmount == 500 ? 'border-green-300 bg-green-600 text-white' : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700'" font-medium rounded-lg transition">
+                        {{ currency() }}500
+                    </button>
+                    <button @click="receivedAmount = 1000" class="py-2 border font-medium rounded-lg transition" :class="receivedAmount == 1000 ? 'border-green-300 bg-green-600 text-white' : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700'" font-medium rounded-lg transition">
+                        {{ currency() }}1000
+                    </button>
+                    <button @click="receivedAmount = total" class="py-2 border font-medium text-sm rounded-lg transition" :class="receivedAmount == total && total > 0 ? 'border-green-300 bg-green-600 text-white' : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700'" font-medium text-sm rounded-lg transition">
+                        Exact
+                    </button>
+                </div>
+                
+                <div class="mb-6">
+                    <div class="text-sm text-gray-600 dark:text-gray-400 mb-2">{{ __('messages.payment_method') }}</div>
+                    <div class="flex rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden bg-gray-50 dark:bg-gray-800 p-1 gap-1">
+                        <button @click="paymentMethod = 'cash'" class="flex-1 py-2 flex items-center justify-center gap-2 rounded-md font-medium text-sm transition" :class="paymentMethod === 'cash' ? 'bg-white dark:bg-gray-600 shadow text-green-600 dark:text-green-400 border border-gray-200 dark:border-gray-500' : 'text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700 border border-transparent'">
+                            <x-heroicon-o-banknotes class="w-4 h-4" /> Cash
+                        </button>
+                        <button @click="paymentMethod = 'upi'" class="flex-1 py-2 flex items-center justify-center gap-2 rounded-md font-medium text-sm transition" :class="paymentMethod === 'upi' ? 'bg-white dark:bg-gray-600 shadow text-blue-600 dark:text-blue-400 border border-gray-200 dark:border-gray-500' : 'text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700 border border-transparent'">
+                            <x-heroicon-o-qr-code class="w-4 h-4" /> UPI
+                        </button>
+                        <button @click="paymentMethod = 'card'" class="flex-1 py-2 flex items-center justify-center gap-2 rounded-md font-medium text-sm transition" :class="paymentMethod === 'card' ? 'bg-white dark:bg-gray-600 shadow text-purple-600 dark:text-purple-400 border border-gray-200 dark:border-gray-500' : 'text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700 border border-transparent'">
+                            <x-heroicon-o-credit-card class="w-4 h-4" /> Card
+                        </button>
+                    </div>
+                </div>
+
+                <template x-if="['upi', 'card'].includes(paymentMethod)">
+                    <div class="mb-6">
+                        <div class="text-sm text-gray-600 dark:text-gray-400 mb-2">{{ __('messages.transaction_number') ?? 'Transaction Number (Optional)' }}</div>
+                        <input type="text" x-model="paymentReference" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-[#1e293b] focus:ring-2 focus:ring-primary focus:border-primary text-sm" placeholder="e.g. TXN123456789">
+                    </div>
+                </template>
+                
+                <div class="flex justify-between items-center mb-8 border-t border-gray-200 dark:border-gray-800 pt-4">
+                    <span class="text-gray-600 dark:text-gray-400">Change</span>
+                    <span class="text-2xl font-bold text-green-600">{{ currency() }}<span x-text="formatCurrency(changeAmount)"></span></span>
+                </div>
+                
+                @if($errors->has('checkout'))
+                    <div class="mb-4 p-3 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-lg text-sm border border-red-200 dark:border-red-800">
+                        {{ $errors->first('checkout') }}
+                    </div>
+                @endif
+                
+                <div class="mt-auto space-y-3">
+                    <button @click="checkout(true)" class="w-full py-4 bg-[#219653] hover:bg-green-700 text-white font-bold rounded-xl flex justify-between items-center px-6 transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed" :disabled="cart.length === 0">
+                        <span>Pay & Print Invoice</span>
+                        <span class="text-green-200 text-sm font-normal">F6</span>
+                    </button>
+                    <button @click="checkout(false)" class="w-full py-4 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 font-bold rounded-xl flex justify-between items-center px-6 transition disabled:opacity-50 disabled:cursor-not-allowed" :disabled="cart.length === 0">
+                        <span>Pay (No Print)</span>
+                        <span class="text-gray-500 dark:text-gray-400 text-sm font-normal">F7</span>
                     </button>
                 </div>
             </div>
         </div>
+        
     </div>
-    @endif
+
+    <!-- Bottom Footer Bar -->
+    <div class="bg-gray-50 dark:bg-[#0f172a] border-t border-gray-200 dark:border-gray-800 px-6 py-4 flex gap-4 overflow-x-auto">
+        <button @click="checkout(true)" class="flex items-center gap-2 bg-white dark:bg-[#1e293b] border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2 font-medium text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed" :disabled="cart.length === 0">
+            <span class="bg-gray-100 dark:bg-gray-800 text-gray-500 px-2 py-0.5 rounded text-xs border border-gray-200 dark:border-gray-700 shadow-sm">F6</span> Pay & Print
+        </button>
+        <button @click="checkout(false)" class="flex items-center gap-2 bg-white dark:bg-[#1e293b] border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2 font-medium text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed" :disabled="cart.length === 0">
+            <span class="bg-gray-100 dark:bg-gray-800 text-gray-500 px-2 py-0.5 rounded text-xs border border-gray-200 dark:border-gray-700 shadow-sm">F7</span> Pay (No Print)
+        </button>
+        <button @click="printLastInvoice()" class="flex items-center gap-2 bg-white dark:bg-[#1e293b] border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2 font-medium text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition">
+            <span class="bg-gray-100 dark:bg-gray-800 text-gray-500 px-2 py-0.5 rounded text-xs border border-gray-200 dark:border-gray-700 shadow-sm">F8</span> Print Invoice
+        </button>
+        <button @click="clearCart()" class="flex items-center gap-2 ml-auto bg-white dark:bg-[#1e293b] border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2 font-medium text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition">
+            <span class="bg-gray-100 dark:bg-gray-800 text-gray-500 px-2 py-0.5 rounded text-xs border border-gray-200 dark:border-gray-700 shadow-sm">Esc</span> Cancel Sale
+        </button>
+    </div>
 
     <x-filament-actions::modals />
 
@@ -239,6 +416,139 @@
                 printWindow.focus();
             }
         });
+              $wire.on('print-estimate', ({ html }) => {
+            const printWindow = window.open('', '_blank', 'width=400,height=600');
+            if (printWindow) {
+                printWindow.document.write(html);
+                printWindow.document.close();
+                printWindow.focus();
+            }
+        });
+
+        Alpine.data('posTerminal', () => ({
+            cart: [],
+            discount: 0,
+            receivedAmount: null,
+            notes: '',
+            applyRoundOff: true,
+            paymentMethod: 'cash',
+            paymentReference: '',
+            customerId: null,
+            selectedCustomerName: '',
+
+            get subTotal() {
+                return this.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            },
+            get taxAmount() {
+                return this.cart.reduce((sum, item) => {
+                    let itemTotal = item.price * item.quantity;
+                    return sum + (itemTotal * (item.tax_rate / 100));
+                }, 0);
+            },
+            get roundOffAmount() {
+                if (!this.applyRoundOff) return 0;
+                let rawTotal = (this.subTotal + this.taxAmount) - parseFloat(this.discount || 0);
+                return Math.round(rawTotal) - rawTotal;
+            },
+            get total() {
+                let rawTotal = (this.subTotal + this.taxAmount) - parseFloat(this.discount || 0);
+                if (this.applyRoundOff) {
+                    return Math.max(0, Math.round(rawTotal));
+                }
+                return Math.max(0, rawTotal);
+            },
+            get changeAmount() {
+                if (this.receivedAmount === null || this.receivedAmount === '') return 0;
+                return Math.max(0, parseFloat(this.receivedAmount) - this.total);
+            },
+            
+            addToCart(payload) {
+                if (!payload || !payload.id) return;
+                let index = this.cart.findIndex(i => i.id === payload.id);
+                let currentQty = index !== -1 ? this.cart[index].quantity : 0;
+                
+                if (currentQty + 1 > payload.available) {
+                    $wire.dispatch('notify', { title: 'Not enough stock available', type: 'danger' });
+                    return;
+                }
+                
+                if (index !== -1) {
+                    this.cart[index].quantity++;
+                } else {
+                    this.cart.push({
+                        medicine_id: payload.id, // mapped for checkout
+                        id: payload.id,
+                        name: payload.name,
+                        unit_price: payload.price,
+                        price: payload.price,
+                        quantity: 1,
+                        inventory_batch_id: payload.batch_id,
+                        batch_number: payload.batch_number,
+                        expiry_date: payload.expiry,
+                        tax_rate: payload.tax_rate,
+                        tax_name: payload.tax_name,
+                        available_stock: payload.available
+                    });
+                }
+            },
+            
+            updateQuantity(index, quantity) {
+                quantity = parseInt(quantity);
+                if (isNaN(quantity) || quantity < 1) {
+                    this.cart.splice(index, 1);
+                    return;
+                }
+                
+                let item = this.cart[index];
+                if (quantity > item.available_stock) {
+                    $wire.dispatch('notify', { title: 'Not enough stock available', type: 'danger' });
+                    item.quantity = Math.max(1, item.available_stock);
+                    return;
+                }
+                
+                item.quantity = quantity;
+            },
+            
+            removeFromCart(index) {
+                this.cart.splice(index, 1);
+            },
+            
+            clearCart() {
+                this.cart = [];
+                this.discount = 0;
+                this.receivedAmount = null;
+                this.notes = '';
+                this.customerId = null;
+                this.selectedCustomerName = '';
+                $wire.clearCustomer();
+            },
+            
+            checkout(print) {
+                if (this.cart.length === 0) return;
+                
+                $wire.processCheckout({
+                    cart: JSON.parse(JSON.stringify(this.cart)),
+                    discount: this.discount,
+                    paymentMethod: this.paymentMethod,
+                    paymentReference: this.paymentReference,
+                    applyRoundOff: this.applyRoundOff,
+                    notes: this.notes,
+                    customerId: this.customerId
+                }, print);
+            },
+            
+            printLastInvoice() {
+                $wire.printLastInvoice({
+                    cart: JSON.parse(JSON.stringify(this.cart)),
+                    discount: this.discount,
+                    applyRoundOff: this.applyRoundOff
+                });
+            },
+            
+            formatCurrency(amount) {
+                return Number(amount).toFixed(2);
+            }
+        }));
     </script>
     @endscript
 </div>

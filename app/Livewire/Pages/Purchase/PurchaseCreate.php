@@ -84,21 +84,26 @@ class PurchaseCreate extends Component implements HasForms, HasActions
     {
         $code = trim($code);
         if ($code === '') return;
-        // dd($code);
-        // Try lookup by barcode(s)
-        $medicine = Medicine::where('barcode', $code)
-            ->orWhere('name', 'like', "%{$code}%")
+        
+        // Try lookup by barcode(s) or SKU exactly
+        $exactMatch = Medicine::where('barcode', $code)
+            ->orWhere('sku', $code)
             ->first();
 
-        if ($medicine) {
-            // call your existing parent-level method
-            $this->addPurchaseItem($medicine->id);
-
-
-            // optional: reset any search state in child by dispatching back or clearing relevant props
-            // e.g., you may want to reset query on parent so child sees it via binding
-            // $this->dispatchBrowserEvent('toast', ['message' => 'Added: ' . $medicine->name]);
+        if ($exactMatch) {
+            $this->addPurchaseItem($exactMatch->id);
             return;
+        }
+
+        // If not exact, see if there's exactly 1 result for the query
+        $medicines = Medicine::where('name', 'like', "%{$code}%")
+            ->orWhere('barcode', 'like', "%{$code}%")
+            ->orWhere('sku', 'like', "%{$code}%")
+            ->take(2)
+            ->get();
+            
+        if ($medicines->count() === 1) {
+            $this->addPurchaseItem($medicines->first()->id);
         }
     }
 

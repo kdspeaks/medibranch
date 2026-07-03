@@ -31,11 +31,25 @@ class PosTerminal extends Component implements HasForms, HasActions
     public $paymentMethod = 'cash';
     public $paymentReference = '';
     
-    public $showCheckoutModal = false;
+    public $receivedAmount = null;
+    public $notes = '';
+    public $applyRoundOff = true;
+    
+    public $showCheckoutModal = false; // We may no longer need this, but we'll keep it for now just in case.
+    public $lastSaleId = null;
 
     public $customerSearch = '';
     public $customerSearchResults = [];
     public $selectedCustomerName = '';
+    
+    #[\Livewire\Attributes\On('notify')]
+    public function notify($data)
+    {
+        Notification::make()
+            ->title($data['title'] ?? 'Notification')
+            ->{$data['type'] ?? 'info'}()
+            ->send();
+    }
     
     public function updatedSearch()
     {
@@ -43,9 +57,25 @@ class PosTerminal extends Component implements HasForms, HasActions
             $branchId = activeBranch()->id ?? null;
 
             // Check exact barcode match first
-            $exactMatch = Medicine::where('barcode', $this->search)->first();
+            $exactMatch = Medicine::where('barcode', $this->search)
+                ->orWhere('sku', $this->search)
+                ->first();
+                
             if ($exactMatch) {
-                $this->addToCart($exactMatch->id);
+                $details = $this->getMedicineDetails($exactMatch->id);
+                $firstBatch = $details->inventories->first()?->batches->first();
+                $this->dispatch('exact-match-found', payload: [
+                    'id' => $details->id,
+                    'name' => $details->name,
+                    'price' => (float)$details->sale_price,
+                    'batch_id' => $firstBatch?->id,
+                    'batch_number' => $firstBatch?->batch_number ?? '--',
+                    'expiry' => $firstBatch?->expiry_date ? \Carbon\Carbon::parse($firstBatch->expiry_date)->format('m/y') : '--/--',
+                    'tax_rate' => (float)($details->tax?->rate ?? 0),
+                    'tax_name' => $details->tax?->name ?? '0%',
+                    'available' => $details->inventories->first()?->batches->sum('available_quantity') ?? 0,
+                ]);
+                $this->search = '';
                 return;
             }
 
@@ -53,110 +83,70 @@ class PosTerminal extends Component implements HasForms, HasActions
             $this->medicines = Medicine::where('is_active', true)
                 ->where(function ($q) {
                     $q->where('name', 'like', '%' . $this->search . '%')
-                      ->orWhere('barcode', 'like', '%' . $this->search . '%');
+                      ->orWhere('barcode', 'like', '%' . $this->search . '%')
+                      ->orWhere('sku', 'like', '%' . $this->search . '%');
                 })
-                ->with(['inventories' => function ($q) use ($branchId) {
-                    $q->where('branch_id', $branchId);
-                }])
+                ->when($branchId, function ($query) use ($branchId) {
+                    $query->with(['inventories' => function ($q) use ($branchId) {
+                        $q->where('branch_id', $branchId)->with(['batches' => function ($query) {
+                            $query->where('available_quantity', '>', 0)
+                                  ->orderBy('expiry_date', 'asc')
+                                  ->orderBy('created_at', 'asc');
+                        }]);
+                    }, 'tax']);
+                })
                 ->take(10)
                 ->get();
         } else {
             $this->medicines = [];
         }
     }
-    
-    public function addToCart($medicineId)
-    {
-        $medicine = Medicine::find($medicineId);
-        if (!$medicine) return;
-        
-        $branchId = activeBranch()->id ?? null;
-        if (!$branchId) {
-            Notification::make()
-                ->title(__('messages.select_branch_first'))
-                ->danger()
-                ->send();
-            return;
-        }
 
-        $availableStock = \App\Models\Inventory::forBranch($branchId)
-            ->where('medicine_id', $medicineId)
-            ->first()?->quantity ?? 0;
-            
-        $index = collect($this->cart)->search(fn($item) => $item['medicine_id'] === $medicineId);
-        $currentCartQty = $index !== false ? $this->cart[$index]['quantity'] : 0;
-        
-        if ($currentCartQty + 1 > $availableStock) {
-            Notification::make()
-                ->title(__('messages.not_enough_stock', ['available' => $availableStock]))
-                ->danger()
-                ->send();
-            return;
+    public function handleEnter()
+    {
+        if (count($this->medicines) === 1) {
+            $details = $this->medicines->first();
+            $firstBatch = $details->inventories->first()?->batches->first();
+            $this->dispatch('exact-match-found', payload: [
+                'id' => $details->id,
+                'name' => $details->name,
+                'price' => (float)$details->sale_price,
+                'batch_id' => $firstBatch?->id,
+                'batch_number' => $firstBatch?->batch_number ?? '--',
+                'expiry' => $firstBatch?->expiry_date ? \Carbon\Carbon::parse($firstBatch->expiry_date)->format('m/y') : '--/--',
+                'tax_rate' => (float)($details->tax?->rate ?? 0),
+                'tax_name' => $details->tax?->name ?? '0%',
+                'available' => $details->inventories->first()?->batches->sum('available_quantity') ?? 0,
+            ]);
+            $this->search = '';
         }
-
-        if ($index !== false) {
-            $this->cart[$index]['quantity']++;
-        } else {
-            $this->cart[] = [
-                'medicine_id' => $medicine->id,
-                'name' => $medicine->name,
-                'unit_price' => $medicine->sale_price,
-                'quantity' => 1,
-            ];
-        }
-        
-        $this->search = '';
-        $this->medicines = [];
     }
     
-    public function updateQuantity($index, $quantity)
+    public function getMedicineDetails($medicineId)
     {
-        if ($quantity < 1) {
-            unset($this->cart[$index]);
-            $this->cart = array_values($this->cart);
-            return;
-        } 
-        
-        $medicineId = $this->cart[$index]['medicine_id'];
         $branchId = activeBranch()->id ?? null;
+        return Medicine::with(['inventories' => function ($q) use ($branchId) {
+            $q->where('branch_id', $branchId)->with(['batches' => function ($query) {
+                $query->where('available_quantity', '>', 0)
+                      ->orderBy('expiry_date', 'asc')
+                      ->orderBy('created_at', 'asc');
+            }]);
+        }, 'tax'])->find($medicineId);
+    }
+
+    public function processCheckout(SaleService $saleService, $checkoutData, $print = true)
+    {
+        $cartItems = $checkoutData['cart'] ?? [];
+        $discount = (float)($checkoutData['discount'] ?? 0);
+        $paymentMethod = $checkoutData['paymentMethod'] ?? 'cash';
+        $paymentReference = $checkoutData['paymentReference'] ?? '';
+        $applyRoundOff = $checkoutData['applyRoundOff'] ?? true;
+        $notes = $checkoutData['notes'] ?? '';
         
-        $availableStock = \App\Models\Inventory::forBranch($branchId)
-            ->where('medicine_id', $medicineId)
-            ->first()?->quantity ?? 0;
-            
-        if ($quantity > $availableStock) {
-            Notification::make()
-                ->title(__('messages.not_enough_stock', ['available' => $availableStock]))
-                ->danger()
-                ->send();
+        if (empty($cartItems)) {
+            $this->addError('cart', 'Cart is empty.');
             return;
         }
-        
-        $this->cart[$index]['quantity'] = $quantity;
-    }
-    
-    public function removeFromCart($index)
-    {
-        unset($this->cart[$index]);
-        $this->cart = array_values($this->cart);
-    }
-    
-    public function getSubTotalProperty()
-    {
-        return collect($this->cart)->sum(fn($item) => $item['unit_price'] * $item['quantity']);
-    }
-    
-    public function getTotalProperty()
-    {
-        return max(0, $this->subTotal - $this->discount);
-    }
-    
-    public function checkout(SaleService $saleService)
-    {
-        $this->validate([
-            'cart' => 'required|array|min:1',
-            'discount' => 'numeric|min:0',
-        ]);
         
         $branchId = activeBranch()->id ?? null;
         if (!$branchId) {
@@ -169,16 +159,22 @@ class PosTerminal extends Component implements HasForms, HasActions
                 branchId: $branchId,
                 userId: auth()->id(),
                 customerId: empty($this->customerId) ? null : $this->customerId,
-                cartItems: $this->cart,
-                discount: (float)$this->discount,
-                paymentMethod: $this->paymentMethod,
+                cartItems: $cartItems,
+                discount: $discount,
+                paymentMethod: $paymentMethod,
                 paymentStatus: 'paid',
-                paymentReference: $this->paymentReference,
-                notes: null
+                paymentReference: $paymentReference,
+                applyRoundOff: $applyRoundOff,
+                notes: $notes
             );
             
-            $this->reset(['cart', 'discount', 'customerId', 'paymentMethod', 'paymentReference', 'showCheckoutModal']);
-            $this->dispatch('sale-completed', saleId: $sale->id);
+            $this->lastSaleId = $sale->id;
+            
+            $this->dispatch('checkout-successful');
+            
+            if ($print) {
+                $this->dispatch('sale-completed', saleId: $sale->id);
+            }
             
             Notification::make()
                 ->title(__('messages.sale_completed'))
@@ -187,6 +183,85 @@ class PosTerminal extends Component implements HasForms, HasActions
             
         } catch (\Exception $e) {
             $this->addError('checkout', $e->getMessage());
+        }
+    }
+
+    public function printLastInvoice($checkoutData = null)
+    {
+        $cartItems = $checkoutData['cart'] ?? [];
+        
+        if (!empty($cartItems)) {
+            $discount = (float)($checkoutData['discount'] ?? 0);
+            $applyRoundOff = $checkoutData['applyRoundOff'] ?? true;
+            
+            $subTotal = collect($cartItems)->sum(fn($item) => $item['unit_price'] * (int)($item['quantity'] ?? 0));
+            $taxAmount = collect($cartItems)->sum(function ($item) {
+                $taxRate = $item['tax_rate'] ?? 0;
+                if ($taxRate <= 0) return 0;
+                $itemTotal = $item['unit_price'] * (int)($item['quantity'] ?? 0);
+                return $itemTotal * ($taxRate / 100);
+            });
+            
+            $rawTotal = ($subTotal + $taxAmount) - $discount;
+            $roundOffAmount = $applyRoundOff ? round($rawTotal) - $rawTotal : 0;
+            $total = $applyRoundOff ? max(0, round($rawTotal)) : max(0, $rawTotal);
+
+            $sale = new \App\Models\Sale([
+                'invoice_number' => 'ESTIMATE',
+                'created_at' => now(),
+                'sub_total' => $subTotal,
+                'tax_amount' => $taxAmount,
+                'discount' => $discount,
+                'round_off' => $roundOffAmount,
+                'total_amount' => $total,
+            ]);
+            $sale->setRelation('branch', activeBranch());
+            $sale->setRelation('user', auth()->user());
+            $sale->setRelation('customer', $this->customerId ? \App\Models\Customer::find($this->customerId) : null);
+
+            $items = collect($cartItems)->map(function($item) {
+                $saleItem = new \App\Models\SaleItem([
+                    'quantity' => $item['quantity'],
+                    'unit_price' => $item['unit_price'],
+                    'total_amount' => ($item['unit_price'] * $item['quantity']) + (($item['unit_price'] * $item['quantity']) * (($item['tax_rate'] ?? 0) / 100)),
+                ]);
+                $medicine = new \App\Models\Medicine(['name' => $item['name']]);
+                $saleItem->setRelation('medicine', $medicine);
+                return $saleItem;
+            });
+            $sale->setRelation('items', $items);
+
+            $html = view('sales.receipt', [
+                'sale' => $sale,
+                'isEstimate' => true,
+            ])->render();
+            
+            $this->dispatch('print-estimate', html: $html);
+            return;
+        }
+
+        $saleIdToPrint = $this->lastSaleId;
+
+        if (!$saleIdToPrint) {
+            $branchId = activeBranch()->id ?? null;
+            $latestSale = \App\Models\Sale::where('branch_id', $branchId)
+                ->where('user_id', auth()->id())
+                ->latest('id')
+                ->first();
+                
+            if ($latestSale) {
+                $saleIdToPrint = $latestSale->id;
+                $this->lastSaleId = $saleIdToPrint;
+            }
+        }
+
+        if ($saleIdToPrint) {
+            $this->dispatch('sale-completed', saleId: $saleIdToPrint);
+        } else {
+            Notification::make()
+                ->title('No recent sale found to print.')
+                ->warning()
+                ->send();
         }
     }
 
@@ -207,6 +282,8 @@ class PosTerminal extends Component implements HasForms, HasActions
                 
                 $this->customerId = $customer->id;
                 $this->selectedCustomerName = $customer->name . ' (' . $customer->phone . ')';
+                
+                $this->dispatch('customer-selected', id: $customer->id, name: $this->selectedCustomerName);
                 
                 Notification::make()
                     ->title(__('messages.customer_created') ?? 'Customer created successfully.')
@@ -233,16 +310,23 @@ class PosTerminal extends Component implements HasForms, HasActions
         $this->selectedCustomerName = $name . ' (' . $phone . ')';
         $this->customerSearch = '';
         $this->customerSearchResults = [];
+        $this->dispatch('customer-selected', id: $id, name: $this->selectedCustomerName);
     }
 
     public function clearCustomer()
     {
         $this->customerId = null;
         $this->selectedCustomerName = '';
+        $this->dispatch('customer-cleared');
     }
 
     public function render()
     {
         return view('livewire.sales.pos-terminal');
+    }
+
+    public function toJSON()
+    {
+        return [];
     }
 }

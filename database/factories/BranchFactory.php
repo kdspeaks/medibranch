@@ -15,6 +15,7 @@ class BranchFactory extends Factory
             'name' => 'Sanjibani Branch',
             'code' => strtoupper($this->faker->unique()->lexify('???-??')),
             'address' => $this->faker->address,
+            'gst_number' => 'GST' . $this->faker->numerify('##########'),
             'phone' => $this->faker->optional()->phoneNumber,
             'email' => $this->faker->optional()->safeEmail(),
             'is_active' => true, // 90% active
