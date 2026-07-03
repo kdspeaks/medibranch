@@ -21,48 +21,15 @@ class SaleList extends Component implements HasForms, HasTable, HasActions
     use InteractsWithTable;
     use InteractsWithForms;
     use InteractsWithActions;
+    use \App\Livewire\Pages\Sales\Concerns\HasSaleTable;
 
     public function table(Table $table): Table
     {
         return $table
             ->query(Sale::query()->with(['customer', 'branch', 'user'])->latest())
-            ->columns([
-                TextColumn::make('invoice_number')->label(__('messages.invoice_no'))->searchable()->sortable(),
-                TextColumn::make('sale_date')->label(__('messages.date'))->dateTime()->sortable(),
-                TextColumn::make('branch.name')->label(__('messages.branch'))->sortable()->toggleable(),
-                TextColumn::make('customer.name')->label(__('messages.customers'))->searchable()->sortable()
-                    ->formatStateUsing(fn ($state) => $state ?? __('messages.walk_in')),
-                TextColumn::make('total_amount')->label(__('messages.total_amount'))->money('BDT', divideBy: 0)->sortable(),
-                TextColumn::make('payment_method')->label(__('messages.payment_method'))->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        'cash' => 'success',
-                        'card' => 'info',
-                        'upi' => 'warning',
-                        default => 'gray',
-                    })->formatStateUsing(fn ($state) => strtoupper($state)),
-                TextColumn::make('payment_status')->label(__('messages.payment_status'))->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        'paid' => 'success',
-                        'partial' => 'warning',
-                        'unpaid' => 'danger',
-                        default => 'gray',
-                    }),
-            ])
-            ->filters([
-                SelectFilter::make('branch_id')
-                    ->label(__('messages.branch'))
-                    ->relationship('branch', 'name'),
-                SelectFilter::make('payment_method')
-                    ->label(__('messages.payment_method'))
-                    ->options([
-                        'cash' => __('messages.cash'),
-                        'card' => __('messages.card'),
-                        'upi' => __('messages.upi'),
-                    ]),
-            ])
-            ->actions([
-                //
-            ])
+            ->columns($this->getSaleTableColumns())
+            ->filters($this->getSaleTableFilters())
+            ->actions($this->getSaleTableActions())
             ->bulkActions([
                 //
             ]);

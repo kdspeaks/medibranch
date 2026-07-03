@@ -170,6 +170,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/{sale}/receipt', [\App\Http\Controllers\SaleController::class, 'receipt'])
             ->middleware('can:manage-sales')
             ->name('sales.receipt');
+        Route::get('/view/{sale}', \App\Livewire\Pages\Sales\SaleView::class)
+            ->middleware('can:manage-sales')
+            ->name('sales.view');
     });
 
     // 💊 Medicines

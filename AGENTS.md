@@ -2,96 +2,250 @@
 
 ## What This App Is
 - Laravel 11 application for a homeopathy medicine shop.
-- Current implemented domains: medicines, manufacturers, suppliers, branches, purchases, inventory, roles/permissions, users, and site settings.
-- UI stack: Livewire 3 pages, Filament form/schema components, PowerGrid tables, Blade layouts/components, Tailwind/Vite.
+- Implemented domains: medicines, manufacturers, suppliers, medicine forms/units, taxes, branches, purchases, inventory, customers, sales/POS, roles/permissions, users, and site settings.
+- UI stack: Livewire 3 page classes, Filament 4 tables/forms/actions, Blade layouts/components, Tailwind v4/Vite.
+- **No PowerGrid** — all data tables are built with Filament `Table` + `InteractsWithTable` directly in Livewire page classes (PowerGrid is listed in composer but not actively used).
+
+## Package Versions (Key)
+- `filament/tables` ~4.0 (NOT Filament Panel — just the standalone table/form/actions packages)
+- `livewire/livewire` ^3.4
+- `livewire/volt` ^1.0
+- `spatie/laravel-permission` ^6.18
+- `maatwebsite/excel` ^3.1 (used for medicine import via `App\Imports\MedicinesImport`)
+- `blade-ui-kit/blade-icons` (heroicons used throughout)
+- `symfony/intl` ^7.3
+
+## Directory Structure
+```
+app/
+  Console/           # Artisan commands
+  DTOs/              # Data Transfer Objects (PurchaseData, PurchaseItemData, MedicineData)
+  Exceptions/        # Exception handlers
+  Forms/
+    Schemas/         # Filament form schema classes (MedicineFormSchema, PurchaseFormSchema)
+  Http/
+    Controllers/     # Only SaleController (receipt printing) — most logic is in Livewire
+    Middleware/
+    Kernel.php
+  Imports/           # MedicinesImport (Maatwebsite Excel)
+  Livewire/
+    Actions/         # Livewire standalone actions (Logout, modal Delete/ChangeRole/CreatePermission)
+    Components/
+      Ui/
+        Modal/       # Base, Delete, ChangeRole, CreatePermission modal components
+    Pages/           # All page-level Livewire components
+      Branches/      # BranchList
+      Customers/     # CustomerList, CustomerView
+      Manufacturers/ # (within Medicines pages)
+      Medicines/
+        Components/  # Medicine sub-components
+        Concerns/    # HasMedicineForm
+        ManufacturerList, MedicineCreate, MedicineEdit, MedicineFormList,
+        MedicineList, MedicineSearch, MedicineView, TaxList
+      Purchase/
+        Concerns/    # HasPurchaseForm
+        PurchaseCreate, PurchaseEdit, PurchaseList, PurchaseView
+      Roles/         # RoleList, PermissionList, RoleTable
+      Sales/
+        Concerns/    # HasSaleTable (shared sale table columns/filters/actions trait)
+        PosTerminal, SaleList, SaleView
+      Settings/      # SiteSettings
+      Supplier/      # SupplierList
+      Users/         # UserList
+      Dashboard.php
+    Forms/           # (currently empty schemas subdir — use app/Forms/Schemas instead)
+  Models/            # All Eloquent models
+  Policies/          # InventoryPolicy, MedicinePolicy, PurchasePolicy
+  PowerGridThemes/   # Kept for compat but not actively used
+  Services/          # Business logic services
+  Tables/
+    Schemas/         # PowerGrid-style table schema classes (MedicineTableSchema, PurchaseTableSchema)
+  View/              # View composers/components
+  helpers.php        # Global helpers: activeBranch(), setting(), currency()
+
+resources/
+  lang/
+    en/messages.php  # English translations
+    bn/messages.php  # Bengali translations
+  views/
+    components/
+      ui/            # sidebar, sidebar-link, sidebar-dropdown, sidebar-subitem,
+                     # button, input, checkbox, theme-toggle, language-switch
+      forms/         # shared form partials
+      datatable/     # datatable partials
+      base-modal, modal, dropdown, nav-link, etc.
+    layouts/         # app.blade.php layout
+    livewire/
+      pages/         # mirrors app/Livewire/Pages structure
+      customers/     # customer-list, customer-view
+      sales/         # pos-terminal, sale-list, sale-view, drafts-modal
+      components/    # shared Livewire component views
+    pages/           # static pages (profile, etc.)
+    sales/           # sale receipt view (used by SaleController)
+    vendor/          # published vendor views (do not edit unless intentional)
+
+database/
+  factories/         # BranchFactory, MedicineFactory, UserFactory
+  migrations/
+  seeders/
+```
 
 ## Core Architecture
-- Keep page-level orchestration in Livewire page classes and shared form concerns.
-- Keep business logic in services:
-  - `App\Services\PurchaseService` owns purchase create/update/receive flow.
-  - `App\Services\InventoryService` owns stock-in and stock-out flow.
-  - `App\Services\PricingService` owns totals/tax rounding logic.
-- Models should stay thin and relationship-focused. The static wrappers on `Inventory` are compatibility helpers, not the preferred place for new logic.
+- **Page-level orchestration** lives in Livewire page classes under `app/Livewire/Pages/`.
+- **Shared table columns/actions** extracted to Concerns traits (e.g. `HasSaleTable` shared between `SaleList` and `CustomerView`).
+- **Form schemas** centralized in `app/Forms/Schemas/` (`MedicineFormSchema`, `PurchaseFormSchema`) and referenced from page classes.
+- **Business logic** belongs in services — never in controllers or Livewire components directly:
+  - `App\Services\PurchaseService` — purchase create/update/receive flow.
+  - `App\Services\InventoryService` — stock-in and stock-out flow.
+  - `App\Services\SaleService` — checkout, invoice generation, stock deduction orchestration.
+  - `App\Services\MedicineService` — medicine search/lookup helpers.
+  - `App\Services\PricingService` — totals/tax rounding logic.
+- **DTOs** in `app/DTOs/` (PurchaseData, PurchaseItemData, MedicineData) are used to pass structured data into services.
+- Models stay thin and relationship-focused.
 
-## Current Domain Model
-- `Medicine`: product master, uses `sale_price` not `selling_price`.
-- `Purchase`: purchase header for a branch and supplier.
-- `PurchaseItem`: purchase line, stores batch details and `inventory_batch_id` after receipt.
-- `Inventory`: branch + medicine aggregate.
-- `InventoryBatch`: real stock units with quantity, available quantity, pricing, batch number, manufacturing and expiry dates.
-- `InventoryLog`: movement history tied to `inventory_batch_id`, with polymorphic `source`.
-- `Branch` and `User`: linked through `branch_user` pivot for branch access.
+## Domain Model
+| Model | Key Notes |
+|---|---|
+| `Medicine` | `sale_price` (not `selling_price`), `purchase_price`, `margin`, `tax_id`, `is_tax_inclusive`, uses `SoftDeletes` |
+| `Tax` | `rate`, `is_active`, uses `SoftDeletes` |
+| `MedicineForm` | form type (tablet, liquid, etc.) |
+| `MedicineUnit` | unit of measure (mg, ml, etc.) |
+| `Manufacturer` | medicine manufacturer |
+| `Supplier` | medicine supplier |
+| `Purchase` | header for branch + supplier, statuses: `draft` / `received` |
+| `PurchaseItem` | line item, stores `inventory_batch_id` after receipt, `mfg_date`, `expiry_date` |
+| `Inventory` | branch + medicine aggregate (total quantity) |
+| `InventoryBatch` | real batch units: `quantity`, `available_quantity`, `batch_number`, `mfg_date`, `expiry_date` |
+| `InventoryLog` | stock movement history, `type` = `in`/`out`, polymorphic `source` |
+| `Branch` | branch with `code`, `gst_number`; linked to `User` via `branch_user` pivot |
+| `User` | Spatie roles/permissions, `branches()` relationship |
+| `Customer` | `name`, `phone`, `email`, `address`; has `sales()` |
+| `Sale` | invoice, `invoice_number` format: `INV-{BRANCH_CODE}-{ID}`, `payment_method`, `payment_status`, `round_off` |
+| `SaleItem` | sale line: `medicine_id`, `inventory_batch_id`, `unit_price`, `tax_amount`, `sub_total`, `total_amount` |
+| `Setting` | key-value site settings (cached via `setting()` helper) |
+| `PosDraft` | POS draft save (migration exists, model stub is empty — not yet implemented) |
+
+## Sales / POS Domain
+- **POS Terminal** (`App\Livewire\Pages\Sales\PosTerminal`) is the main checkout UI.
+  - Cart state is managed entirely server-side in the Livewire component.
+  - Barcode/SKU exact match triggers `exact-match-found` browser event.
+  - Checkout delegates to `SaleService::checkout()`.
+  - Invoice number format: `INV-{BRANCH_CODE}-{SALE_ID}`.
+- **SaleService::checkout()** wraps the entire checkout in a DB transaction:
+  1. Creates the `Sale` with a temporary invoice number.
+  2. Calls `InventoryService::stockOut()` per cart item.
+  3. Creates `SaleItem` rows.
+  4. Re-links `InventoryLog` entries from `Sale` → `SaleItem` source for precision.
+  5. Updates totals and final invoice number.
+- **PosDraft**: migration and model stub exist but the model class is empty — do not assume it has any relationships or behaviour until implemented.
+- **SaleController** only handles receipt printing (`GET /sales/{sale}/receipt` → `sales.receipt` view).
+
+## Customer Domain
+- `CustomerList` — Filament table with create/edit/delete actions inline.
+- `CustomerView` — Customer profile page showing stats + sale history table (uses `HasSaleTable` concern).
+- Customer uniqueness is enforced on `phone`.
 
 ## Stock Flow Rules
-- Creating a purchase in `draft` does not add stock.
-- A purchase only adds stock when status is `received`.
-- Receiving a purchase creates or updates:
-  - one `inventories` row per branch + medicine
-  - one `inventory_batches` row per batch (or increments an existing matching batch)
-  - one `inventory_logs` row of type `in`
-  - `purchase_items.inventory_batch_id`
-- Stock-out is batch-based and defaults to FIFO by earliest expiry, then oldest batch creation time.
-- If a preferred batch ID is supplied, it is prioritized for deduction.
-- Received purchases are intentionally protected from unsafe edits after stock has been added.
+- Draft purchase → no stock change.
+- `received` purchase → creates/updates `inventories`, `inventory_batches`, `inventory_logs` (type `in`), and links `purchase_items.inventory_batch_id`.
+- Stock-out: FIFO by earliest `expiry_date`, then oldest `created_at`. If `preferredBatchId` is supplied it is prioritized.
+- Received purchases are protected from unsafe edits.
 
-## Branch Rules
-- Branch access is user-aware now.
-- `activeBranch()` is still used as a fallback/global branch helper, mainly for defaults.
-- Non-super-admin users should only see data for assigned active branches.
-- When adding any purchase or inventory query, make it branch-aware from the start.
+## Branch & Auth Rules
+- `activeBranch()` helper: returns first active branch for non-super-admin users, or the configured site branch for super admins.
+- `currency()` helper: returns the configured currency symbol (default `₹`).
+- `setting($key, $default)` helper: cached key-value store via `Setting` model.
+- Non-super-admin users only see data scoped to their active assigned branches.
+- Always make new purchase/inventory/sale queries branch-aware.
 
 ## Permission Rules
-- Permission names use hyphenated slugs only, for example:
-  - `manage-medicines`
-  - `manage-purchases`
-  - `manage-suppliers`
-- Do not introduce space-separated permission names.
+- Permission slugs are **hyphenated only**: `manage-medicines`, `manage-purchases`, `manage-sales`, `manage-pos`, `manage-customers`, `manage-suppliers`, `manage-manufacturers`, `manage-branches`, `manage-users`, `manage-roles-permission`, `manage-settings`.
+- Do not use space-separated permission names.
+- Policies: `MedicinePolicy`, `PurchasePolicy`, `InventoryPolicy` exist — check them before adding gate logic.
+
+## Filament Usage (Standalone, NOT Panel)
+- This project uses **Filament standalone packages** (`filament/tables`, `filament/forms`, `filament/actions`, `filament/notifications`) — there is no Filament Panel/Admin.
+- **CRITICAL — Actions Namespace**: Always use `Filament\Actions\Action`, `Filament\Actions\EditAction`, `Filament\Actions\DeleteAction`, `Filament\Actions\CreateAction`. **Never** use `Filament\Tables\Actions\Action` — it will cause a `Class not found` error.
+- Livewire page components that use Filament tables implement `HasForms`, `HasTable`, `HasActions` interfaces and use the corresponding `InteractsWith*` traits.
+- Table columns, filters, and actions from `Filament\Tables\Columns\*`, `Filament\Tables\Filters\*` are fine; only the top-level `Action` class must come from `Filament\Actions`.
+- Filament `Notification::make()->title(...)->success()->send()` is used for flash notifications.
 
 ## UI Conventions
-- Routes are defined in `routes/web.php` and mostly map directly to Livewire page classes.
-- Medicine and purchase forms are centralized in:
-  - `app/Livewire/Pages/Medicines/Concerns/HasMedicineForm.php`
-  - `app/Livewire/Pages/Purchase/Concerns/HasPurchaseForm.php`
-- Reuse existing Filament components and patterns before inventing new UI structure.
-- Sidebar active-state handling for parameterized routes was fixed via route URI matching; be careful not to regress it.
-- **Localization Requirement**: Any page, component, or menu created going forward MUST support Bengali localization. Do not use hardcoded strings; always use `__('messages.key')` and add the corresponding keys to both `resources/lang/en/messages.php` and `resources/lang/bn/messages.php`.
+- Layout: `#[Layout('layouts.app')]` attribute on all page components.
+- Sidebar: `resources/views/components/ui/sidebar.blade.php` (active-state via route URI matching).
+- UI components in `resources/views/components/ui/`: `button`, `input`, `checkbox`, `theme-toggle`, `language-switch`, `sidebar-link`, `sidebar-dropdown`, `sidebar-subitem`.
+- **Localization (MANDATORY)**: Every page, component, and menu item MUST use `__('messages.key')`. Add keys to BOTH `resources/lang/en/messages.php` AND `resources/lang/bn/messages.php`. Never hardcode display strings.
+- Dark mode is supported — new views must include `dark:` variants matching existing patterns.
+- All routes use named routes; prefer `route('name', $model)` over manual URL construction.
 
-## Known Legacy / Cleanup Areas
-- Root `README.md` is still default Laravel boilerplate and does not describe this app.
-- `resources/views/components/ui/sidebar.blade bak.php` is an old backup file.
-- `resources/views/livewire/components/old/*` contains legacy view fragments.
-- `routes/web.php` still contains a large commented-out older route block and some mojibake comments.
-- Vendor-published PowerGrid views exist under `resources/views/vendor/livewire-powergrid`; edit only when intentionally customizing PowerGrid output.
+## Routes (Current Active Routes)
+```
+/                       → redirect to login
+/dashboard              → Dashboard
+/profile                → profile (view)
+/users                  → UserList
+/roles                  → RoleList
+/permissions            → PermissionList
+/settings/site          → SiteSettings [can:manage-settings]
+/branches               → BranchList [can:manage-branches]
+/customers              → CustomerList [can:manage-customers]
+/customers/view/{customer} → CustomerView [can:manage-customers]
+/pos                    → PosTerminal [can:manage-pos]
+/sales                  → SaleList [can:manage-sales]
+/sales/{sale}/receipt   → SaleController@receipt [can:manage-sales]
+/sales/view/{sale}      → SaleView [can:manage-sales]
+/medicines/list         → MedicineList [can:manage-medicines]
+/medicines/create       → MedicineCreate [can:manage-medicines]
+/medicines/edit/{m}     → MedicineEdit [can:manage-medicines]
+/medicines/view/{m}     → MedicineView [can:manage-medicines]
+/medicines/manufacturers → ManufacturerList [can:manage-manufacturers]
+/medicines/forms        → MedicineFormList [can:manage-settings]
+/medicines/taxes        → TaxList [can:manage-settings]
+/medicines/suppliers    → SupplierList [can:manage-suppliers]
+/medicines/purchases/list   → PurchaseList [can:manage-purchases]
+/medicines/purchases/create → PurchaseCreate [can:manage-purchases]
+/medicines/purchases/view/{p} → PurchaseView [can:manage-purchases]
+/medicines/purchases/edit/{p} → PurchaseEdit [can:manage-purchases]
+/lang/{locale}          → session locale switch
+```
 
 ## Data / Validation Conventions
-- Prefer model casts for dates, decimals, booleans, and statuses.
-- Money/tax calculations should go through `PricingService` instead of ad hoc arithmetic.
-- Preserve uniqueness around `barcode` and `sku`.
-- Keep purchase item dates mapped correctly:
-  - `mfg_date`
-  - `expiry_date`
+- Prefer model `casts()` method for dates, decimals, booleans (most models already do this).
+- Money/tax calculations go through `PricingService`.
+- Uniqueness: `barcode` and `sku` on medicines; `phone` on customers.
+- Purchase item dates: `mfg_date`, `expiry_date` (not `manufacture_date` or `manufactured_at`).
+
+## Existing Factories
+- `BranchFactory`, `MedicineFactory`, `UserFactory` exist.
+- **No factory** for: Customer, Sale, Purchase, Inventory, Tax — create manually in tests or add factories as needed.
 
 ## Testing Expectations
-- Feature coverage already exists around:
-  - purchase receiving
-  - inventory batch/log linking
-  - FIFO deduction
-  - branch restriction
-  - medicine view stock/history rendering
-- Run at least:
-  - `php artisan test`
-- For changes touching purchases, inventory, medicine view, permissions, or branch access, add or update focused feature tests.
+- Test framework: **PHPUnit** (not Pest). Use `php artisan make:test --phpunit {name}`.
+- Existing feature tests: `FoundationCleanupTest`, `SaleCheckoutTest`, `MedicineViewTest`, `ProfileTest`, `Auth/*`.
+- Coverage exists for: purchase receiving, batch/log linking, FIFO deduction, branch restriction, medicine view, sale checkout.
+- For any change touching purchases, inventory, sales/POS, medicine view, permissions, or branch access: add or update a focused feature test.
+- Run only the minimal set: `php artisan test tests/Feature/SomethingTest.php` or `--filter=testName`.
 
 ## How To Extend Safely
-- New invoicing work should consume inventory through the service layer, not direct batch mutation in controllers/components.
-- Future customer support should plug into the existing branch-aware and batch-aware flow.
-- For multi-branch evolution, prefer expanding the `branch_user` and scoped-query pattern rather than adding more global branch state.
+- New features consuming stock must go through `InventoryService::stockOut()` — never mutate batches directly.
+- New customer-facing flows should reuse `HasSaleTable` concern for consistent sale table rendering.
+- New Filament table pages follow the `HasForms + HasTable + HasActions` + `InteractsWith*` pattern.
+- New permissions must be registered in the seeder/permission tables and use hyphenated slugs.
+- For multi-branch expansion, extend the `branch_user` pivot + scoped-query pattern; avoid adding global branch state.
+
+## Known Legacy / Cleanup Areas
+- `resources/views/components/ui/sidebar.blade bak.php` — old backup, do not edit.
+- `routes/web.php` — contains a large commented-out legacy route block (lines ~29–102); do not uncomment or duplicate.
+- `app/PowerGridThemes/` — exists but PowerGrid is not actively used in new code.
+- `app/Tables/Schemas/` — `MedicineTableSchema`, `PurchaseTableSchema` exist but are not the primary table pattern (Filament tables are used instead).
+- `app/Models/PosDraft.php` — empty stub; migration `create_pos_drafts_table` exists. Implement before using.
+- `scratch.php` and `rewrite_pos.py` in project root — scratch/utility files, not part of the app.
 
 ## Practical Editing Guidance
-- Prefer editing app code under `app/`, `resources/views/livewire/`, `resources/views/components/ui/`, `routes/`, `database/`, and `tests/`.
-- Avoid touching `vendor/` and `node_modules/`.
-- Be cautious with files that look like backups or obsolete copies unless the task is explicit cleanup.
-- **Filament Actions Namespace**: When adding table actions or page actions (like `Action::make('view')` or `EditAction::make()`), ALWAYS use `Filament\Actions\Action` or `Filament\Actions\EditAction`. Do NOT use `Filament\Tables\Actions\Action` as it will cause a `Class not found` error in this project's setup.
+- Primary edit paths: `app/`, `resources/views/livewire/`, `resources/views/components/ui/`, `resources/lang/`, `routes/`, `database/`, `tests/`.
+- Avoid: `vendor/`, `node_modules/`, files with `.bak.` in the name.
+- After PHP changes run: `vendor/bin/pint --dirty`.
+- After Blade/CSS changes the user may need to run `npm run dev` or `npm run build`.
 
 ===
 

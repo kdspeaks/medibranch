@@ -33,40 +33,15 @@ class CustomerView extends Component implements HasForms, HasTable, HasActions
         $this->customer = $customer;
     }
 
+    use \App\Livewire\Pages\Sales\Concerns\HasSaleTable;
+
     public function table(Table $table): Table
     {
         return $table
             ->query(Sale::where('customer_id', $this->customer->id)->latest('id'))
-            ->columns([
-                TextColumn::make('invoice_number')->label(__('messages.invoice_no') ?? 'Invoice No')->searchable(),
-                TextColumn::make('branch.name')->label(__('messages.branch') ?? 'Branch')->sortable(),
-                TextColumn::make('created_at')->label(__('messages.date') ?? 'Date')->dateTime()->sortable(),
-                TextColumn::make('total_amount')->label(__('messages.total') ?? 'Total')->money('inr')->sortable(),
-                TextColumn::make('payment_status')
-                    ->label('Payment')
-                    ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        'paid' => 'success',
-                        'partial' => 'warning',
-                        'unpaid' => 'danger',
-                        default => 'secondary',
-                    }),
-                TextColumn::make('status')
-                    ->label('Status')
-                    ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        'completed' => 'success',
-                        'cancelled' => 'danger',
-                        default => 'secondary',
-                    }),
-            ])
-            ->actions([
-                Action::make('view_receipt')
-                    ->label('Receipt')
-                    ->icon('heroicon-o-document-text')
-                    ->url(fn (Sale $record): string => route('sales.receipt', $record))
-                    ->openUrlInNewTab(),
-            ])
+            ->columns($this->getSaleTableColumns())
+            ->filters($this->getSaleTableFilters())
+            ->actions($this->getSaleTableActions())
             ->paginated([10, 25, 50])
             ->defaultPaginationPageOption(10)
             ->striped();
