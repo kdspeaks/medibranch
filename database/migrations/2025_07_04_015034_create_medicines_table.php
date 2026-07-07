@@ -30,8 +30,8 @@ return new class extends Migration {
                 ->constrained('taxes')
                 ->nullOnDelete(); // optional: null if tax deleted
             $table->boolean('is_tax_inclusive')->default(true);
-            $table->decimal('margin', 10, 2)->default(0.00);
-            $table->decimal('sale_price', 10, 2)->default(0.00);
+            $table->decimal('discount_on_purchase', 10, 2)->default(0.00);
+            $table->decimal('mrp', 10, 2)->default(0.00);
             $table->decimal('discount_on_sale', 10, 2)->default(0.00);
 
 

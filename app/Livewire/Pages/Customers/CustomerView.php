@@ -50,7 +50,7 @@ class CustomerView extends Component implements HasForms, HasTable, HasActions
     public function render()
     {
         $totalPurchases = $this->customer->sales()->count();
-        $totalSpent = $this->customer->sales()->where('status', 'completed')->sum('total_amount');
+        $totalSpent = $this->customer->sales()->where('payment_status', 'paid')->sum('total_amount');
 
         return view('livewire.customers.customer-view', [
             'totalPurchases' => $totalPurchases,

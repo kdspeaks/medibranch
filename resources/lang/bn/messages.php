@@ -1,4 +1,5 @@
 <?php
+
 return [
     'login' => 'লগইন',
     'email' => 'ইমেইল',
@@ -116,6 +117,8 @@ return [
     'unit' => 'ইউনিট',
     'purchase_price' => 'ক্রয় মূল্য',
     'margin_percentage' => 'মার্জিন (%)',
+    'mrp' => 'এমআরপি (MRP)',
+    'discount_on_purchase' => 'ছাড় (%)',
     'tax' => 'ট্যাক্স',
     'tax_included' => 'ট্যাক্স অন্তর্ভুক্ত?',
     'sale_price' => 'বিক্রয় মূল্য',
@@ -133,14 +136,16 @@ return [
     'import_successful_body' => ':new টি নতুন ওষুধ আমদানি করা হয়েছে এবং :updated টি বিদ্যমান ওষুধ আপডেট করা হয়েছে।',
 
     // Purchases
-    'purchase_details' => 'ক্রয় বিবরণ',
+    'purchase_details' => 'ক্রয়ের বিবরণ',
     'branch' => 'শাখা',
     'supplier' => 'সরবরাহকারী',
     'reference_no' => 'রেফারেন্স নম্বর',
     'invoice_no' => 'ইনভয়েস নম্বর',
     'purchase_date' => 'ক্রয়ের তারিখ',
     'total_amount' => 'মোট পরিমাণ',
-    'status' => 'অবস্থা (Status)',
+    'total_mrp' => 'মোট এমআরপি (MRP)',
+    'total_discount' => 'মোট ছাড়',
+    'status' => 'অবস্থা',
     'draft' => 'খসড়া (Draft)',
     'received' => 'গৃহীত (Received)',
     'cancelled' => 'বাতিল (Cancelled)',
@@ -210,4 +215,9 @@ return [
     'search_customer' => 'নাম বা ফোন নম্বর খুঁজুন...',
     'customer_created' => 'গ্রাহক সফলভাবে তৈরি করা হয়েছে।',
     'walk_in' => 'ওয়াক-ইন গ্রাহক',
+    'drafts' => 'ড্রাফট',
+    'invoice_held' => 'ইনভয়েস সফলভাবে ধরে রাখা হয়েছে।',
+    'draft_loaded' => 'ড্রাফট লোড করা হয়েছে।',
+    'draft_deleted' => 'ড্রাফট মুছে ফেলা হয়েছে।',
+    'no_recent_sale' => 'প্রিন্ট করার জন্য কোনো সাম্প্রতিক বিক্রয় পাওয়া যায়নি।',
 ];

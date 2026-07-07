@@ -5,7 +5,7 @@
         </x-ui.button>
     </x-slot>
     <div class="my-5" {{-- x-data --}} {{-- x-on:ui:medicine-selected.window="
-            // $event.detail has: id, name, purchase_price, sale_price
+            // $event.detail has: id, name, purchase_price, mrp
             $wire.call('onMedicineSelectedFromJs', $event.detail.id)
         " --}}
         x-on:medicine-selected.window="

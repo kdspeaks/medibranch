@@ -113,6 +113,22 @@ class PurchaseFormSchema
                         ->dehydrated()
                         ->default(0.00),
 
+                    TextInput::make('total_mrp')
+                        ->label(__('messages.total_mrp'))
+                        ->prefix('₹')
+                        ->readOnly()
+                        ->numeric()
+                        ->dehydrated()
+                        ->default(0.00),
+
+                    TextInput::make('total_discount')
+                        ->label(__('messages.total_discount'))
+                        ->prefix('₹')
+                        ->readOnly()
+                        ->numeric()
+                        ->dehydrated()
+                        ->default(0.00),
+
                     Select::make('status')
                         ->label(__('messages.status'))
                         ->required()
@@ -142,21 +158,37 @@ class PurchaseFormSchema
                                 ->live(debounce: 500)
                                 ->afterStateUpdated(fn($state, $set, $get) => $livewire ? $livewire->setLinePrices($state, $set, $get) : null),
 
-                            TextInput::make('unit_purchase_price')
+                            TextInput::make('mrp')
                                 ->prefix('₹')
-                                ->label(__('messages.purchase_price'))
+                                ->label(__('messages.mrp'))
                                 ->numeric()
                                 ->required()
                                 ->minValue(0)
                                 ->live(debounce: 500)
-                                ->afterStateUpdated(fn($state, $set, $get) => $livewire ? $livewire->setLinePrices($state, $set, $get) : null),
+                                ->afterStateUpdated(function($state, $set, $get) use ($livewire) {
+                                    $mrp = (float) ($get('mrp') ?? 0);
+                                    $discount = (float) ($get('discount_on_purchase') ?? 0);
+                                    $purchase = $mrp - ($mrp * ($discount / 100));
+                                    $set('unit_purchase_price', round($purchase, 2));
+                                    if ($livewire) $livewire->setLinePrices($state, $set, $get);
+                                }),
 
-                            TextInput::make('margin')
-                                ->label(__('messages.margin_percentage'))
+                            TextInput::make('discount_on_purchase')
+                                ->label(__('messages.discount_on_purchase'))
                                 ->prefix('%')
                                 ->numeric()
                                 ->required()
-                                ->minValue(0),
+                                ->minValue(0)
+                                ->live(debounce: 500)
+                                ->afterStateUpdated(function($state, $set, $get) use ($livewire) {
+                                    $mrp = (float) ($get('mrp') ?? 0);
+                                    $discount = (float) ($get('discount_on_purchase') ?? 0);
+                                    $purchase = $mrp - ($mrp * ($discount / 100));
+                                    $set('unit_purchase_price', round($purchase, 2));
+                                    if ($livewire) $livewire->setLinePrices($state, $set, $get);
+                                }),
+
+                            Hidden::make('unit_purchase_price'),
 
                             TextInput::make('batch_number')
                                 ->label(__('messages.batch_no'))
@@ -211,15 +243,38 @@ class PurchaseFormSchema
                         ->deleteAction(fn(Action $action) => $action->requiresConfirmation())
                         ->afterStateUpdated(function ($state, $set) use ($livewire) {
                             if (!$livewire) return;
-                            $totalInCents = collect($state)->reduce(function ($carry, $item) use ($livewire) {
+                            $totalAmountInCents = 0;
+                            $totalMrpInCents = 0;
+                            $totalDiscountInCents = 0;
+
+                            foreach ($state as $item) {
                                 $quantity = isset($item['quantity']) ? (float) $item['quantity'] : 0.0;
                                 $unit_price = isset($item['unit_purchase_price']) ? (float) $item['unit_purchase_price'] : 0.0;
+                                $mrp = isset($item['mrp']) ? (float) $item['mrp'] : 0.0;
+                                $discount = isset($item['discount_on_purchase']) ? (float) $item['discount_on_purchase'] : 0.0;
                                 $tax_id = isset($item['tax_id']) ? (int) $item['tax_id'] : 0;
-                                if (!is_numeric($quantity) || !is_numeric($unit_price)) return $carry;
-                                $line = $livewire->computeLineWithTax((int)$quantity, (float)$unit_price, $tax_id)['line_total_amount'] ?? 0.0;
-                                return $carry + (int) round($line * 100);
-                            }, 0);
-                            $set('total_amount', round($totalInCents / 100, 2));
+                                
+                                if (!is_numeric($quantity)) continue;
+                                
+                                if (is_numeric($unit_price)) {
+                                    $line = $livewire->computeLineWithTax((int)$quantity, (float)$unit_price, $tax_id)['line_total_amount'] ?? 0.0;
+                                    $totalAmountInCents += (int) round($line * 100);
+                                }
+                                
+                                if (is_numeric($mrp)) {
+                                    $mrpLine = $quantity * $mrp;
+                                    $totalMrpInCents += (int) round($mrpLine * 100);
+                                    
+                                    if (is_numeric($discount)) {
+                                        $discountLine = $mrpLine * ($discount / 100);
+                                        $totalDiscountInCents += (int) round($discountLine * 100);
+                                    }
+                                }
+                            }
+                            
+                            $set('total_amount', round($totalAmountInCents / 100, 2));
+                            $set('total_mrp', round($totalMrpInCents / 100, 2));
+                            $set('total_discount', round($totalDiscountInCents / 100, 2));
                         }),
                 ]),
 

@@ -1,30 +1,28 @@
 <?php
 
-use App\Livewire\Pages\Purchase\PurchaseEdit;
-use App\Models\Tax;
-
-use App\Livewire\Pages\Dashboard;
-use Illuminate\Support\Facades\Route;
-use App\Livewire\Pages\Roles\RoleList;
-use App\Livewire\Pages\Users\UserList;
-use Illuminate\Support\Facades\Session;
-use App\Livewire\Pages\Medicines\TaxList;
 use App\Livewire\Pages\Branches\BranchList;
-use App\Livewire\Pages\Roles\PermissionList;
-use App\Livewire\Pages\Purchase\PurchaseList;
-use App\Livewire\Pages\Purchase\PurchaseView;
-use App\Livewire\Pages\Settings\SiteSettings;
-use App\Livewire\Pages\Supplier\SupplierList;
+use App\Livewire\Pages\Dashboard;
+use App\Livewire\Pages\Medicines\ManufacturerList;
+use App\Livewire\Pages\Medicines\MedicineCreate;
 use App\Livewire\Pages\Medicines\MedicineEdit;
 use App\Livewire\Pages\Medicines\MedicineList;
 use App\Livewire\Pages\Medicines\MedicineView;
+use App\Livewire\Pages\Medicines\TaxList;
 use App\Livewire\Pages\Purchase\PurchaseCreate;
-use App\Livewire\Pages\Medicines\MedicineCreate;
-use App\Livewire\Pages\Medicines\ManufacturerList;
+use App\Livewire\Pages\Purchase\PurchaseEdit;
+use App\Livewire\Pages\Purchase\PurchaseList;
+use App\Livewire\Pages\Purchase\PurchaseView;
+use App\Livewire\Pages\Roles\PermissionList;
+use App\Livewire\Pages\Roles\RoleList;
+use App\Livewire\Pages\Settings\SiteSettings;
+use App\Livewire\Pages\Supplier\SupplierList;
+use App\Livewire\Pages\Users\UserList;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Session;
 
-require __DIR__ . '/auth.php';
+require __DIR__.'/auth.php';
 
-Route::get('/', fn() => redirect()->route('login'));
+Route::get('/', fn () => redirect()->route('login'));
 
 // Route::middleware(['auth', 'verified'])->group(function () {
 
@@ -71,7 +69,6 @@ Route::get('/', fn() => redirect()->route('login'));
 //         ->middleware('can:manage-medicines')
 //         ->name('medicines.view');
 
-
 //     Route::get('/medicines/manufacturers', ManufacturerList::class)
 //         ->middleware('can:manage-medicines')
 //         ->name('medicines.manufacturers');
@@ -101,7 +98,6 @@ Route::get('/', fn() => redirect()->route('login'));
 //         ->name('medicines.purchases.edit');
 // });
 
-
 Route::middleware(['auth', 'verified'])->group(function () {
 
     // 🧭 Dashboard
@@ -116,20 +112,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // 👥 User Management
     Route::prefix('users')->group(function () {
         Route::get('/', UserList::class)
-            // ->middleware('can:manage-users')
+            ->middleware('can:manage-users')
             ->name('users');
     });
 
     // 🧩 Role & Permission Management
     Route::prefix('roles')->group(function () {
         Route::get('/', RoleList::class)
-            // ->middleware('can:manage-roles-permission')
+            ->middleware('can:manage-roles-permission')
             ->name('roles');
     });
 
     Route::prefix('permissions')->group(function () {
         Route::get('/', PermissionList::class)
-            // ->middleware('can:manage-roles-permission')
+            ->middleware('can:manage-roles-permission')
             ->name('permissions');
     });
 
@@ -152,7 +148,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/', \App\Livewire\Pages\Customers\CustomerList::class)
             ->middleware('can:manage-customers')
             ->name('customers');
-            
+
         Route::get('/view/{customer}', \App\Livewire\Pages\Customers\CustomerView::class)
             ->middleware('can:manage-customers')
             ->name('customers.view');
@@ -162,7 +158,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/pos', \App\Livewire\Pages\Sales\PosTerminal::class)
         ->middleware('can:manage-pos')
         ->name('pos');
-        
+
     Route::prefix('sales')->group(function () {
         Route::get('/', \App\Livewire\Pages\Sales\SaleList::class)
             ->middleware('can:manage-sales')
@@ -200,9 +196,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 });
 
-
-
 Route::get('/lang/{locale}', function ($locale) {
     Session::put('locale', $locale);
+
     return redirect()->back();
 });

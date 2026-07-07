@@ -31,9 +31,9 @@ class SyncMedicinePrices extends Command
         $this->info('Starting to sync medicine prices...');
 
         $medicines = Medicine::where('purchase_price', 0)
-            ->orWhere('sale_price', 0)
+            ->orWhere('mrp', 0)
             ->orWhereNull('purchase_price')
-            ->orWhereNull('sale_price')
+            ->orWhereNull('mrp')
             ->get();
 
         if ($medicines->isEmpty()) {
@@ -52,16 +52,16 @@ class SyncMedicinePrices extends Command
 
             if ($latestBatch && $latestBatch->unit_purchase_price > 0) {
                 $purchasePrice = (float) $latestBatch->unit_purchase_price;
-                $margin = (float) ($latestBatch->margin ?? 0);
-                $salePrice = $pricingService->salePriceFromMargin($purchasePrice, $margin);
+                $mrp = (float) ($latestBatch->mrp ?? 0);
+                $discountOnPurchase = (float) ($latestBatch->discount_on_purchase ?? 0);
 
                 $medicine->update([
                     'purchase_price' => $purchasePrice,
-                    'margin' => $margin,
-                    'sale_price' => $salePrice,
+                    'mrp' => $mrp,
+                    'discount_on_purchase' => $discountOnPurchase,
                 ]);
 
-                $this->line("Updated Medicine ID {$medicine->id} ({$medicine->name}): Purchase Price -> {$purchasePrice}, Sale Price -> {$salePrice}");
+                $this->line("Updated Medicine ID {$medicine->id} ({$medicine->name}): Purchase Price -> {$purchasePrice}, MRP -> {$mrp}");
                 $updatedCount++;
             } else {
                 $this->warn("No inventory batch with a valid price found for Medicine ID {$medicine->id} ({$medicine->name}).");

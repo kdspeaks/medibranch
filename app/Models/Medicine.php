@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
-use App\Models\Tax;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Medicine extends Model
 {
@@ -15,7 +17,7 @@ class Medicine extends Model
     protected $fillable = [
         'name',
         'barcode',
-        'sku', // Unique identifier for scanning
+        'sku',
         'manufacturer_id',
         'potency',
         'medicine_form_id',
@@ -24,8 +26,8 @@ class Medicine extends Model
         'purchase_price',
         'tax_id',
         'is_tax_inclusive',
-        'margin',
-        'sale_price',
+        'discount_on_purchase',
+        'mrp',
         'discount_on_sale',
         'description',
         'is_active',
@@ -33,54 +35,50 @@ class Medicine extends Model
         'last_updated_by',
     ];
 
-    protected $casts = [
-        'packing_quantity' => 'integer',
-        'purchase_price' => 'decimal:2',
-        'is_tax_inclusive' => 'boolean',
-        'margin' => 'decimal:2',
-        'sale_price' => 'decimal:2',
-        'discount_on_sale' => 'decimal:2',
-        'is_active' => 'boolean',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'packing_quantity'      => 'integer',
+            'purchase_price'        => 'decimal:2',
+            'is_tax_inclusive'      => 'boolean',
+            'discount_on_purchase'  => 'decimal:2',
+            'mrp'                   => 'decimal:2',
+            'discount_on_sale'      => 'decimal:2',
+            'is_active'             => 'boolean',
+        ];
+    }
 
-    public function scopeActive($query)
+    public function scopeActive($query): mixed
     {
         return $query->where('is_active', true);
     }
 
-    public function medicineForm()
+    public function medicineForm(): BelongsTo
     {
         return $this->belongsTo(MedicineForm::class);
     }
 
-    public function medicineUnit()
+    public function medicineUnit(): BelongsTo
     {
         return $this->belongsTo(MedicineUnit::class);
     }
-    protected $dates = ['deleted_at']; // Optional: This tells Laravel that `deleted_at` is a date field.
 
-    public function manufacturer()
+    public function manufacturer(): BelongsTo
     {
         return $this->belongsTo(Manufacturer::class);
     }
 
-    public function getPackingLabelAttribute(): string
-    {
-        $unitName = $this->medicineUnit ? $this->medicineUnit->name : '';
-        return "{$this->packing_quantity} {$unitName}";
-    }
-
-    public function tax()
+    public function tax(): BelongsTo
     {
         return $this->belongsTo(Tax::class);
     }
 
-    public function inventories()
+    public function inventories(): HasMany
     {
         return $this->hasMany(Inventory::class);
     }
 
-    public function inventoryBatches()
+    public function inventoryBatches(): HasManyThrough
     {
         return $this->hasManyThrough(
             InventoryBatch::class,
@@ -92,8 +90,15 @@ class Medicine extends Model
         );
     }
 
-    public function purchaseItems()
+    public function purchaseItems(): HasMany
     {
         return $this->hasMany(PurchaseItem::class);
+    }
+
+    public function getPackingLabelAttribute(): string
+    {
+        $unitName = $this->medicineUnit ? $this->medicineUnit->name : '';
+
+        return "{$this->packing_quantity} {$unitName}";
     }
 }

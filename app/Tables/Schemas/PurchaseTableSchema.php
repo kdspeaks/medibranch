@@ -49,6 +49,16 @@ class PurchaseTableSchema
                     ->label(__('messages.total'))
                     ->money('INR')
                     ->sortable(),
+                TextColumn::make('total_mrp')
+                    ->label(__('messages.total_mrp'))
+                    ->money('INR')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('total_discount')
+                    ->label(__('messages.total_discount'))
+                    ->money('INR')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->recordActions([
                 Action::make('view')

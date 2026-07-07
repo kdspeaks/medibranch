@@ -18,7 +18,8 @@ class InventoryService
         int $medicineId,
         int $quantity,
         float $purchasePrice,
-        float $margin,
+        float $mrp,
+        float $discountOnPurchase,
         ?string $reason = null,
         ?string $batchNumber = null,
         ?string $mfgDate = null,
@@ -43,7 +44,8 @@ class InventoryService
             $batch->increment('available_quantity', $quantity);
             $batch->update([
                 'unit_purchase_price' => $purchasePrice,
-                'margin' => $margin,
+                'mrp' => $mrp,
+                'discount_on_purchase' => $discountOnPurchase,
                 'mfg_date' => $mfgDate,
                 'expiry_date' => $expiryDate,
                 'status' => 'active',
@@ -53,7 +55,8 @@ class InventoryService
                 'quantity' => $quantity,
                 'available_quantity' => $quantity,
                 'unit_purchase_price' => $purchasePrice,
-                'margin' => $margin,
+                'mrp' => $mrp,
+                'discount_on_purchase' => $discountOnPurchase,
                 'batch_number' => $batchNumber,
                 'mfg_date' => $mfgDate,
                 'expiry_date' => $expiryDate,
@@ -68,8 +71,8 @@ class InventoryService
             // Update medicine prices if they are zero, or if the new purchase price is different
             $medicine->update([
                 'purchase_price' => $purchasePrice,
-                'margin' => $margin,
-                'sale_price' => $this->pricingService->salePriceFromMargin($purchasePrice, $margin)
+                'discount_on_purchase' => $discountOnPurchase,
+                'mrp' => $mrp,
             ]);
         }
 

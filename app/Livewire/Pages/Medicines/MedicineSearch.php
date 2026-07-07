@@ -21,7 +21,7 @@ class MedicineSearch extends Component
                   ->orWhere('sku', 'like', "%{$this->query}%");
             })
             ->limit(10)
-            ->get(['id', 'name', 'purchase_price', 'margin'])
+            ->get(['id', 'name', 'purchase_price', 'mrp', 'discount_on_purchase'])
             ->map(fn($m) => $m->toArray())
             ->toArray();
     }

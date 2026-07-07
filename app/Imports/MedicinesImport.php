@@ -23,7 +23,7 @@ class MedicinesImport implements ToCollection, WithHeadingRow
     {
         foreach ($rows as $row) {
             // The heading row keys are generated from the header row in Excel (usually lowercased and snake_cased)
-            // Example headers from our file: "Medicine Name", "Manufacturer", "Barcode", "Form", "Potency", "Packing Quantity", "Unit", "Stored Location", "Purchase Price", "Margin (%)", "Sale Price", "Tax (GST %)", "Is Tax Incl. in Price", "Discount on Sale (%)", "Description"
+            // Example headers from our file: "Medicine Name", "Manufacturer", "Barcode", "Form", "Potency", "Packing Quantity", "Unit", "Stored Location", "MRP", "Purchase Discount (%)", "Purchase Price", "Tax (GST %)", "Is Tax Incl. in Price", "Discount on Sale (%)", "Description"
 
             if (empty($row['medicine_name']) && empty($row['barcode'])) {
                 continue; // Skip empty rows
@@ -82,13 +82,17 @@ class MedicinesImport implements ToCollection, WithHeadingRow
             $sku = $this->generateSku(trim($row['medicine_name']), trim($row['potency']), trim($row['form']), $row['packing_quantity'], trim($row['unit']));
 
             // Validate prices
+            $mrp = floatval($row['mrp'] ?? 0);
+            $discountOnPurchase = floatval($row['purchase_discount'] ?? 0);
             $purchasePrice = floatval($row['purchase_price'] ?? 0);
-            $margin = floatval($row['margin'] ?? 0);
-            $salePrice = floatval($row['sale_price'] ?? 0);
             
-            // If margin is missing but prices exist
-            if ($margin <= 0 && $purchasePrice > 0 && $salePrice > 0) {
-                $margin = (($salePrice - $purchasePrice) / $purchasePrice) * 100;
+            // If discount is missing but prices exist
+            if ($discountOnPurchase <= 0 && $mrp > 0 && $purchasePrice > 0) {
+                $discountOnPurchase = (($mrp - $purchasePrice) / $mrp) * 100;
+            }
+
+            if ($purchasePrice <= 0 && $mrp > 0) {
+                $purchasePrice = $mrp - ($mrp * ($discountOnPurchase / 100));
             }
 
             // Fallback for barcode
@@ -110,8 +114,8 @@ class MedicinesImport implements ToCollection, WithHeadingRow
                 'purchase_price' => $purchasePrice,
                 'tax_id' => $taxId,
                 'is_tax_inclusive' => strtolower(trim($row['is_tax_incl_in_price'] ?? 'yes')) === 'yes',
-                'margin' => round($margin, 2),
-                'sale_price' => $salePrice,
+                'discount_on_purchase' => round($discountOnPurchase, 2),
+                'mrp' => $mrp,
                 'discount_on_sale' => floatval($row['discount_on_sale'] ?? 0),
                 'description' => trim($row['description'] ?? ''),
                 'is_active' => true,

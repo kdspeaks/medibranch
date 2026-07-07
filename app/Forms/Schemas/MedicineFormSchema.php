@@ -141,32 +141,36 @@ class MedicineFormSchema
             ]),
 
             Section::make()->columns(['sm' => 4])->schema([
+                TextInput::make('mrp')
+                    ->label(__('messages.mrp'))
+                    ->numeric()
+                    ->default(0.00)
+                    ->required()
+                    ->live(debounce: 500)
+                    ->afterStateUpdated(function($get, $set) {
+                        $mrp = (float) ($get('mrp') ?? 0);
+                        $discount = (float) ($get('discount_on_purchase') ?? 0);
+                        $purchase = $mrp - ($mrp * ($discount / 100));
+                        $set('purchase_price', round($purchase, 2));
+                    }),
+                TextInput::make('discount_on_purchase')
+                    ->label(__('messages.discount_on_purchase'))
+                    ->numeric()
+                    ->default(0.00)
+                    ->required()
+                    ->live(debounce: 500)
+                    ->afterStateUpdated(function($get, $set) {
+                        $mrp = (float) ($get('mrp') ?? 0);
+                        $discount = (float) ($get('discount_on_purchase') ?? 0);
+                        $purchase = $mrp - ($mrp * ($discount / 100));
+                        $set('purchase_price', round($purchase, 2));
+                    }),
                 TextInput::make('purchase_price')
                     ->label(__('messages.purchase_price'))
                     ->numeric()
                     ->default(0.00)
-                    ->required()
-                    ->live(debounce: 500)
-                    ->afterStateUpdated(function($get, $set) {
-                        $purchase = (float) ($get('purchase_price') ?? 0);
-                        if ($purchase <= 0) return;
-                        $margin = (float) ($get('margin') ?? 0);
-                        $sale = $purchase * (1 + ($margin / 100));
-                        $set('sale_price', round($sale, 2));
-                    }),
-                TextInput::make('margin')
-                    ->label(__('messages.margin_percentage'))
-                    ->numeric()
-                    ->default(0.00)
-                    ->required()
-                    ->live(debounce: 500)
-                    ->afterStateUpdated(function($get, $set) {
-                        $purchase = (float) ($get('purchase_price') ?? 0);
-                        if ($purchase <= 0) return;
-                        $margin = (float) ($get('margin') ?? 0);
-                        $sale = $purchase * (1 + ($margin / 100));
-                        $set('sale_price', round($sale, 2));
-                    }),
+                    ->readOnly()
+                    ->required(),
                 Select::make('tax_id')
                     ->label(__('messages.tax'))
                     ->options(fn () => Tax::where('is_active', true)->pluck('name', 'id'))
@@ -198,19 +202,7 @@ class MedicineFormSchema
                     ->grouped()
                     ->default(true)
                     ->columns(2),
-                TextInput::make('sale_price')
-                    ->label(__('messages.sale_price'))
-                    ->numeric()
-                    ->live(debounce: 500)
-                    ->default(0.00)
-                    ->required()
-                    ->afterStateUpdated(function($get, $set) {
-                       $purchase = (float) ($get('purchase_price') ?? 0);
-                        if ($purchase <= 0) return;
-                        $sale = (float) ($get('sale_price') ?? 0);
-                        $margin = $purchase > 0 ? (($sale - $purchase) / $purchase) * 100 : 0;
-                        $set('margin', round($margin, 2));
-                    }),
+
                 TextInput::make('discount_on_sale')
                     ->label(__('messages.discount_on_sale'))
                     ->numeric()

@@ -27,7 +27,8 @@ class FoundationCleanupTest extends TestCase
         $medicine = Medicine::factory()->create([
             'tax_id' => $tax->id,
             'purchase_price' => 100,
-            'sale_price' => 120,
+            'mrp' => 120,
+            'discount_on_purchase' => 10,
         ]);
 
         $purchase = app(PurchaseService::class)->save(\App\DTOs\PurchaseData::fromArray([
@@ -40,7 +41,8 @@ class FoundationCleanupTest extends TestCase
                 'medicine_id' => $medicine->id,
                 'quantity' => 2,
                 'unit_purchase_price' => 100,
-                'margin' => 20,
+                'mrp' => 120,
+                'discountOnPurchase' => 10,
                 'batch_number' => 'B1',
                 'mfg_date' => '2026-01-01',
                 'expiry_date' => '2027-01-01',
@@ -68,11 +70,11 @@ class FoundationCleanupTest extends TestCase
     public function test_stock_out_uses_fifo_by_expiry_date(): void
     {
         $branch = Branch::factory()->create();
-        $medicine = Medicine::factory()->create(['sale_price' => 50]);
+        $medicine = Medicine::factory()->create(['mrp' => 50, 'discount_on_purchase' => 10]);
         $service = app(InventoryService::class);
 
-        $later = $service->stockIn($branch->id, $medicine->id, 5, 20, 10, 'test', 'LATER', null, '2028-01-01');
-        $earlier = $service->stockIn($branch->id, $medicine->id, 3, 20, 10, 'test', 'EARLIER', null, '2027-01-01');
+        $later = $service->stockIn($branch->id, $medicine->id, 5, 20, 50, 10, 'test', 'LATER', null, '2028-01-01');
+        $earlier = $service->stockIn($branch->id, $medicine->id, 3, 20, 50, 10, 'test', 'EARLIER', null, '2027-01-01');
 
         $service->stockOut($branch->id, $medicine->id, 4, 'test_fifo');
 
@@ -107,10 +109,10 @@ class FoundationCleanupTest extends TestCase
             ->assertForbidden();
     }
 
-    public function test_medicine_uses_sale_price_column(): void
+    public function test_medicine_uses_mrp_column(): void
     {
-        $medicine = Medicine::factory()->create(['sale_price' => 123.45]);
+        $medicine = Medicine::factory()->create(['mrp' => 123.45]);
 
-        $this->assertSame('123.45', $medicine->fresh()->sale_price);
+        $this->assertSame('123.45', $medicine->fresh()->mrp);
     }
 }

@@ -22,7 +22,7 @@ class SaleCheckoutTest extends TestCase
         $user = User::factory()->create();
         $customer = Customer::create(['name' => 'John Doe', 'phone' => '123456']);
         
-        $medicine = Medicine::factory()->create(['sale_price' => 100]);
+        $medicine = Medicine::factory()->create(['mrp' => 100, 'discount_on_purchase' => 20]);
         
         // Stock in 50 units
         $inventoryService = app(InventoryService::class);
@@ -31,7 +31,8 @@ class SaleCheckoutTest extends TestCase
             medicineId: $medicine->id,
             quantity: 50,
             purchasePrice: 80,
-            margin: 25
+            mrp: 100,
+            discountOnPurchase: 20
         );
         
         $saleService = app(SaleService::class);

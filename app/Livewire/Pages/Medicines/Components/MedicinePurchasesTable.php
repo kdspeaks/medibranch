@@ -62,6 +62,13 @@ class MedicinePurchasesTable extends Component implements HasForms, HasTable, Ha
                 TextColumn::make('unit_purchase_price')
                     ->label(__('messages.unit_price'))
                     ->money('INR'),
+                TextColumn::make('mrp')
+                    ->label(__('messages.mrp'))
+                    ->money('INR'),
+                TextColumn::make('discount_on_purchase')
+                    ->label(__('messages.discount_on_purchase'))
+                    ->suffix('%')
+                    ->numeric(),
                 TextColumn::make('line_total_amount')
                     ->label(__('messages.total'))
                     ->money('INR'),

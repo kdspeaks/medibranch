@@ -45,7 +45,7 @@
                   <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                       <x-heroicon-o-magnifying-glass class="w-5 h-5 text-gray-400" />
                   </div>
-                  <input wire:model.live.debounce.300ms="search" id="search" type="text" placeholder="{{ __('messages.search_medicine') }} (F2)" class="w-full pl-10 pr-12 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-[#0f172a] focus:ring-2 focus:ring-primary focus:border-primary sm:text-sm">
+                  <input wire:model.live.debounce.300ms="search" id="search" type="text" placeholder="{{ __('messages.search_medicine') }}" class="w-full pl-10 pr-12 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-[#0f172a] focus:ring-2 focus:ring-primary focus:border-primary sm:text-sm">
                   <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                       <span class="text-xs text-gray-400 border border-gray-300 dark:border-gray-700 rounded px-1.5 py-0.5">F2</span>
                   </div>
@@ -59,7 +59,7 @@
                                       $payload = json_encode([
                                           'id' => $medicine->id,
                                           'name' => $medicine->name,
-                                          'price' => (float)$medicine->sale_price,
+                                          'price' => (float)$medicine->mrp,
                                           'batch_id' => $firstBatch?->id,
                                           'batch_number' => $firstBatch?->batch_number ?? '--',
                                           'expiry' => $firstBatch?->expiry_date ? \Carbon\Carbon::parse($firstBatch->expiry_date)->format('m/y') : '--/--',
@@ -79,7 +79,7 @@
                                               @endif
                                           </div>
                                           <div class="text-sm text-gray-500 dark:text-gray-400 flex justify-between mt-1">
-                                              <span>{{ $medicine->barcode ? $medicine->barcode . ' • ' : '' }}{{ currency() }}{{ number_format($medicine->sale_price, 2) }}</span>
+                                              <span>{{ $medicine->barcode ? $medicine->barcode . ' • ' : '' }}{{ currency() }}{{ number_format($medicine->mrp, 2) }}</span>
                                               <span class="text-xs font-semibold px-2 py-0.5 rounded-full {{ ($medicine->inventories->first()?->quantity ?? 0) > 0 ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' }}">
                                                   {{ __('messages.stock') ?? 'Stock' }}: {{ $medicine->inventories->first()?->quantity ?? 0 }}
                                               </span>

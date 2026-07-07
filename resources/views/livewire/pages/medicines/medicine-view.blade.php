@@ -140,7 +140,7 @@
                             <div>
                                 <span class="text-sm text-text-muted dark:text-text-muted-dark">Sale Price</span>
                                 <div class="font-medium text-text dark:text-text-dark">
-                                    ₹{{ number_format((float) $medicine->sale_price, 2) }}
+                                    ₹{{ number_format((float) $medicine->mrp, 2) }}
                                 </div>
                             </div>
                             <div>

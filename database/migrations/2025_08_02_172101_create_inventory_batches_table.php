@@ -17,7 +17,8 @@ return new class extends Migration
             $table->integer('quantity');             // Total added
             $table->integer('available_quantity');   // Remaining in this batch
             $table->decimal('unit_purchase_price', 10, 2);
-            $table->decimal('margin', 10, 2);
+            $table->decimal('mrp', 10, 2)->default(0.00);
+            $table->decimal('discount_on_purchase', 10, 2)->default(0.00);
             $table->string('batch_number')->nullable();
             $table->date('mfg_date')->nullable();
             $table->date('expiry_date')->nullable();

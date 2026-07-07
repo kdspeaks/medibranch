@@ -87,8 +87,8 @@ class SaleService
                     source: clone $sale // Will link item later
                 );
 
-                // Pricing calculation (Assuming cart already provided unit_price or we use medicine sale_price)
-                $unitPrice = $item['unit_price'] ?? $medicine->sale_price;
+                // Pricing calculation (Assuming cart already provided unit_price or we use medicine mrp)
+                $unitPrice = $item['unit_price'] ?? $medicine->mrp;
                 $pricing = $this->pricingService->lineWithTax($item['quantity'], $unitPrice, $medicine->tax_id);
 
                 $lineSubTotal = $item['quantity'] * $unitPrice;

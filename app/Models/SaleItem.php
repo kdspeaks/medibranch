@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class SaleItem extends Model
 {
@@ -22,17 +23,17 @@ class SaleItem extends Model
         ];
     }
 
-    public function sale()
+    public function sale(): BelongsTo
     {
         return $this->belongsTo(Sale::class);
     }
 
-    public function medicine()
+    public function medicine(): BelongsTo
     {
         return $this->belongsTo(Medicine::class);
     }
 
-    public function inventoryBatch()
+    public function inventoryBatch(): BelongsTo
     {
         return $this->belongsTo(InventoryBatch::class);
     }

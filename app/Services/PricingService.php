@@ -18,6 +18,11 @@ class PricingService
             }
         }
 
+        return $this->lineWithTaxRate($quantity, $unitPrice, $taxRate);
+    }
+
+    public function lineWithTaxRate(int $quantity, float $unitPrice, float $taxRate): array
+    {
         $line = $quantity * $unitPrice;
         $taxAmount = $taxRate > 0 ? $line * ($taxRate / 100) : 0.0;
 
@@ -39,9 +44,9 @@ class PricingService
         return $this->money($paise / 100);
     }
 
-    public function salePriceFromMargin(float $purchasePrice, float $margin): float
+    public function purchasePriceFromMrp(float $mrp, float $discountOnPurchase): float
     {
-        return $this->money($purchasePrice * (1 + ($margin / 100)));
+        return $this->money($mrp - ($mrp * ($discountOnPurchase / 100)));
     }
 
     public function money(float $amount): float

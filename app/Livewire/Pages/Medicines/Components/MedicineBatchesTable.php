@@ -52,8 +52,11 @@ class MedicineBatchesTable extends Component implements HasForms, HasTable, HasA
                 TextColumn::make('unit_purchase_price')
                     ->label(__('messages.purchase'))
                     ->money('INR'),
-                TextColumn::make('margin')
-                    ->label(__('messages.margin'))
+                TextColumn::make('mrp')
+                    ->label(__('messages.mrp'))
+                    ->money('INR'),
+                TextColumn::make('discount_on_purchase')
+                    ->label(__('messages.discount_on_purchase'))
                     ->suffix('%')
                     ->numeric(),
                 TextColumn::make('mfg_date')

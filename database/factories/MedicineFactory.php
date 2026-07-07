@@ -32,8 +32,11 @@ class MedicineFactory extends Factory
             'packing_quantity' => $this->faker->numberBetween(10, 100),
             'medicine_unit_id' => $unit?->id,
 
-            'purchase_price' => $this->faker->randomFloat(2, 5, 500),
-            'margin' => $this->faker->randomFloat(2, 2, 20),
+            'mrp' => $this->faker->randomFloat(2, 10, 600),
+            'discount_on_purchase' => $this->faker->randomFloat(2, 5, 30),
+            'purchase_price' => function (array $attributes) {
+                return $attributes['mrp'] - ($attributes['mrp'] * ($attributes['discount_on_purchase'] / 100));
+            },
 
             'description' => $this->faker->optional()->sentence(),
             'is_active' => $this->faker->boolean(90), // 90% chance of being active

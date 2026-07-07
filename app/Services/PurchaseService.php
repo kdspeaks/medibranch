@@ -38,6 +38,8 @@ class PurchaseService
             'ref_code_prefix' => $data->refCodePrefix,
             'ref_code_count' => $data->refCodeCount,
             'total_amount' => $totalAmount,
+            'total_mrp' => array_reduce($data->items, fn($carry, $item) => $carry + ($item->quantity * $item->mrp), 0.0),
+            'total_discount' => array_reduce($data->items, fn($carry, $item) => $carry + ($item->quantity * $item->mrp * ($item->discountOnPurchase / 100)), 0.0),
         ];
 
         return DB::transaction(function () use ($purchaseDataArray, $data, $purchase): Purchase {
@@ -98,7 +100,8 @@ class PurchaseService
                 'medicine_id' => $item->medicineId,
                 'quantity' => $item->quantity,
                 'unit_purchase_price' => $item->unitPurchasePrice,
-                'margin' => $item->margin,
+                'mrp' => $item->mrp,
+                'discount_on_purchase' => $item->discountOnPurchase,
                 'batch_number' => $item->batchNumber,
                 'mfg_date' => $item->mfgDate,
                 'expiry_date' => $item->expiryDate,
@@ -124,7 +127,8 @@ class PurchaseService
                 medicineId: (int) $item->medicine_id,
                 quantity: (int) $item->quantity,
                 purchasePrice: (float) $item->unit_purchase_price,
-                margin: (float) $item->margin,
+                mrp: (float) $item->mrp,
+                discountOnPurchase: (float) $item->discount_on_purchase,
                 reason: 'purchase_received',
                 batchNumber: $item->batch_number,
                 mfgDate: $item->mfg_date?->toDateString(),

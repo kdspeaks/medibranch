@@ -1,4 +1,5 @@
 <?php
+
 return [
     'login' => 'Login',
     'email' => 'Email',
@@ -11,7 +12,7 @@ return [
     'morning' => 'Good morning,',
     'afternoon' => 'Good afternoon,',
     'evening' => 'Good evening,',
-    
+
     // Sidebar
     'dashboard' => 'Dashboard',
     'contacts' => 'Contacts',
@@ -33,7 +34,7 @@ return [
     'earnings' => 'Earnings',
     'sign_out' => 'Sign Out',
     'hi_again' => 'Hi again, :name!',
-    
+
     // Roles & Users
     'create_role' => 'Create Role',
     'create_new_role' => 'Create New Role',
@@ -51,7 +52,7 @@ return [
     'create_permission' => 'Create Permission',
     'create_new_permission' => 'Create New Permission',
     'edit_permission' => 'Edit Permission',
-    
+
     // Branches
     'create_branch' => 'Create Branch',
     'create_new_branch' => 'Create New Branch',
@@ -117,6 +118,8 @@ return [
     'unit' => 'Unit',
     'purchase_price' => 'Purchase Price',
     'margin_percentage' => 'Margin (%)',
+    'mrp' => 'MRP',
+    'discount_on_purchase' => 'Discount (%)',
     'tax' => 'Tax',
     'tax_included' => 'Tax Included?',
     'sale_price' => 'Sale Price',
@@ -141,6 +144,8 @@ return [
     'invoice_no' => 'Invoice No.',
     'purchase_date' => 'Purchase Date',
     'total_amount' => 'Total Amount',
+    'total_mrp' => 'Total MRP',
+    'total_discount' => 'Total Discount',
     'status' => 'Status',
     'draft' => 'Draft',
     'received' => 'Received',
@@ -211,4 +216,9 @@ return [
     'search_customer' => 'Search Name or Phone...',
     'customer_created' => 'Customer created successfully.',
     'walk_in' => 'Walk-in Customer',
+    'drafts' => 'Drafts',
+    'invoice_held' => 'Invoice held successfully.',
+    'draft_loaded' => 'Draft loaded.',
+    'draft_deleted' => 'Draft deleted.',
+    'no_recent_sale' => 'No recent sale found to print.',
 ];
