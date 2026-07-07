@@ -1,9 +1,12 @@
 <x-page-layout title="Medicine View {{ $medicine->name }}">
     <x-slot name="actionButton">
-        <x-ui.button icon="heroicon-o-pencil" variant="primary" class="w-full" wire:navigate
-            href="{{ route('medicines.edit', ['medicine' => $medicine]) }}">
-            Edit Medicine
-        </x-ui.button>
+        <div class="flex gap-2">
+            {{ $this->adjustStockAction }}
+            <x-ui.button icon="heroicon-o-pencil" variant="primary" class="w-full" wire:navigate
+                href="{{ route('medicines.edit', ['medicine' => $medicine]) }}">
+                Edit Medicine
+            </x-ui.button>
+        </div>
     </x-slot>
 
     @php
@@ -170,4 +173,5 @@
 
             <livewire:pages.medicines.components.medicine-purchases-table :medicine="$medicine" :branch-id="$scopedBranchId" />
     </div>
+    <x-filament-actions::modals />
 </x-page-layout>

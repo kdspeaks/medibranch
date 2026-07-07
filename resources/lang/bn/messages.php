@@ -220,4 +220,21 @@ return [
     'draft_loaded' => 'ড্রাফট লোড করা হয়েছে।',
     'draft_deleted' => 'ড্রাফট মুছে ফেলা হয়েছে।',
     'no_recent_sale' => 'প্রিন্ট করার জন্য কোনো সাম্প্রতিক বিক্রয় পাওয়া যায়নি।',
+
+    // Manual Stock Entry
+    'adjust_stock' => 'Adjust Stock',
+    'adjustment_type' => 'Adjustment Type',
+    'stock_in' => 'Stock In (Add)',
+    'stock_out' => 'Stock Out (Deduct)',
+    'preferred_batch' => 'Preferred Batch (Optional)',
+    'manual_stock_entry_reason' => 'Reason',
+    'stock_adjusted_successfully' => 'Stock adjusted successfully.',
+    'quantity' => 'Quantity',
+    'reason' => 'Reason',
+    'purchase_price' => 'Purchase Price',
+    'mrp' => 'Sale Price (MRP)',
+    'discount_on_purchase' => 'Discount on Purchase',
+    'batch_number' => 'Batch Number',
+    'mfg_date' => 'Mfg Date',
+    'expiry_date' => 'Expiry Date',
 ];
