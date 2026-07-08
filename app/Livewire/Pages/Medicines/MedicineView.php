@@ -74,25 +74,51 @@ class MedicineView extends Component implements HasActions, HasForms
                     ->minValue(1),
 
                 // Fields only for Stock In
-                TextInput::make('purchase_price')
-                    ->label(__('messages.purchase_price'))
-                    ->numeric()
-                    ->default($this->medicine->purchase_price)
-                    ->required()
-                    ->visible(fn ($get) => $get('adjustment_type') === 'in'),
-
                 TextInput::make('mrp')
                     ->label(__('messages.mrp'))
+                    ->id('mrp_input')
                     ->numeric()
                     ->default($this->medicine->mrp)
                     ->required()
+                    ->extraInputAttributes([
+                        'x-on:input' => '
+                            let mrp = parseFloat($el.value) || 0;
+                            let discount = parseFloat(document.getElementById(\'discount_input\')?.value || 0);
+                            let pp = document.getElementById(\'purchase_price_input\');
+                            if (pp) {
+                                pp.value = (mrp - (mrp * discount / 100)).toFixed(2);
+                                pp.dispatchEvent(new Event(\'input\', { bubbles: true }));
+                            }
+                        '
+                    ])
                     ->visible(fn ($get) => $get('adjustment_type') === 'in'),
 
                 TextInput::make('discount_on_purchase')
                     ->label(__('messages.discount_on_purchase'))
+                    ->id('discount_input')
                     ->numeric()
                     ->default($this->medicine->discount_on_purchase ?? 0)
                     ->required()
+                    ->extraInputAttributes([
+                        'x-on:input' => '
+                            let discount = parseFloat($el.value) || 0;
+                            let mrp = parseFloat(document.getElementById(\'mrp_input\')?.value || 0);
+                            let pp = document.getElementById(\'purchase_price_input\');
+                            if (pp) {
+                                pp.value = (mrp - (mrp * discount / 100)).toFixed(2);
+                                pp.dispatchEvent(new Event(\'input\', { bubbles: true }));
+                            }
+                        '
+                    ])
+                    ->visible(fn ($get) => $get('adjustment_type') === 'in'),
+
+                TextInput::make('purchase_price')
+                    ->label(__('messages.purchase_price'))
+                    ->id('purchase_price_input')
+                    ->numeric()
+                    ->default($this->medicine->purchase_price)
+                    ->required()
+                    ->readOnly()
                     ->visible(fn ($get) => $get('adjustment_type') === 'in'),
 
                 TextInput::make('batch_number')
