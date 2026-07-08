@@ -60,6 +60,7 @@ return [
     'branch_code' => 'শাখা কোড',
     'address' => 'ঠিকানা',
     'gst_number' => 'জিএসটি নম্বর',
+    'drug_license_number' => 'ওষুধের লাইসেন্স নম্বর',
     'phone' => 'ফোন',
     'is_active' => 'সক্রিয়?',
 

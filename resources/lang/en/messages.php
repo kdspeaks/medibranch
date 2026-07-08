@@ -61,6 +61,7 @@ return [
     'branch_code' => 'Branch Code',
     'address' => 'Address',
     'gst_number' => 'GST Number',
+    'drug_license_number' => 'Drug License Number',
     'phone' => 'Phone',
     'is_active' => 'Is Active',
 

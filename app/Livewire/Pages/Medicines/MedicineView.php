@@ -53,10 +53,19 @@ class MedicineView extends Component implements HasActions, HasForms
 
                 Select::make('branch_id')
                     ->label(__('messages.branch'))
-                    ->options(\App\Models\Branch::pluck('name', 'id'))
+                    ->options(function () {
+                        if ($this->isSuperAdmin()) {
+                            return \App\Models\Branch::pluck('name', 'id');
+                        }
+                        return auth()->user()?->branches()->where('is_active', true)->pluck('branches.name', 'branches.id') ?? [];
+                    })
                     ->required()
-                    ->visible(fn () => $this->isSuperAdmin())
-                    ->default(fn () => $this->scopedBranchId()),
+                    ->visible(function () {
+                        if ($this->isSuperAdmin()) return true;
+                        return auth()->user()?->branches()->where('is_active', true)->count() > 1;
+                    })
+                    ->default(fn () => $this->scopedBranchId())
+                    ->live(),
 
                 TextInput::make('quantity')
                     ->label(__('messages.quantity'))

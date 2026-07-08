@@ -86,6 +86,9 @@ class BranchList extends Component  implements HasForms, HasActions, HasTable
                             TextInput::make('gst_number')
                                 ->label(__('messages.gst_number'))
                                 ->maxLength(255),
+                            TextInput::make('drug_license_number')
+                                ->label(__('messages.drug_license_number'))
+                                ->maxLength(255),
                             Radio::make('is_active')
                                 ->label(__('messages.is_active'))
                                 ->boolean()
@@ -166,6 +169,9 @@ class BranchList extends Component  implements HasForms, HasActions, HasTable
                                         ->maxLength(255),
                                     TextInput::make('gst_number')
                                         ->label(__('messages.gst_number'))
+                                        ->maxLength(255),
+                                    TextInput::make('drug_license_number')
+                                        ->label(__('messages.drug_license_number'))
                                         ->maxLength(255),
                                     Radio::make('is_active')
                                         ->label(__('messages.is_active'))

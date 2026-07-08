@@ -83,7 +83,12 @@ class UserList extends Component implements HasForms, HasActions, HasTable
                         ->required()
                         ->native(false),
 
-
+                    Select::make('branches')
+                        ->relationship('branches', 'name')
+                        ->multiple()
+                        ->preload()
+                        ->label(__('messages.branches'))
+                        ->native(false),
 
                 ])
             ]);
@@ -104,8 +109,11 @@ class UserList extends Component implements HasForms, HasActions, HasTable
                     ->label(__('messages.email')),
                 TextColumn::make('roles.name')
                     ->label(__('messages.roles'))
-                    ->sortable()
-
+                    ->sortable(),
+                TextColumn::make('branches.name')
+                    ->label(__('messages.branches'))
+                    ->badge()
+                    ->separator(',')
             ])
             ->filters([
                 // ...
@@ -138,7 +146,12 @@ class UserList extends Component implements HasForms, HasActions, HasTable
                                 ->required()
                                 ->native(false),
 
-
+                            Select::make('branches')
+                                ->relationship('branches', 'name')
+                                ->multiple()
+                                ->preload()
+                                ->label(__('messages.branches'))
+                                ->native(false),
 
                         ])
                     ]),

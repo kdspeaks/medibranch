@@ -14,6 +14,7 @@ class Branch extends Model
         'code',
         'address',
         'gst_number',
+        'drug_license_number',
         'phone',
         'email',
         'is_active',

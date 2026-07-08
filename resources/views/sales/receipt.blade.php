@@ -49,6 +49,9 @@
             @if($sale->branch?->gst_number)
             <div>GSTIN: {{ $sale->branch->gst_number }}</div>
             @endif
+            @if($sale->branch?->drug_license_number)
+            <div>DL No: {{ $sale->branch->drug_license_number }}</div>
+            @endif
         </div>
 
         <!-- Sale Details -->
