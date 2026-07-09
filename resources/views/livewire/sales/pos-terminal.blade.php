@@ -12,6 +12,7 @@
     @customer-selected.window="customerId = $event.detail.id; selectedCustomerName = $event.detail.name"
     @customer-cleared.window="customerId = null; selectedCustomerName = ''"
     @checkout-successful.window="clearCart()"
+    @branch-changed.window="clearCart()"
 >
     <!-- Top Bar -->
     <div class="flex items-center justify-between px-6 py-3 bg-white dark:bg-[#1e293b] border-b border-gray-200 dark:border-gray-800">
@@ -95,6 +96,18 @@
         
         <!-- Top Right Actions -->
         <div class="flex items-center gap-3">
+            @if(count($this->availableBranches) > 1)
+                <select wire:model.live="selectedBranchId" class="text-sm border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 focus:ring-primary focus:border-primary py-2 pl-3 pr-10">
+                    @foreach($this->availableBranches as $id => $name)
+                        <option value="{{ $id }}">{{ $name }}</option>
+                    @endforeach
+                </select>
+            @elseif(count($this->availableBranches) === 1)
+                <span class="text-sm font-medium text-gray-600 dark:text-gray-400 border px-3 py-2 rounded-lg border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+                    {{ $this->availableBranches->first() }}
+                </span>
+            @endif
+
             <button @click="newSale()" class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-green-700 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 dark:bg-green-900/20 dark:border-green-800 dark:text-green-400">
                 <x-heroicon-o-plus class="w-4 h-4" /> New Sale
             </button>

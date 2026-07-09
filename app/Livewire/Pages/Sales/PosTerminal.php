@@ -55,19 +55,51 @@ class PosTerminal extends Component implements HasActions, HasForms
 
     public $selectedCustomerName = '';
 
+    public $selectedBranchId = null;
+
+    public function mount()
+    {
+        $this->selectedBranchId = activeBranch()?->id;
+        
+        if (!$this->selectedBranchId && $this->isSuperAdmin()) {
+            $this->selectedBranchId = \App\Models\Branch::first()?->id;
+        } elseif (!$this->selectedBranchId) {
+            $this->selectedBranchId = auth()->user()?->branches()->where('is_active', true)->first()?->id;
+        }
+    }
+
+    private function isSuperAdmin(): bool
+    {
+        return auth()->user()?->hasRole('Super Admin') ?? false;
+    }
+
+    #[\Livewire\Attributes\Computed]
+    public function availableBranches()
+    {
+        if ($this->isSuperAdmin()) {
+            return \App\Models\Branch::pluck('name', 'id');
+        }
+        return auth()->user()?->branches()->where('is_active', true)->pluck('branches.name', 'branches.id') ?? collect();
+    }
+
+    public function updatedSelectedBranchId()
+    {
+        $this->dispatch('branch-changed');
+    }
+
     #[\Livewire\Attributes\On('notify')]
-    public function notify($data)
+    public function notify($title = 'Notification', $type = 'info')
     {
         Notification::make()
-            ->title($data['title'] ?? 'Notification')
-            ->{$data['type'] ?? 'info'}()
+            ->title($title)
+            ->{$type}()
             ->send();
     }
 
     public function updatedSearch()
     {
         if (strlen($this->search) > 1) {
-            $branchId = activeBranch()->id ?? null;
+            $branchId = $this->selectedBranchId;
 
             // Check exact barcode match first
             $exactMatch = Medicine::where('barcode', $this->search)
@@ -138,7 +170,7 @@ class PosTerminal extends Component implements HasActions, HasForms
 
     public function getMedicineDetails($medicineId)
     {
-        $branchId = activeBranch()->id ?? null;
+        $branchId = $this->selectedBranchId;
 
         return Medicine::with(['inventories' => function ($q) use ($branchId) {
             $q->where('branch_id', $branchId)->with(['batches' => function ($query) {
@@ -164,7 +196,7 @@ class PosTerminal extends Component implements HasActions, HasForms
             return;
         }
 
-        $branchId = activeBranch()->id ?? null;
+        $branchId = $this->selectedBranchId;
         if (! $branchId) {
             $this->addError('cart', 'No active branch selected.');
 
@@ -237,7 +269,7 @@ class PosTerminal extends Component implements HasActions, HasForms
                 'round_off' => $roundOffAmount,
                 'total_amount' => $total,
             ]);
-            $sale->setRelation('branch', activeBranch());
+            $sale->setRelation('branch', \App\Models\Branch::find($this->selectedBranchId));
             $sale->setRelation('user', auth()->user());
             $sale->setRelation('customer', $this->customerId ? \App\Models\Customer::find($this->customerId) : null);
 
@@ -267,7 +299,7 @@ class PosTerminal extends Component implements HasActions, HasForms
         $saleIdToPrint = $this->lastSaleId;
 
         if (! $saleIdToPrint) {
-            $branchId = activeBranch()->id ?? null;
+            $branchId = $this->selectedBranchId;
             $latestSale = \App\Models\Sale::where('branch_id', $branchId)
                 ->where('user_id', auth()->id())
                 ->latest('id')
@@ -298,7 +330,7 @@ class PosTerminal extends Component implements HasActions, HasForms
             return;
         }
 
-        $branchId = activeBranch()->id ?? null;
+        $branchId = $this->selectedBranchId;
         if (! $branchId) {
             $this->addError('cart', 'No active branch selected.');
 
@@ -349,7 +381,7 @@ class PosTerminal extends Component implements HasActions, HasForms
 
     public function loadDraft($draftId)
     {
-        $draft = PosDraft::where('branch_id', activeBranch()->id ?? null)->find($draftId);
+        $draft = PosDraft::where('branch_id', $this->selectedBranchId)->find($draftId);
         if (! $draft) {
             Notification::make()->title('Draft not found')->danger()->send();
 
@@ -371,7 +403,7 @@ class PosTerminal extends Component implements HasActions, HasForms
 
     public function deleteDraft($draftId)
     {
-        $draft = PosDraft::where('branch_id', activeBranch()->id ?? null)->find($draftId);
+        $draft = PosDraft::where('branch_id', $this->selectedBranchId)->find($draftId);
         if ($draft) {
             $draft->delete();
             Notification::make()->title(__('messages.draft_deleted'))->success()->send();
@@ -385,7 +417,7 @@ class PosTerminal extends Component implements HasActions, HasForms
             ->icon('heroicon-o-document-text')
             ->modalHeading('Saved Drafts')
             ->modalContent(fn () => view('livewire.sales.drafts-modal', [
-                'drafts' => PosDraft::where('branch_id', activeBranch()->id ?? null)
+                'drafts' => PosDraft::where('branch_id', $this->selectedBranchId)
                     ->with('customer')
                     ->latest()
                     ->get(),
