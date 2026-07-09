@@ -30,7 +30,7 @@ class MedicineTableSchema
                     ->badge()
                     ->color(fn ($state) => (int)$state > 0 ? 'success' : 'danger')
                     ->sortable(query: function (\Illuminate\Database\Eloquent\Builder $query, string $direction, $livewire) {
-                        $branchId = current($livewire->getTableFilterState('branch_id') ?? []) ?? (Auth::user()?->hasRole('Super Admin') ? null : activeBranch()?->id);
+                        $branchId = current($livewire->getTableFilterState('branch_id') ?? []) ?? activeBranch()?->id;
                         
                         $batchQuery = \App\Models\InventoryBatch::selectRaw('COALESCE(SUM(inventory_batches.available_quantity), 0)')
                             ->join('inventories', 'inventories.id', '=', 'inventory_batches.inventory_id')
@@ -96,9 +96,9 @@ class MedicineTableSchema
                         }
                         return Auth::user()?->branches()->where('is_active', true)->pluck('branches.name', 'branches.id') ?? [];
                     })
-                    ->default(fn () => Auth::user()?->hasRole('Super Admin') ? null : activeBranch()?->id)
+                    ->default(fn () => activeBranch()?->id)
                     ->query(function (\Illuminate\Database\Eloquent\Builder $query, array $data) {
-                        $branchId = $data['value'] ?? (Auth::user()?->hasRole('Super Admin') ? null : activeBranch()?->id);
+                        $branchId = $data['value'] ?? activeBranch()?->id;
                         
                         $query->with(['inventories' => function ($q) use ($branchId) {
                             if ($branchId) {
