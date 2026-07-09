@@ -21,6 +21,7 @@ class MedicineStocksTable extends Component implements HasForms, HasTable, HasAc
     use InteractsWithActions;
 
     public Medicine $medicine;
+    #[\Livewire\Attributes\Reactive]
     public ?int $branchId = null;
 
     public function table(Table $table): Table

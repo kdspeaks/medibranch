@@ -20,6 +20,7 @@ class MedicineBatchesTable extends Component implements HasForms, HasTable, HasA
     use InteractsWithActions;
 
     public Medicine $medicine;
+    #[\Livewire\Attributes\Reactive]
     public ?int $branchId = null;
 
     public function table(Table $table): Table

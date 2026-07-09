@@ -14,16 +14,7 @@ class MedicineTableSchema
 {
     public static function table(Table $table, $queryBuilder = null): Table
     {
-        $branchId = activeBranch()->id ?? null;
-        
-        $query = $queryBuilder ?? Medicine::query()->with([
-            'tax',
-            'inventories' => function ($q) use ($branchId) {
-                if ($branchId) {
-                    $q->where('branch_id', $branchId);
-                }
-            }
-        ]);
+        $query = $queryBuilder ?? Medicine::query()->with(['tax']);
 
         return $table
             ->query($query)
@@ -35,19 +26,22 @@ class MedicineTableSchema
                     
                 TextColumn::make('stock_available')
                     ->label(__('messages.stock') ?? 'Stock')
-                    ->state(fn ($record) => $record->inventories->first()?->quantity ?? 0)
+                    ->state(fn ($record) => $record->inventories->sum('quantity'))
                     ->badge()
                     ->color(fn ($state) => (int)$state > 0 ? 'success' : 'danger')
-                    ->sortable(query: function (\Illuminate\Database\Eloquent\Builder $query, string $direction) use ($branchId) {
-                        if (!$branchId) return $query;
-                        return $query->orderBy(
-                            \App\Models\InventoryBatch::selectRaw('COALESCE(SUM(inventory_batches.available_quantity), 0)')
-                                ->join('inventories', 'inventories.id', '=', 'inventory_batches.inventory_id')
-                                ->whereColumn('inventories.medicine_id', 'medicines.id')
-                                ->where('inventories.branch_id', $branchId)
-                                ->whereNull('inventories.deleted_at'),
-                            $direction
-                        );
+                    ->sortable(query: function (\Illuminate\Database\Eloquent\Builder $query, string $direction, $livewire) {
+                        $branchId = current($livewire->getTableFilterState('branch_id') ?? []) ?? (Auth::user()?->hasRole('Super Admin') ? null : activeBranch()?->id);
+                        
+                        $batchQuery = \App\Models\InventoryBatch::selectRaw('COALESCE(SUM(inventory_batches.available_quantity), 0)')
+                            ->join('inventories', 'inventories.id', '=', 'inventory_batches.inventory_id')
+                            ->whereColumn('inventories.medicine_id', 'medicines.id')
+                            ->whereNull('inventories.deleted_at');
+                            
+                        if ($branchId) {
+                            $batchQuery->where('inventories.branch_id', $branchId);
+                        }
+                        
+                        return $query->orderBy($batchQuery, $direction);
                     }),
 
                 TextColumn::make('potency')
@@ -93,9 +87,30 @@ class MedicineTableSchema
             ])
             ->paginated([10, 20, 50, 100, 'all'])
             ->defaultPaginationPageOption(20)
+            ->filters([
+                \Filament\Tables\Filters\SelectFilter::make('branch_id')
+                    ->label(__('messages.branch'))
+                    ->options(function () {
+                        if (Auth::user()?->hasRole('Super Admin')) {
+                            return \App\Models\Branch::pluck('name', 'id');
+                        }
+                        return Auth::user()?->branches()->where('is_active', true)->pluck('branches.name', 'branches.id') ?? [];
+                    })
+                    ->default(fn () => Auth::user()?->hasRole('Super Admin') ? null : activeBranch()?->id)
+                    ->query(function (\Illuminate\Database\Eloquent\Builder $query, array $data) {
+                        $branchId = $data['value'] ?? (Auth::user()?->hasRole('Super Admin') ? null : activeBranch()?->id);
+                        
+                        $query->with(['inventories' => function ($q) use ($branchId) {
+                            if ($branchId) {
+                                $q->where('branch_id', $branchId);
+                            }
+                        }]);
+                    })
+            ])
             ->recordUrl(
                 fn(Medicine $record) => route('medicines.view', ['medicine' => $record])
             )
+            ->filtersLayout(\Filament\Tables\Enums\FiltersLayout::AboveContent)
             ->striped();
     }
 }

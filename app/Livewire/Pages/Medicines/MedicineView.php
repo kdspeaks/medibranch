@@ -19,6 +19,7 @@ use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
 use Livewire\Component;
+use Livewire\Attributes\Computed;
 
 class MedicineView extends Component implements HasActions, HasForms
 {
@@ -219,6 +220,15 @@ class MedicineView extends Component implements HasActions, HasForms
     private function isSuperAdmin(): bool
     {
         return auth()->user()?->hasRole('Super Admin') ?? false;
+    }
+
+    #[Computed]
+    public function availableBranches()
+    {
+        if ($this->isSuperAdmin()) {
+            return \App\Models\Branch::pluck('name', 'id');
+        }
+        return auth()->user()?->branches()->where('is_active', true)->pluck('branches.name', 'branches.id') ?? collect();
     }
 
     private function scopedBranchId(): ?int

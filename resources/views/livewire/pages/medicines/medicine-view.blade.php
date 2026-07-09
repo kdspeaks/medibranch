@@ -1,6 +1,18 @@
 <x-page-layout title="Medicine View {{ $medicine->name }}">
     <x-slot name="actionButton">
-        <div class="flex gap-2">
+        <div class="flex gap-2 items-center">
+            @if($this->availableBranches->count() > 1 || auth()->user()?->hasRole('Super Admin'))
+                <select wire:model.live="scopedBranchId" 
+                    class="block w-48 rounded-lg border bg-input-bg text-input-text placeholder-input-placeholder border-input-border dark:bg-input-bg-dark dark:text-input-text-dark dark:placeholder-input-placeholder dark:border-input-border-dark sm:text-sm focus:ring-primary focus:border-primary">
+                    @if(auth()->user()?->hasRole('Super Admin'))
+                        <option value="">All Branches</option>
+                    @endif
+                    @foreach($this->availableBranches as $id => $name)
+                        <option value="{{ $id }}">{{ $name }}</option>
+                    @endforeach
+                </select>
+            @endif
+            
             {{ $this->adjustStockAction }}
             <x-ui.button icon="heroicon-o-pencil" variant="primary" class="w-full" wire:navigate
                 href="{{ route('medicines.edit', ['medicine' => $medicine]) }}">

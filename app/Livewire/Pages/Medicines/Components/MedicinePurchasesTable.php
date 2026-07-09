@@ -21,6 +21,7 @@ class MedicinePurchasesTable extends Component implements HasForms, HasTable, Ha
     use InteractsWithActions;
 
     public Medicine $medicine;
+    #[\Livewire\Attributes\Reactive]
     public ?int $branchId = null;
 
     public function table(Table $table): Table
