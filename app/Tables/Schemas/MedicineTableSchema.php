@@ -111,6 +111,7 @@ class MedicineTableSchema
                 fn(Medicine $record) => route('medicines.view', ['medicine' => $record])
             )
             ->filtersLayout(\Filament\Tables\Enums\FiltersLayout::AboveContent)
+            ->deferFilters(false)
             ->striped();
     }
 }
