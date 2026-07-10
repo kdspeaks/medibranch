@@ -150,11 +150,11 @@
                             <th class="px-4 py-2 font-medium">#</th>
                             <th class="px-4 py-2 font-medium">Medicine</th>
                             <th class="px-4 py-2 font-medium">Batch / Expiry</th>
-                            <th class="px-4 py-2 font-medium">MRP</th>
-                            <th class="px-4 py-2 font-medium">Price</th>
-                            <th class="px-4 py-2 font-medium">Qty</th>
-                            <th class="px-4 py-2 font-medium">Tax</th>
-                            <th class="px-4 py-2 font-medium text-right">Amount</th>
+                            <th class="px-4 py-2 font-medium">Unit Price</th>
+                            <th class="px-4 py-2 font-medium text-center">Qty</th>
+                            <th class="px-4 py-2 font-medium text-right">Price without tax</th>
+                            <th class="px-4 py-2 font-medium text-right">Tax</th>
+                            <th class="px-4 py-2 font-medium text-right">Total</th>
                             <th class="px-4 py-2"></th>
                         </tr>
                     </thead>
@@ -164,15 +164,17 @@
                                 <td class="px-4 py-2 text-gray-500" x-text="index + 1"></td>
                                 <td class="px-4 py-2">
                                     <div class="flex items-center gap-2">
-                                        <div class="font-bold text-gray-900 dark:text-gray-100" x-text="item.name"></div>
+                                        <div>
+                                            <div class="font-bold text-gray-900 dark:text-gray-100" x-text="item.name"></div>
+                                            <div class="text-xs text-gray-500" x-show="item.sku" x-text="'SKU: ' + item.sku"></div>
+                                        </div>
                                     </div>
                                 </td>
                                 <td class="px-4 py-2">
                                     <div class="text-gray-900 dark:text-gray-300" x-text="item.batch_number"></div>
                                     <div class="text-xs text-gray-500" x-text="item.expiry_date"></div>
                                 </td>
-                                <td class="px-4 py-2 text-gray-500">{{ currency() }}<span x-text="formatCurrency(item.unit_price)"></span></td>
-                                <td class="px-4 py-2 font-medium">{{ currency() }}<span x-text="formatCurrency(item.unit_price)"></span></td>
+                                <td class="px-4 py-2 text-gray-900 dark:text-gray-300 font-medium">{{ currency() }}<span x-text="formatCurrency(item.unit_price)"></span></td>
                                 <td class="px-4 py-2">
                                     <div class="flex items-center justify-center gap-3 border border-gray-200 dark:border-gray-700 rounded-lg px-2 py-1 w-28 mx-auto bg-white dark:bg-[#1e293b]">
                                         <button @click="updateQuantity(index, item.quantity - 1)" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
@@ -184,9 +186,15 @@
                                         </button>
                                     </div>
                                 </td>
-                                <td class="px-4 py-2 text-gray-600 dark:text-gray-300" x-text="item.tax_name"></td>
+                                <td class="px-4 py-2 text-right font-medium text-gray-900 dark:text-gray-300">
+                                    {{ currency() }}<span x-text="formatCurrency(lineSubtotal(item))"></span>
+                                </td>
+                                <td class="px-4 py-2 text-right">
+                                    <div class="text-gray-900 dark:text-gray-300" x-text="item.tax_name"></div>
+                                    <div class="text-xs text-gray-500">{{ currency() }}<span x-text="formatCurrency(lineTaxAmount(item))"></span></div>
+                                </td>
                                 <td class="px-4 py-2 text-right font-bold text-gray-900 dark:text-gray-100">
-                                    {{ currency() }}<span x-text="formatCurrency(item.unit_price * item.quantity)"></span>
+                                    {{ currency() }}<span x-text="formatCurrency(lineTotalAmount(item))"></span>
                                 </td>
                                 <td class="px-2 py-2 text-right">
                                     <button @click="removeFromCart(index)" class="text-gray-400 hover:text-red-500 transition">
@@ -226,8 +234,12 @@
                         </div>
                     </div>
                     <div class="flex justify-between text-xs text-gray-600 dark:text-gray-400">
-                        <span>Tax</span>
-                        <span class="font-medium text-gray-900 dark:text-white">{{ currency() }}<span x-text="formatCurrency(taxAmount)"></span></span>
+                        <span>CGST</span>
+                        <span class="font-medium text-gray-900 dark:text-white">{{ currency() }}<span x-text="formatCurrency(taxAmount / 2)"></span></span>
+                    </div>
+                    <div class="flex justify-between text-xs text-gray-600 dark:text-gray-400">
+                        <span>SGST</span>
+                        <span class="font-medium text-gray-900 dark:text-white">{{ currency() }}<span x-text="formatCurrency(taxAmount / 2)"></span></span>
                     </div>
                     <div class="flex justify-between items-center text-xs text-gray-600 dark:text-gray-400">
                         <label class="flex items-center cursor-pointer gap-1">
@@ -483,12 +495,29 @@
             selectedCustomerName: '',
 
             get subTotal() {
-                return this.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                let total = 0;
+                for (let item of this.cart) {
+                    let itemTotal = item.price * item.quantity;
+                    if (item.is_tax_inclusive) {
+                        let taxRate = parseFloat(item.tax_rate) || 0;
+                        let itemTax = taxRate > 0 ? itemTotal - (itemTotal / (1 + (taxRate / 100))) : 0;
+                        total += (itemTotal - itemTax);
+                    } else {
+                        total += itemTotal;
+                    }
+                }
+                return total;
             },
             get taxAmount() {
                 return this.cart.reduce((sum, item) => {
                     let itemTotal = item.price * item.quantity;
-                    return sum + (itemTotal * (item.tax_rate / 100));
+                    let taxRate = parseFloat(item.tax_rate) || 0;
+                    if (taxRate <= 0) return sum;
+                    
+                    if (item.is_tax_inclusive) {
+                        return sum + (itemTotal - (itemTotal / (1 + (taxRate / 100))));
+                    }
+                    return sum + (itemTotal * (taxRate / 100));
                 }, 0);
             },
             get roundOffAmount() {
@@ -508,6 +537,31 @@
                 return Math.max(0, parseFloat(this.receivedAmount) - this.total);
             },
             
+            lineTaxAmount(item) {
+                let itemTotal = item.price * item.quantity;
+                let taxRate = parseFloat(item.tax_rate) || 0;
+                if (taxRate <= 0) return 0;
+                
+                if (item.is_tax_inclusive) {
+                    return itemTotal - (itemTotal / (1 + (taxRate / 100)));
+                }
+                return itemTotal * (taxRate / 100);
+            },
+            lineSubtotal(item) {
+                let itemTotal = item.price * item.quantity;
+                if (item.is_tax_inclusive) {
+                    return itemTotal - this.lineTaxAmount(item);
+                }
+                return itemTotal;
+            },
+            lineTotalAmount(item) {
+                let itemTotal = item.price * item.quantity;
+                if (item.is_tax_inclusive) {
+                    return itemTotal;
+                }
+                return itemTotal + this.lineTaxAmount(item);
+            },
+            
             addToCart(payload) {
                 if (!payload || !payload.id) return;
                 let index = this.cart.findIndex(i => i.id === payload.id);
@@ -525,6 +579,7 @@
                         medicine_id: payload.id, // mapped for checkout
                         id: payload.id,
                         name: payload.name,
+                        sku: payload.sku,
                         unit_price: payload.price,
                         price: payload.price,
                         quantity: 1,
@@ -533,6 +588,7 @@
                         expiry_date: payload.expiry,
                         tax_rate: payload.tax_rate,
                         tax_name: payload.tax_name,
+                        is_tax_inclusive: payload.is_tax_inclusive,
                         available_stock: payload.available
                     });
                 }

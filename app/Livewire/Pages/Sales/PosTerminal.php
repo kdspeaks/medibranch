@@ -112,12 +112,14 @@ class PosTerminal extends Component implements HasActions, HasForms
                 $this->dispatch('exact-match-found', payload: [
                     'id' => $details->id,
                     'name' => $details->name,
+                    'sku' => $details->sku,
                     'price' => (float) $details->mrp,
                     'batch_id' => $firstBatch?->id,
                     'batch_number' => $firstBatch?->batch_number ?? '--',
                     'expiry' => $firstBatch?->expiry_date ? \Carbon\Carbon::parse($firstBatch->expiry_date)->format('m/y') : '--/--',
                     'tax_rate' => (float) ($details->tax?->rate ?? 0),
                     'tax_name' => $details->tax?->name ?? '0%',
+                    'is_tax_inclusive' => (bool) $details->is_tax_inclusive,
                     'available' => $details->inventories->first()?->batches->sum('available_quantity') ?? 0,
                 ]);
                 $this->search = '';
@@ -156,12 +158,14 @@ class PosTerminal extends Component implements HasActions, HasForms
             $this->dispatch('exact-match-found', payload: [
                 'id' => $details->id,
                 'name' => $details->name,
+                'sku' => $details->sku,
                 'price' => (float) $details->mrp,
                 'batch_id' => $firstBatch?->id,
                 'batch_number' => $firstBatch?->batch_number ?? '--',
                 'expiry' => $firstBatch?->expiry_date ? \Carbon\Carbon::parse($firstBatch->expiry_date)->format('m/y') : '--/--',
                 'tax_rate' => (float) ($details->tax?->rate ?? 0),
                 'tax_name' => $details->tax?->name ?? '0%',
+                'is_tax_inclusive' => (bool) $details->is_tax_inclusive,
                 'available' => $details->inventories->first()?->batches->sum('available_quantity') ?? 0,
             ]);
             $this->search = '';
@@ -247,12 +251,14 @@ class PosTerminal extends Component implements HasActions, HasForms
             $taxAmount = 0.0;
 
             foreach ($cartItems as $item) {
+                $isInclusive = $item['is_tax_inclusive'] ?? false;
                 $pricing = $pricingService->lineWithTaxRate(
                     (int) ($item['quantity'] ?? 0),
                     (float) $item['unit_price'],
-                    (float) ($item['tax_rate'] ?? 0)
+                    (float) ($item['tax_rate'] ?? 0),
+                    $isInclusive
                 );
-                $subTotal += (int) ($item['quantity'] ?? 0) * (float) $item['unit_price'];
+                $subTotal += $pricing['line_sub_total'];
                 $taxAmount += $pricing['tax_amount'];
             }
 
@@ -273,11 +279,18 @@ class PosTerminal extends Component implements HasActions, HasForms
             $sale->setRelation('user', auth()->user());
             $sale->setRelation('customer', $this->customerId ? \App\Models\Customer::find($this->customerId) : null);
 
-            $items = collect($cartItems)->map(function ($item) {
+            $items = collect($cartItems)->map(function ($item) use ($pricingService) {
+                $isInclusive = $item['is_tax_inclusive'] ?? false;
+                $pricing = $pricingService->lineWithTaxRate(
+                    (int) ($item['quantity'] ?? 0),
+                    (float) $item['unit_price'],
+                    (float) ($item['tax_rate'] ?? 0),
+                    $isInclusive
+                );
                 $saleItem = new \App\Models\SaleItem([
                     'quantity' => $item['quantity'],
                     'unit_price' => $item['unit_price'],
-                    'total_amount' => ($item['unit_price'] * $item['quantity']) + (($item['unit_price'] * $item['quantity']) * (($item['tax_rate'] ?? 0) / 100)),
+                    'total_amount' => $pricing['line_total_amount'],
                 ]);
                 $medicine = new \App\Models\Medicine(['name' => $item['name']]);
                 $saleItem->setRelation('medicine', $medicine);
@@ -339,16 +352,16 @@ class PosTerminal extends Component implements HasActions, HasForms
 
         // Calculate total for draft
         $discount = (float) ($checkoutData['discount'] ?? 0);
-        $subTotal = collect($cartItems)->sum(fn ($item) => $item['unit_price'] * (int) ($item['quantity'] ?? 0));
-        $taxAmount = collect($cartItems)->sum(function ($item) {
-            $taxRate = $item['tax_rate'] ?? 0;
-            if ($taxRate <= 0) {
-                return 0;
-            }
-            $itemTotal = $item['unit_price'] * (int) ($item['quantity'] ?? 0);
-
-            return $itemTotal * ($taxRate / 100);
-        });
+        
+        $pricingService = app(PricingService::class);
+        $subTotal = 0;
+        $taxAmount = 0;
+        foreach ($cartItems as $item) {
+            $isInclusive = $item['is_tax_inclusive'] ?? false;
+            $pricing = $pricingService->lineWithTaxRate((int) ($item['quantity'] ?? 0), (float) $item['unit_price'], (float) ($item['tax_rate'] ?? 0), $isInclusive);
+            $subTotal += $pricing['line_sub_total'];
+            $taxAmount += $pricing['tax_amount'];
+        }
 
         $total = ($subTotal + $taxAmount) - $discount;
 

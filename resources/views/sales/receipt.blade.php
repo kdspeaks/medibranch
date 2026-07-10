@@ -73,22 +73,33 @@
         <table class="mb-2">
             <thead>
                 <tr class="border-b">
+                    <th style="width: 12px;">#</th>
                     <th class="item-name">Item</th>
+                    <th class="text-right">MRP</th>
                     <th class="text-center">Qty</th>
                     <th class="text-right">Total</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach($sale->items as $item)
+                @foreach($sale->items as $index => $item)
                 <tr>
+                    <td style="vertical-align: top;">{{ $index + 1 }}</td>
                     <td class="item-name">
                         {{ $item->medicine->name }}<br>
-                        <small>@ {{ currency() }}{{ number_format($item->unit_price, 2) }}</small>
+                        @if($item->medicine->manufacturer)
+                        <small style="font-style: italic;">Brand: {{ $item->medicine->manufacturer->name }}</small>
+                        @endif
                     </td>
-                    <td class="text-center">{{ $item->quantity }}</td>
+                    <td class="text-right">{{ currency() }}{{ number_format($item->unit_price, 2) }}</td>
+                    <td class="text-center">{{ (int)$item->quantity }}</td>
                     <td class="text-right">{{ currency() }}{{ number_format($item->total_amount, 2) }}</td>
                 </tr>
                 @endforeach
+                <tr class="border-t font-bold">
+                    <td colspan="3" class="text-right" style="padding-top: 4px;">Total</td>
+                    <td class="text-center" style="padding-top: 4px;">{{ (int)$sale->items->sum('quantity') }}</td>
+                    <td class="text-right" style="padding-top: 4px;">{{ currency() }}{{ number_format($sale->items->sum('total_amount'), 2) }}</td>
+                </tr>
             </tbody>
         </table>
 
@@ -96,19 +107,23 @@
         <div class="border-t pt-2 mb-3">
             <table style="width: 100%;">
                 <tr>
-                    <td>Subtotal:</td>
+                    <td>Sub Total:</td>
                     <td class="text-right">{{ currency() }}{{ number_format($sale->sub_total, 2) }}</td>
                 </tr>
-                @if($sale->tax_amount > 0)
-                <tr>
-                    <td>Tax:</td>
-                    <td class="text-right">{{ currency() }}{{ number_format($sale->tax_amount, 2) }}</td>
-                </tr>
-                @endif
                 @if($sale->discount > 0)
                 <tr>
                     <td>Discount:</td>
                     <td class="text-right">-{{ currency() }}{{ number_format($sale->discount, 2) }}</td>
+                </tr>
+                @endif
+                @if($sale->tax_amount > 0)
+                <tr>
+                    <td>CGST:</td>
+                    <td class="text-right">{{ currency() }}{{ number_format($sale->tax_amount / 2, 2) }}</td>
+                </tr>
+                <tr>
+                    <td>SGST:</td>
+                    <td class="text-right">{{ currency() }}{{ number_format($sale->tax_amount / 2, 2) }}</td>
                 </tr>
                 @endif
                 @if($sale->round_off != 0)
@@ -121,11 +136,56 @@
                 </tr>
                 @endif
                 <tr class="font-bold" style="font-size: 14px;">
-                    <td style="padding-top: 5px;">Total:</td>
+                    <td style="padding-top: 5px;">Grand Total:</td>
                     <td class="text-right" style="padding-top: 5px;">{{ currency() }}{{ number_format($sale->total_amount, 2) }}</td>
                 </tr>
             </table>
         </div>
+
+        <!-- GST Summary -->
+        @php
+            $gstSummary = [];
+            foreach ($sale->items as $item) {
+                $rate = (float) ($item->medicine->tax->rate ?? 0);
+                if ($rate > 0) {
+                    $key = (string) $rate;
+                    if (!isset($gstSummary[$key])) {
+                        $gstSummary[$key] = ['taxable_amount' => 0, 'tax_amount' => 0];
+                    }
+                    $gstSummary[$key]['taxable_amount'] += $item->sub_total;
+                    $gstSummary[$key]['tax_amount'] += $item->tax_amount;
+                }
+            }
+        @endphp
+        @if(count($gstSummary) > 0)
+        <div class="border-t pt-2 mb-2">
+            <div class="text-center font-bold mb-1">GST</div>
+            <table>
+                <thead>
+                    <tr class="border-b">
+                        <th>Taxable Amt</th>
+                        <th class="text-right">CGST %</th>
+                        <th class="text-right">CGST Amt</th>
+                        <th class="text-right">SGST %</th>
+                        <th class="text-right">SGST Amt</th>
+                        <th class="text-right">Tax Amt</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($gstSummary as $rate => $data)
+                    <tr>
+                        <td>{{ number_format($data['taxable_amount'], 2) }}</td>
+                        <td class="text-right">{{ number_format((float)$rate / 2, 2) }}%</td>
+                        <td class="text-right">{{ number_format($data['tax_amount'] / 2, 2) }}</td>
+                        <td class="text-right">{{ number_format((float)$rate / 2, 2) }}%</td>
+                        <td class="text-right">{{ number_format($data['tax_amount'] / 2, 2) }}</td>
+                        <td class="text-right">{{ number_format($data['tax_amount'], 2) }}</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+        @endif
 
         <!-- Payment Details -->
         @if(!($isEstimate ?? false))

@@ -89,9 +89,9 @@ class SaleService
 
                 // Pricing calculation (Assuming cart already provided unit_price or we use medicine mrp)
                 $unitPrice = $item['unit_price'] ?? $medicine->mrp;
-                $pricing = $this->pricingService->lineWithTax($item['quantity'], $unitPrice, $medicine->tax_id);
+                $pricing = $this->pricingService->lineWithTax($item['quantity'], $unitPrice, $medicine->tax_id, (bool) $medicine->is_tax_inclusive);
 
-                $lineSubTotal = $item['quantity'] * $unitPrice;
+                $lineSubTotal = $pricing['line_sub_total'] ?? ($item['quantity'] * $unitPrice);
                 $lineTaxAmount = $pricing['tax_amount'];
                 $lineTotalAmount = $pricing['line_total_amount'];
 
