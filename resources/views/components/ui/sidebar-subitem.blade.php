@@ -86,6 +86,6 @@
             'text-primary bg-surface-dark/10 dark:text-primary-dark dark:bg-surface/10' :
             'text-text hover:bg-surface-dark/10 dark:text-text-dark dark:hover:bg-surface/10'"
         {{ $attributes->merge(['class' => 'flex items-center p-2 pl-11 text-base rounded-lg transition group']) }}>
-        {{ trim($slot) }}
+        {{ $slot }}
     </a>
 </li>

@@ -15,6 +15,11 @@ return [
 
     // Sidebar
     'dashboard' => 'Dashboard',
+    'today_sales' => 'Today\'s Sales',
+    'today_invoices' => 'Today\'s Invoices',
+    'today_purchases' => 'Today\'s Purchases',
+    'total_customers' => 'Total Customers',
+    'total_medicines' => 'Total Medicines',
     'contacts' => 'Contacts',
     'suppliers' => 'Suppliers',
     'users' => 'Users',
@@ -64,7 +69,7 @@ return [
     'drug_license_number' => 'Drug License Number',
     'phone' => 'Phone',
     'is_active' => 'Is Active',
-
+    'taxable' => 'Taxable',
     // Settings & Taxes
     'site_name' => 'Site Name',
     'site_branch' => 'Site Branch',
@@ -222,7 +227,7 @@ return [
     'draft_loaded' => 'Draft loaded.',
     'draft_deleted' => 'Draft deleted.',
     'no_recent_sale' => 'No recent sale found to print.',
-
+    'transaction_number' => 'Transaction Number',
     // Manual Stock Entry
     'adjust_stock' => 'Adjust Stock',
     'adjustment_type' => 'Adjustment Type',

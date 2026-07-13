@@ -18,10 +18,12 @@ class Branch extends Model
         'phone',
         'email',
         'is_active',
+        'taxable',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
+        'taxable' => 'boolean',
     ];
 
     public function users()

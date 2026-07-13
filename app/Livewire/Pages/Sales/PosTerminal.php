@@ -116,14 +116,17 @@ class PosTerminal extends Component implements HasActions, HasForms
                         'batch_number' => $b->batch_number,
                         'expiry' => $b->expiry_date ? \Carbon\Carbon::parse($b->expiry_date)->format('m/y') : '--/--',
                         'available_quantity' => $b->available_quantity,
+                        'mrp' => (float) $b->mrp,
                     ];
                 })->toArray() ?? [];
+
+                $price = (float) ($firstBatch?->mrp ?: $details->mrp);
 
                 $this->dispatch('exact-match-found', payload: [
                     'id' => $details->id,
                     'name' => $details->name,
                     'sku' => $details->sku,
-                    'price' => (float) $details->mrp,
+                    'price' => $price,
                     'batch_id' => $firstBatch?->id,
                     'batch_number' => $firstBatch?->batch_number ?? '--',
                     'expiry' => $firstBatch?->expiry_date ? \Carbon\Carbon::parse($firstBatch->expiry_date)->format('m/y') : '--/--',
@@ -172,14 +175,17 @@ class PosTerminal extends Component implements HasActions, HasForms
                     'batch_number' => $b->batch_number,
                     'expiry' => $b->expiry_date ? \Carbon\Carbon::parse($b->expiry_date)->format('m/y') : '--/--',
                     'available_quantity' => $b->available_quantity,
+                    'mrp' => (float) $b->mrp,
                 ];
             })->toArray() ?? [];
+
+            $price = (float) ($firstBatch?->mrp ?: $details->mrp);
 
             $this->dispatch('exact-match-found', payload: [
                 'id' => $details->id,
                 'name' => $details->name,
                 'sku' => $details->sku,
-                'price' => (float) $details->mrp,
+                'price' => $price,
                 'batch_id' => $firstBatch?->id,
                 'batch_number' => $firstBatch?->batch_number ?? '--',
                 'expiry' => $firstBatch?->expiry_date ? \Carbon\Carbon::parse($firstBatch->expiry_date)->format('m/y') : '--/--',
@@ -268,15 +274,19 @@ class PosTerminal extends Component implements HasActions, HasForms
             $discount = (float) ($checkoutData['discount'] ?? 0);
             $applyRoundOff = $checkoutData['applyRoundOff'] ?? true;
 
+            $branch = \App\Models\Branch::find($this->selectedBranchId);
+            $isTaxable = $branch ? $branch->taxable : false;
+
             $subTotal = 0.0;
             $taxAmount = 0.0;
 
             foreach ($cartItems as $item) {
-                $isInclusive = $item['is_tax_inclusive'] ?? false;
+                $isInclusive = $isTaxable ? ($item['is_tax_inclusive'] ?? false) : false;
+                $taxRate = $isTaxable ? (float) ($item['tax_rate'] ?? 0) : 0;
                 $pricing = $pricingService->lineWithTaxRate(
                     (int) ($item['quantity'] ?? 0),
                     (float) $item['unit_price'],
-                    (float) ($item['tax_rate'] ?? 0),
+                    $taxRate,
                     $isInclusive
                 );
                 $subTotal += $pricing['line_sub_total'];
@@ -300,12 +310,13 @@ class PosTerminal extends Component implements HasActions, HasForms
             $sale->setRelation('user', auth()->user());
             $sale->setRelation('customer', $this->customerId ? \App\Models\Customer::find($this->customerId) : null);
 
-            $items = collect($cartItems)->map(function ($item) use ($pricingService) {
-                $isInclusive = $item['is_tax_inclusive'] ?? false;
+            $items = collect($cartItems)->map(function ($item) use ($pricingService, $isTaxable) {
+                $isInclusive = $isTaxable ? ($item['is_tax_inclusive'] ?? false) : false;
+                $taxRate = $isTaxable ? (float) ($item['tax_rate'] ?? 0) : 0;
                 $pricing = $pricingService->lineWithTaxRate(
                     (int) ($item['quantity'] ?? 0),
                     (float) $item['unit_price'],
-                    (float) ($item['tax_rate'] ?? 0),
+                    $taxRate,
                     $isInclusive
                 );
                 $saleItem = new \App\Models\SaleItem([
@@ -371,6 +382,9 @@ class PosTerminal extends Component implements HasActions, HasForms
             return;
         }
 
+        $branch = \App\Models\Branch::find($branchId);
+        $isTaxable = $branch ? $branch->taxable : false;
+
         // Calculate total for draft
         $discount = (float) ($checkoutData['discount'] ?? 0);
 
@@ -378,8 +392,9 @@ class PosTerminal extends Component implements HasActions, HasForms
         $subTotal = 0;
         $taxAmount = 0;
         foreach ($cartItems as $item) {
-            $isInclusive = $item['is_tax_inclusive'] ?? false;
-            $pricing = $pricingService->lineWithTaxRate((int) ($item['quantity'] ?? 0), (float) $item['unit_price'], (float) ($item['tax_rate'] ?? 0), $isInclusive);
+            $isInclusive = $isTaxable ? ($item['is_tax_inclusive'] ?? false) : false;
+            $taxRate = $isTaxable ? (float) ($item['tax_rate'] ?? 0) : 0;
+            $pricing = $pricingService->lineWithTaxRate((int) ($item['quantity'] ?? 0), (float) $item['unit_price'], $taxRate, $isInclusive);
             $subTotal += $pricing['line_sub_total'];
             $taxAmount += $pricing['tax_amount'];
         }
@@ -525,7 +540,10 @@ class PosTerminal extends Component implements HasActions, HasForms
 
     public function render()
     {
-        return view('livewire.sales.pos-terminal');
+        $branch = \App\Models\Branch::find($this->selectedBranchId);
+        return view('livewire.sales.pos-terminal', [
+            'isTaxable' => $branch ? $branch->taxable : false,
+        ]);
     }
 
     public function toJSON()

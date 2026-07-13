@@ -70,6 +70,11 @@ class MedicineMovementsTable extends Component implements HasActions, HasForms, 
                     ->label(__('messages.quantity'))
                     ->numeric()
                     ->sortable(),
+                TextColumn::make('batch.mrp')
+                    ->label(__('messages.mrp') ?? 'MRP')
+                    ->numeric()
+                    ->prefix(currency())
+                    ->sortable(),
                 TextColumn::make('reason')
                     ->label(__('messages.reason')),
                 TextColumn::make('source_label')
@@ -114,6 +119,10 @@ class MedicineMovementsTable extends Component implements HasActions, HasForms, 
                         DatePicker::make('expiry_date')
                             ->label(__('messages.expiry_date'))
                             ->visible(fn (InventoryLog $record) => $record->source_type === null && $record->type === 'in'),
+                        TextInput::make('mrp')
+                            ->label(__('messages.mrp') ?? 'MRP')
+                            ->numeric()
+                            ->visible(fn (InventoryLog $record) => $record->source_type === null && $record->type === 'in'),
                     ])
                     ->fillForm(function (InventoryLog $record): array {
                         return [
@@ -123,6 +132,7 @@ class MedicineMovementsTable extends Component implements HasActions, HasForms, 
                             'batch_number' => $record->batch?->batch_number,
                             'mfg_date' => $record->batch?->mfg_date,
                             'expiry_date' => $record->batch?->expiry_date,
+                            'mrp' => $record->batch?->mrp,
                         ];
                     })
                     ->action(function (array $data, InventoryLog $record) {
@@ -160,6 +170,12 @@ class MedicineMovementsTable extends Component implements HasActions, HasForms, 
                                         $batch->batch_number = $data['batch_number'] ?? $batch->batch_number;
                                         $batch->mfg_date = $data['mfg_date'] ?? $batch->mfg_date;
                                         $batch->expiry_date = $data['expiry_date'] ?? $batch->expiry_date;
+
+                                        if (isset($data['mrp'])) {
+                                            $batch->mrp = $data['mrp'];
+                                            // Also update global medicine MRP
+                                            $batch->inventory->medicine->update(['mrp' => $data['mrp']]);
+                                        }
                                     }
 
                                     $batch->save();

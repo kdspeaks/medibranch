@@ -39,18 +39,23 @@
                              })"
                              x-text="siteName"></span>
                      </div>
-                     <div class="ml-auto absolute -bottom-4 right-0">
-                        <span
-                         x-data="{ siteBranch: '{{ activeBranch()?->name ?? "" }}' }"
-                         x-init="window.addEventListener('branch-name-updated', e => {
-                                 siteBranch = e.detail.branch_name;
-                             })"
-                        class="bg-primary p-1 rounded-sm text-text-dark text-xxs" x-text="siteBranch"></span>
-                     </div>
                  </a>
 
              </div>
              <div class="flex items-center">
+                 <!-- Live Clock -->
+                 <div class="hidden md:flex items-center px-3 py-1 mr-2 rounded-lg bg-surface-dark/5 dark:bg-surface/10 border border-border dark:border-border-dark" x-data="{
+                     time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+                     init() {
+                         setInterval(() => {
+                             this.time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                         }, 1000);
+                     }
+                 }">
+                     <x-icon name="heroicon-o-clock" class="w-4 h-4 mr-2 text-primary dark:text-primary-dark" />
+                     <span x-text="time" class="text-sm font-medium font-mono text-text dark:text-text-dark tabular-nums tracking-tight"></span>
+                 </div>
+
                  <x-ui.theme-toggle class="ml-3" />
 
                  <div class="ml-3">
@@ -109,7 +114,7 @@
                                      </div>
                                      <ul class="py-1" role="none">
                                          <li>
-                                             <a href="#"
+                                             <a href="{{ route('dashboard') }}"
                                                  class="block px-4 py-2 text-sm text-text/80 hover:bg-surface-dark/10 dark:text-text-dark/80 dark:hover:bg-surface/10 dark:hover:text-text-dark"
                                                  role="menuitem">{{ __('messages.dashboard') }}</a>
                                          </li>
@@ -117,11 +122,6 @@
                                              <a href="{{ route('profile') }}" wire:navigate
                                                  class="block px-4 py-2 text-sm text-text/80 hover:bg-surface-dark/10 dark:text-text-dark/80 dark:hover:bg-surface/10 dark:hover:text-text-dark"
                                                  role="menuitem">{{ __('messages.profile') }}</a>
-                                         </li>
-                                         <li>
-                                             <a href="#"
-                                                 class="block px-4 py-2 text-sm text-text/80 hover:bg-surface-dark/10 dark:text-text-dark/80 dark:hover:bg-surface/10 dark:hover:text-text-dark"
-                                                 role="menuitem">{{ __('messages.earnings') }}</a>
                                          </li>
                                          <li>
                                              <a wire:click="logout"

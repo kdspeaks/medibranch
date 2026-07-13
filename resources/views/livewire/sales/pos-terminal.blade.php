@@ -62,18 +62,21 @@
                                               'batch_number' => $b->batch_number,
                                               'expiry' => $b->expiry_date ? \Carbon\Carbon::parse($b->expiry_date)->format('m/y') : '--/--',
                                               'available_quantity' => $b->available_quantity,
+                                              'mrp' => (float) $b->mrp,
                                           ];
                                       })->toArray() ?? [];
                                       $firstBatch = $medicine->inventories->first()?->batches->first();
+                                      $price = (float) ($firstBatch?->mrp ?: $medicine->mrp);
                                       $payload = json_encode([
                                           'id' => $medicine->id,
                                           'name' => $medicine->name,
-                                          'price' => (float)$medicine->mrp,
+                                          'price' => $price,
                                           'batch_id' => $firstBatch?->id,
                                           'batch_number' => $firstBatch?->batch_number ?? '--',
                                           'expiry' => $firstBatch?->expiry_date ? \Carbon\Carbon::parse($firstBatch->expiry_date)->format('m/y') : '--/--',
                                           'tax_rate' => (float)($medicine->tax?->rate ?? 0),
                                           'tax_name' => $medicine->tax?->name ?? '0%',
+                                          'is_tax_inclusive' => (bool)$medicine->is_tax_inclusive,
                                           'available' => $medicine->inventories->first()?->batches->sum('available_quantity') ?? 0,
                                           'batches' => $allBatches,
                                       ]);
@@ -123,6 +126,19 @@
             
             <div class="h-6 w-px bg-gray-300 dark:bg-gray-700 mx-1"></div>
             
+            <!-- Live Clock -->
+            <div class="hidden md:flex items-center px-3 py-1 rounded-lg bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700" x-data="{
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+                init() {
+                    setInterval(() => {
+                        this.time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                    }, 1000);
+                }
+            }">
+                <x-heroicon-o-clock class="w-4 h-4 mr-2 text-primary dark:text-primary-dark" />
+                <span x-text="time" class="text-sm font-medium font-mono text-gray-700 dark:text-gray-300 tabular-nums tracking-tight"></span>
+            </div>
+
             <x-ui.theme-toggle />
             
             <div class="flex items-center gap-2 ml-2">
@@ -161,8 +177,10 @@
                             <th class="px-4 py-2 font-medium">Batch / Expiry</th>
                             <th class="px-4 py-2 font-medium">Unit Price</th>
                             <th class="px-4 py-2 font-medium text-center">Qty</th>
+                            @if($isTaxable)
                             <th class="px-4 py-2 font-medium text-right">Price without tax</th>
                             <th class="px-4 py-2 font-medium text-right">Tax</th>
+                            @endif
                             <th class="px-4 py-2 font-medium text-right">Total</th>
                             <th class="px-4 py-2"></th>
                         </tr>
@@ -206,6 +224,7 @@
                                         </button>
                                     </div>
                                 </td>
+                                @if($isTaxable)
                                 <td class="px-4 py-2 text-right font-medium text-gray-900 dark:text-gray-300">
                                     {{ currency() }}<span x-text="formatCurrency(lineSubtotal(item))"></span>
                                 </td>
@@ -213,6 +232,7 @@
                                     <div class="text-gray-900 dark:text-gray-300" x-text="item.tax_name"></div>
                                     <div class="text-xs text-gray-500">{{ currency() }}<span x-text="formatCurrency(lineTaxAmount(item))"></span></div>
                                 </td>
+                                @endif
                                 <td class="px-4 py-2 text-right font-bold text-gray-900 dark:text-gray-100">
                                     {{ currency() }}<span x-text="formatCurrency(lineTotalAmount(item))"></span>
                                 </td>
@@ -224,7 +244,7 @@
                             </tr>
                         </template>
                         <tr x-show="cart.length === 0" x-cloak>
-                            <td colspan="9" class="px-6 py-12 text-center text-gray-500">
+                            <td colspan="{{ $isTaxable ? 9 : 7 }}" class="px-6 py-12 text-center text-gray-500">
                                 <x-heroicon-o-shopping-bag class="w-12 h-12 mx-auto text-gray-300 mb-3" />
                                 {{ __('messages.search_medicine') }}
                             </td>
@@ -253,6 +273,7 @@
                             <input type="number" step="0.01" x-model.number="discount" class="w-16 text-right px-1 py-0.5 border border-gray-300 dark:border-gray-700 rounded bg-white dark:bg-[#1e293b] focus:outline-none focus:border-primary text-red-500 font-medium">
                         </div>
                     </div>
+                    @if($isTaxable)
                     <div class="flex justify-between text-xs text-gray-600 dark:text-gray-400">
                         <span>CGST</span>
                         <span class="font-medium text-gray-900 dark:text-white">{{ currency() }}<span x-text="formatCurrency(taxAmount / 2)"></span></span>
@@ -261,6 +282,7 @@
                         <span>SGST</span>
                         <span class="font-medium text-gray-900 dark:text-white">{{ currency() }}<span x-text="formatCurrency(taxAmount / 2)"></span></span>
                     </div>
+                    @endif
                     <div class="flex justify-between items-center text-xs text-gray-600 dark:text-gray-400">
                         <label class="flex items-center cursor-pointer gap-1">
                             <input type="checkbox" x-model="applyRoundOff" class="rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary h-3 w-3">
@@ -516,9 +538,10 @@
 
             get subTotal() {
                 let total = 0;
+                let isTaxable = {{ $isTaxable ? 'true' : 'false' }};
                 for (let item of this.cart) {
                     let itemTotal = item.price * item.quantity;
-                    if (item.is_tax_inclusive) {
+                    if (isTaxable && item.is_tax_inclusive) {
                         let taxRate = parseFloat(item.tax_rate) || 0;
                         let itemTax = taxRate > 0 ? itemTotal - (itemTotal / (1 + (taxRate / 100))) : 0;
                         total += (itemTotal - itemTax);
@@ -529,6 +552,8 @@
                 return total;
             },
             get taxAmount() {
+                let isTaxable = {{ $isTaxable ? 'true' : 'false' }};
+                if (!isTaxable) return 0;
                 return this.cart.reduce((sum, item) => {
                     let itemTotal = item.price * item.quantity;
                     let taxRate = parseFloat(item.tax_rate) || 0;
@@ -558,6 +583,8 @@
             },
             
             lineTaxAmount(item) {
+                let isTaxable = {{ $isTaxable ? 'true' : 'false' }};
+                if (!isTaxable) return 0;
                 let itemTotal = item.price * item.quantity;
                 let taxRate = parseFloat(item.tax_rate) || 0;
                 if (taxRate <= 0) return 0;
@@ -568,15 +595,17 @@
                 return itemTotal * (taxRate / 100);
             },
             lineSubtotal(item) {
+                let isTaxable = {{ $isTaxable ? 'true' : 'false' }};
                 let itemTotal = item.price * item.quantity;
-                if (item.is_tax_inclusive) {
+                if (isTaxable && item.is_tax_inclusive) {
                     return itemTotal - this.lineTaxAmount(item);
                 }
                 return itemTotal;
             },
             lineTotalAmount(item) {
+                let isTaxable = {{ $isTaxable ? 'true' : 'false' }};
                 let itemTotal = item.price * item.quantity;
-                if (item.is_tax_inclusive) {
+                if (isTaxable && item.is_tax_inclusive) {
                     return itemTotal;
                 }
                 return itemTotal + this.lineTaxAmount(item);
@@ -623,6 +652,10 @@
                     item.inventory_batch_id = batch.id;
                     item.batch_number = batch.batch_number;
                     item.expiry_date = batch.expiry;
+                    if (batch.mrp) {
+                        item.price = batch.mrp;
+                        item.unit_price = batch.mrp;
+                    }
                 }
             },
             

@@ -12,9 +12,10 @@
                     @endforeach
                 </select>
             @endif
-            
-            {{ $this->adjustStockAction }}
-            <x-ui.button icon="heroicon-o-pencil" variant="primary" class="w-full" wire:navigate
+            <div class="shrink-0">
+                {{ $this->adjustStockAction }}
+            </div>
+            <x-ui.button icon="heroicon-o-pencil" variant="primary" class="shrink-0" wire:navigate
                 href="{{ route('medicines.edit', ['medicine' => $medicine]) }}">
                 Edit Medicine
             </x-ui.button>

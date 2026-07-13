@@ -46,7 +46,7 @@ x-data="{ showSidebar: window.innerWidth >= 1024 }"
                 </div>
             </main>
             <footer
-                class="w-full p-4 text-sm text-text bg-surface border-t border-border dark:text-text-dark dark:bg-surface-dark dark:border-border-dark">
+                class="w-full p-4 lg:p-0 lg:px-4 lg:h-[74px] flex flex-col justify-center text-sm text-text bg-surface border-t border-border dark:text-text-dark dark:bg-surface-dark dark:border-border-dark">
                 <div class="flex flex-col items-center justify-between gap-2 md:flex-row">
                     <div class="text-center md:text-left">
                         &copy; {{ date('Y') }} — Created by <span class="font-medium">Kunal Dutta</span> with ❤️

@@ -15,6 +15,11 @@ return [
 
     // Sidebar
     'dashboard' => 'ড্যাশবোর্ড',
+    'today_sales' => 'আজকের বিক্রয়',
+    'today_invoices' => 'আজকের চালান',
+    'today_purchases' => 'আজকের ক্রয়',
+    'total_customers' => 'মোট গ্রাহক',
+    'total_medicines' => 'মোট ওষুধ',
     'contacts' => 'যোগাযোগ',
     'suppliers' => 'সরবরাহকারী',
     'users' => 'ব্যবহারকারী',
@@ -63,7 +68,7 @@ return [
     'drug_license_number' => 'ওষুধের লাইসেন্স নম্বর',
     'phone' => 'ফোন',
     'is_active' => 'সক্রিয়?',
-
+    'taxable' => 'ট্যাক্সযোগ্য',
     // Settings & Taxes
     'site_name' => 'সাইটের নাম',
     'site_branch' => 'সাইটের শাখা',
@@ -221,7 +226,7 @@ return [
     'draft_loaded' => 'ড্রাফট লোড করা হয়েছে।',
     'draft_deleted' => 'ড্রাফট মুছে ফেলা হয়েছে।',
     'no_recent_sale' => 'প্রিন্ট করার জন্য কোনো সাম্প্রতিক বিক্রয় পাওয়া যায়নি।',
-
+    'transaction_number' => 'লেনদেন নম্বর',
     // Manual Stock Entry
     'adjust_stock' => 'Adjust Stock',
     'adjustment_type' => 'Adjustment Type',

@@ -116,7 +116,7 @@
                     <td class="text-right">-{{ currency() }}{{ number_format($sale->discount, 2) }}</td>
                 </tr>
                 @endif
-                @if($sale->tax_amount > 0)
+                @if(($sale->branch->taxable ?? false) && $sale->tax_amount > 0)
                 <tr>
                     <td>CGST:</td>
                     <td class="text-right">{{ currency() }}{{ number_format($sale->tax_amount / 2, 2) }}</td>
@@ -157,7 +157,7 @@
                 }
             }
         @endphp
-        @if(count($gstSummary) > 0)
+        @if(($sale->branch->taxable ?? false) && count($gstSummary) > 0)
         <div class="border-t pt-2 mb-2">
             <div class="text-center font-bold mb-1">GST</div>
             <table>

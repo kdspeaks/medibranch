@@ -93,6 +93,11 @@ class BranchList extends Component  implements HasForms, HasActions, HasTable
                                 ->label(__('messages.is_active'))
                                 ->boolean()
                                 ->default(true)
+                                ->inline(),
+                            Radio::make('taxable')
+                                ->label(__('messages.taxable') ?? 'Taxable')
+                                ->boolean()
+                                ->default(false)
                                 ->inline()
                         ]),
 
@@ -177,6 +182,11 @@ class BranchList extends Component  implements HasForms, HasActions, HasTable
                                         ->label(__('messages.is_active'))
                                         ->boolean()
                                         ->default(true)
+                                        ->inline(),
+                                    Radio::make('taxable')
+                                        ->label(__('messages.taxable') ?? 'Taxable')
+                                        ->boolean()
+                                        ->default(false)
                                         ->inline()
                                 ]),
 
