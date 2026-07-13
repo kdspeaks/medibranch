@@ -27,6 +27,7 @@ class DatabaseSeeder extends Seeder
             'manage-pos',
             'manage-sales',
             'manage-customers',
+            'edit-stock-transactions',
         ];
 
         foreach ($permissions as $permission) {

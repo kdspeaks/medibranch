@@ -238,4 +238,5 @@ return [
     'batch_number' => 'Batch Number',
     'mfg_date' => 'Mfg Date',
     'expiry_date' => 'Expiry Date',
+    'edit_transaction' => 'লেনদেন সম্পাদনা করুন',
 ];
