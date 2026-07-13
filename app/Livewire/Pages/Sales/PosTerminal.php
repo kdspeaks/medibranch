@@ -60,10 +60,10 @@ class PosTerminal extends Component implements HasActions, HasForms
     public function mount()
     {
         $this->selectedBranchId = activeBranch()?->id;
-        
-        if (!$this->selectedBranchId && $this->isSuperAdmin()) {
+
+        if (! $this->selectedBranchId && $this->isSuperAdmin()) {
             $this->selectedBranchId = \App\Models\Branch::first()?->id;
-        } elseif (!$this->selectedBranchId) {
+        } elseif (! $this->selectedBranchId) {
             $this->selectedBranchId = auth()->user()?->branches()->where('is_active', true)->first()?->id;
         }
     }
@@ -79,6 +79,7 @@ class PosTerminal extends Component implements HasActions, HasForms
         if ($this->isSuperAdmin()) {
             return \App\Models\Branch::pluck('name', 'id');
         }
+
         return auth()->user()?->branches()->where('is_active', true)->pluck('branches.name', 'branches.id') ?? collect();
     }
 
@@ -109,6 +110,15 @@ class PosTerminal extends Component implements HasActions, HasForms
             if ($exactMatch) {
                 $details = $this->getMedicineDetails($exactMatch->id);
                 $firstBatch = $details->inventories->first()?->batches->first();
+                $allBatches = $details->inventories->first()?->batches->map(function ($b) {
+                    return [
+                        'id' => $b->id,
+                        'batch_number' => $b->batch_number,
+                        'expiry' => $b->expiry_date ? \Carbon\Carbon::parse($b->expiry_date)->format('m/y') : '--/--',
+                        'available_quantity' => $b->available_quantity,
+                    ];
+                })->toArray() ?? [];
+
                 $this->dispatch('exact-match-found', payload: [
                     'id' => $details->id,
                     'name' => $details->name,
@@ -121,6 +131,7 @@ class PosTerminal extends Component implements HasActions, HasForms
                     'tax_name' => $details->tax?->name ?? '0%',
                     'is_tax_inclusive' => (bool) $details->is_tax_inclusive,
                     'available' => $details->inventories->first()?->batches->sum('available_quantity') ?? 0,
+                    'batches' => $allBatches,
                 ]);
                 $this->search = '';
 
@@ -155,6 +166,15 @@ class PosTerminal extends Component implements HasActions, HasForms
         if (count($this->medicines) === 1) {
             $details = $this->medicines->first();
             $firstBatch = $details->inventories->first()?->batches->first();
+            $allBatches = $details->inventories->first()?->batches->map(function ($b) {
+                return [
+                    'id' => $b->id,
+                    'batch_number' => $b->batch_number,
+                    'expiry' => $b->expiry_date ? \Carbon\Carbon::parse($b->expiry_date)->format('m/y') : '--/--',
+                    'available_quantity' => $b->available_quantity,
+                ];
+            })->toArray() ?? [];
+
             $this->dispatch('exact-match-found', payload: [
                 'id' => $details->id,
                 'name' => $details->name,
@@ -167,6 +187,7 @@ class PosTerminal extends Component implements HasActions, HasForms
                 'tax_name' => $details->tax?->name ?? '0%',
                 'is_tax_inclusive' => (bool) $details->is_tax_inclusive,
                 'available' => $details->inventories->first()?->batches->sum('available_quantity') ?? 0,
+                'batches' => $allBatches,
             ]);
             $this->search = '';
         }
@@ -352,7 +373,7 @@ class PosTerminal extends Component implements HasActions, HasForms
 
         // Calculate total for draft
         $discount = (float) ($checkoutData['discount'] ?? 0);
-        
+
         $pricingService = app(PricingService::class);
         $subTotal = 0;
         $taxAmount = 0;

@@ -56,6 +56,14 @@
                           <ul class="max-h-60 overflow-auto">
                               @foreach($medicines as $medicine)
                                   @php
+                                      $allBatches = $medicine->inventories->first()?->batches->map(function ($b) {
+                                          return [
+                                              'id' => $b->id,
+                                              'batch_number' => $b->batch_number,
+                                              'expiry' => $b->expiry_date ? \Carbon\Carbon::parse($b->expiry_date)->format('m/y') : '--/--',
+                                              'available_quantity' => $b->available_quantity,
+                                          ];
+                                      })->toArray() ?? [];
                                       $firstBatch = $medicine->inventories->first()?->batches->first();
                                       $payload = json_encode([
                                           'id' => $medicine->id,
@@ -67,6 +75,7 @@
                                           'tax_rate' => (float)($medicine->tax?->rate ?? 0),
                                           'tax_name' => $medicine->tax?->name ?? '0%',
                                           'available' => $medicine->inventories->first()?->batches->sum('available_quantity') ?? 0,
+                                          'batches' => $allBatches,
                                       ]);
                                   @endphp
                                   <li>
@@ -171,8 +180,19 @@
                                     </div>
                                 </td>
                                 <td class="px-4 py-2">
-                                    <div class="text-gray-900 dark:text-gray-300" x-text="item.batch_number"></div>
-                                    <div class="text-xs text-gray-500" x-text="item.expiry_date"></div>
+                                    <template x-if="item.batches && item.batches.length > 0">
+                                        <select x-model="item.inventory_batch_id" @change="updateBatch(index, $event.target.value)" class="text-sm border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 focus:ring-primary focus:border-primary py-1 pl-2 pr-8 text-gray-900 dark:text-gray-300 w-full min-w-[140px]">
+                                            <template x-for="batch in item.batches" :key="batch.id">
+                                                <option :value="batch.id" x-text="batch.batch_number + ' (Exp: ' + batch.expiry + ')'"></option>
+                                            </template>
+                                        </select>
+                                    </template>
+                                    <template x-if="!item.batches || item.batches.length === 0">
+                                        <div>
+                                            <div class="text-gray-900 dark:text-gray-300" x-text="item.batch_number"></div>
+                                            <div class="text-xs text-gray-500" x-text="item.expiry_date"></div>
+                                        </div>
+                                    </template>
                                 </td>
                                 <td class="px-4 py-2 text-gray-900 dark:text-gray-300 font-medium">{{ currency() }}<span x-text="formatCurrency(item.unit_price)"></span></td>
                                 <td class="px-4 py-2">
@@ -589,8 +609,20 @@
                         tax_rate: payload.tax_rate,
                         tax_name: payload.tax_name,
                         is_tax_inclusive: payload.is_tax_inclusive,
-                        available_stock: payload.available
+                        available_stock: payload.available,
+                        batches: payload.batches || []
                     });
+                }
+            },
+            
+            updateBatch(index, batchId) {
+                let item = this.cart[index];
+                if (!item.batches) return;
+                let batch = item.batches.find(b => b.id == batchId);
+                if (batch) {
+                    item.inventory_batch_id = batch.id;
+                    item.batch_number = batch.batch_number;
+                    item.expiry_date = batch.expiry;
                 }
             },
             
