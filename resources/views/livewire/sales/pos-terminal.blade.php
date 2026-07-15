@@ -67,7 +67,7 @@
                                       })->toArray() ?? [];
                                       $firstBatch = $medicine->inventories->first()?->batches->first();
                                       $price = (float) ($firstBatch?->mrp ?: $medicine->mrp);
-                                      $payload = json_encode([
+                                      $payload = rawurlencode(json_encode([
                                           'id' => $medicine->id,
                                           'name' => $medicine->name,
                                           'price' => $price,
@@ -79,10 +79,10 @@
                                           'is_tax_inclusive' => (bool)$medicine->is_tax_inclusive,
                                           'available' => $medicine->inventories->first()?->batches->sum('available_quantity') ?? 0,
                                           'batches' => $allBatches,
-                                      ]);
+                                      ]));
                                   @endphp
                                   <li>
-                                      <button @click="addToCart({{ $payload }}); $wire.set('search', '')"  
+                                      <button @click="addToCart(JSON.parse(decodeURIComponent('{{ $payload }}'))); $wire.set('search', '')"  
                                               class="search-item w-full text-left px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 focus:outline-none border-b border-gray-100 dark:border-gray-800 last:border-0 transition-colors"
                                               :class="{ 'bg-gray-100 dark:bg-gray-700': highlightedIndex === {{ $loop->index }} }">
                                           <div class="font-medium text-gray-900 dark:text-gray-100">
