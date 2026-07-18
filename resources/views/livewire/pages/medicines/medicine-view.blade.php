@@ -134,7 +134,40 @@
                             </div>
                             <div>
                                 <span class="text-sm text-text-muted dark:text-text-muted-dark">Barcode</span>
-                                <div class="font-medium text-text dark:text-text-dark">{{ $medicine->barcode ?? '-' }}</div>
+                                <div class="font-medium text-text dark:text-text-dark flex flex-col gap-2 mt-1">
+                                    @if($medicine->barcode)
+                                    <div class="bg-white p-2 rounded-lg inline-block self-start border border-gray-200 dark:border-gray-700" 
+                                         x-data="{ 
+                                            initBarcode() {
+                                                if (typeof JsBarcode === 'undefined') {
+                                                    const script = document.createElement('script');
+                                                    script.src = 'https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js';
+                                                    script.onload = () => this.renderBarcode();
+                                                    document.head.appendChild(script);
+                                                } else {
+                                                    this.renderBarcode();
+                                                }
+                                            },
+                                            renderBarcode() {
+                                                JsBarcode(this.$refs.barcode, '{{ $medicine->barcode }}', {
+                                                    format: 'CODE128',
+                                                    width: 1.5,
+                                                    height: 40,
+                                                    displayValue: true,
+                                                    margin: 0,
+                                                    background: '#ffffff',
+                                                    lineColor: '#000000',
+                                                    fontSize: 14
+                                                });
+                                            }
+                                         }" 
+                                         x-init="initBarcode()">
+                                        <svg x-ref="barcode" class="max-w-full"></svg>
+                                    </div>
+                                    @else
+                                        <span>-</span>
+                                    @endif
+                                </div>
                             </div>
                             <!-- <div>
                                 <span class="text-sm text-text-muted dark:text-text-muted-dark">Generic Name</span>

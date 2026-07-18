@@ -144,11 +144,11 @@
             <div class="flex items-center gap-2 ml-2">
                 <div class="text-right hidden md:block">
                     <div class="text-sm font-semibold leading-none">{{ auth()->user()->name }}</div>
-                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">Cashier</div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ auth()->user()->getRoleNames()->implode(', ') ?: 'Cashier' }}</div>
                 </div>
-                <button class="text-gray-400 hover:text-gray-600">
+                <!-- <button class="text-gray-400 hover:text-gray-600">
                     <x-heroicon-o-chevron-down class="w-4 h-4" />
-                </button>
+                </button> -->
             </div>
         </div>
     </div>

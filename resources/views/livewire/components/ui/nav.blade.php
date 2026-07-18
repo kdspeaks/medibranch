@@ -58,6 +58,13 @@
 
                  <x-ui.theme-toggle class="ml-3" />
 
+                 @can('manage-pos')
+                 <a href="{{ route('pos') }}" wire:navigate class="hidden md:flex items-center ml-3 px-3 py-1.5 text-sm font-medium text-white bg-primary hover:bg-primary/90 dark:bg-primary-dark dark:hover:bg-primary-dark/90 rounded-lg shadow-sm transition-all duration-200 focus:ring-4 focus:ring-primary/30">
+                     <x-heroicon-o-shopping-cart class="w-4 h-4 mr-1.5" />
+                     {{ __('messages.pos') ?? 'POS' }}
+                 </a>
+                 @endcan
+
                  <div class="ml-3">
                      <div>
                          @php
