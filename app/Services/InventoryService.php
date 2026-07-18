@@ -31,7 +31,9 @@ class InventoryService
             'medicine_id' => $medicineId,
         ]);
 
-        $batchQuery = $inventory->batches();
+        $batchQuery = $inventory->batches()
+            ->where('mrp', $mrp)
+            ->where('unit_purchase_price', $purchasePrice);
 
         $batchNumber === null
             ? $batchQuery->whereNull('batch_number')
