@@ -2,35 +2,60 @@
 
 namespace App\Livewire\Pages\Medicines;
 
-use Filament\Schemas\Components\Group;
-use Filament\Actions\EditAction;
-use Filament\Actions\DeleteAction;
 use App\Models\Tax;
-use Livewire\Component;
-use Filament\Tables\Table;
 use Filament\Actions\Action;
-use Livewire\Attributes\Title;
-use Filament\Actions\CreateAction;
-use Filament\Forms\Contracts\HasForms;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Contracts\HasTable;
-use Filament\Forms\Components\TextInput;
-use Spatie\Permission\Models\Permission;
-use Filament\Tables\Columns\ToggleColumn;
+use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Forms\Contracts\HasForms;
+use Filament\Schemas\Components\Group;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
-use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Tables\Contracts\HasTable;
+use Filament\Tables\Table;
+use Livewire\Component;
 
-class TaxList extends Component implements HasForms, HasActions, HasTable
+class TaxList extends Component implements HasActions, HasForms, HasTable
 {
     use InteractsWithActions;
-    use InteractsWithTable;
     use InteractsWithForms;
+    use InteractsWithTable;
+
     public function render()
     {
         return view('livewire.pages.medicines.tax-list');
+    }
+
+    protected function getFormSchema(): array
+    {
+        return [
+            Group::make()
+                ->schema([
+                    TextInput::make('name')
+                        ->label(__('messages.name'))
+                        ->required()
+                        ->maxLength(255),
+
+                    TextInput::make('rate')
+                        ->label(__('messages.rate'))
+                        ->required()
+                        ->maxLength(255),
+
+                    ToggleButtons::make('is_active')
+                        ->label(__('messages.is_active'))
+                        ->boolean()
+                        ->grouped()
+                        ->default(true),
+                ])
+                ->columns(3)
+                ->columnSpanFull(),
+        ];
     }
 
     public function createAction(): Action
@@ -39,30 +64,7 @@ class TaxList extends Component implements HasForms, HasActions, HasTable
             ->modalHeading(__('messages.create_new_tax'))
             ->model(Tax::class)
             ->label(__('messages.create_tax'))
-            ->schema([
-                Group::make()
-                    ->schema([
-                        TextInput::make('name')
-                            ->label(__('messages.name'))
-                            ->required()
-                            ->maxLength(255),
-
-                        TextInput::make('rate')
-                            ->label(__('messages.rate'))
-                            ->required()
-                            ->maxLength(255),
-
-
-
-                        ToggleButtons::make('is_active')
-                            ->label(__('messages.is_active'))
-                            ->boolean()
-                            ->grouped()
-                            ->default(true),
-                    ])
-                    ->columns(3)
-                    ->columnSpanFull()
-            ]);
+            ->schema($this->getFormSchema());
     }
 
     public function table(Table $table): Table
@@ -84,7 +86,7 @@ class TaxList extends Component implements HasForms, HasActions, HasTable
                     ->onIcon('heroicon-m-check-circle')
                     ->offIcon('heroicon-m-x-circle')
                     ->toggleable()
-                    ->sortable()
+                    ->sortable(),
             ])
             ->filters([
                 // ...
@@ -92,32 +94,9 @@ class TaxList extends Component implements HasForms, HasActions, HasTable
             ->recordActions([
                 EditAction::make()
                     ->modalHeading(__('messages.edit_tax'))
-                    ->schema([
-                        Group::make()
-                            ->schema([
-                                TextInput::make('name')
-                                    ->label(__('messages.name'))
-                                    ->required()
-                                    ->maxLength(255),
-
-                                TextInput::make('rate')
-                                    ->label(__('messages.rate'))
-                                    ->required()
-                                    ->maxLength(255),
-
-
-
-                                ToggleButtons::make('is_active')
-                                    ->label(__('messages.is_active'))
-                                    ->boolean()
-                                    ->grouped()
-                                    ->default(true),
-                            ])
-                            ->columns(3)
-                            ->columnSpanFull()
-                    ]),
+                    ->schema($this->getFormSchema()),
                 DeleteAction::make()
-                    ->requiresConfirmation()
+                    ->requiresConfirmation(),
             ])
             ->toolbarActions([
                 // ...

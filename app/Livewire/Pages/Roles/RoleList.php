@@ -2,34 +2,29 @@
 
 namespace App\Livewire\Pages\Roles;
 
-
-use Filament\Schemas\Components\Group;
-use Filament\Actions\EditAction;
-use Filament\Actions\DeleteAction;
-use Livewire\Component;
-use Filament\Tables\Table;
 use Filament\Actions\Action;
-use Livewire\Attributes\Title;
-use Filament\Actions\CreateAction;
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Roles;
-use Filament\Forms\Contracts\HasForms;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Contracts\HasTable;
-use Filament\Forms\Components\TextInput;
-use Spatie\Permission\Models\Permission;
-use Filament\Actions\Contracts\HasActions;
-use Filament\Forms\Components\CheckboxList;
-use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Actions\Concerns\InteractsWithActions;
-use Filament\Tables\Actions\CreateAction as ActionsCreateAction;
+use Filament\Actions\Contracts\HasActions;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\CheckboxList;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Forms\Contracts\HasForms;
+use Filament\Schemas\Components\Group;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Concerns\InteractsWithTable;
+use Filament\Tables\Contracts\HasTable;
+use Filament\Tables\Table;
+use Livewire\Component;
+use Spatie\Permission\Models\Role;
 
-class RoleList extends Component implements HasForms, HasActions, HasTable
+class RoleList extends Component implements HasActions, HasForms, HasTable
 {
     use InteractsWithActions;
-    use InteractsWithTable;
     use InteractsWithForms;
+    use InteractsWithTable;
     // public function createAction(): Action
     // {
     //     return CreateAction::make('create')
@@ -51,33 +46,31 @@ class RoleList extends Component implements HasForms, HasActions, HasTable
     //         ]);
     // }
 
+    protected function getFormSchema(bool $isEdit = false): array
+    {
+        return [
+            Group::make([
+                TextInput::make('name')
+                    ->unique(ignoreRecord: true)
+                    ->label(__('messages.role_name'))
+                    ->required()
+                    ->maxLength(255),
+
+                CheckboxList::make('permissions')
+                    ->relationship('permissions', 'name')
+                    ->label(__('messages.assign_permissions'))
+                    ->columns($isEdit ? 4 : 2),
+            ]),
+        ];
+    }
+
     public function createAction(): Action
     {
         return CreateAction::make('create')
             ->model(Role::class)
             ->label(__('messages.create_role'))
             ->modalHeading(__('messages.create_new_role'))
-            ->schema([
-                Group::make([
-                    TextInput::make('name')
-                        ->unique(ignoreRecord: true)
-                        ->label(__('messages.role_name'))
-                        ->required()
-                        ->maxLength(255),
-
-                    CheckboxList::make('permissions')
-                        // ->required()
-                        ->relationship('permissions', 'name')
-                        ->label(__('messages.assign_permissions'))
-                        ->options(
-                            Permission::all()->pluck('name', 'id')
-                        )
-                        ->columns(2)
-
-
-
-                ])
-            ]);
+            ->schema($this->getFormSchema());
     }
 
     public function table(Table $table): Table
@@ -92,7 +85,7 @@ class RoleList extends Component implements HasForms, HasActions, HasTable
                     ->sortable(),
                 TextColumn::make('permissions.name')
                     ->label(__('messages.permissions'))
-                    ->separator(', ')
+                    ->separator(', '),
             ])
             ->filters([
                 // ...
@@ -100,29 +93,18 @@ class RoleList extends Component implements HasForms, HasActions, HasTable
             ->recordActions([
                 EditAction::make()
                     ->modalHeading(__('messages.edit_role'))
-                    ->visible(fn($record) => $record->name !== 'Super Admin')
-                    ->schema([
-                        TextInput::make('name')
-                            ->label(__('messages.role_name'))
-                            ->required()
-                            ->unique(ignoreRecord: true)
-                            ->maxLength(255),
-                        CheckboxList::make('permissions')
-                            ->relationship('permissions', 'name')
-                            ->label(__('messages.assign_permissions'))
-                            // ->required()
-                            ->columns(4),
-                    ]),
+                    ->visible(fn ($record) => $record->name !== 'Super Admin')
+                    ->schema($this->getFormSchema(true)),
                 DeleteAction::make()
-                    ->visible(fn($record) => $record->name !== 'Super Admin')
-                    ->requiresConfirmation()
+                    ->visible(fn ($record) => $record->name !== 'Super Admin')
+                    ->requiresConfirmation(),
             ])
             ->toolbarActions([
                 // ...
             ])
             ->headerActions([])
             ->paginated([10, 20, 50, 100, 'all'])
-            ->defaultPaginationPageOption(20);;
+            ->defaultPaginationPageOption(20);
     }
 
     public function render()

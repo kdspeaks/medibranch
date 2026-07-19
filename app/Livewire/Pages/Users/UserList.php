@@ -2,36 +2,32 @@
 
 namespace App\Livewire\Pages\Users;
 
-use Filament\Schemas\Components\Group;
-use Filament\Actions\EditAction;
-use Filament\Actions\DeleteAction;
 use App\Models\User;
-use Livewire\Component;
-use Filament\Tables\Table;
 use Filament\Actions\Action;
-use Livewire\Attributes\Title;
-use Filament\Actions\CreateAction;
-use Spatie\Permission\Models\Role;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Contracts\HasForms;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Contracts\HasTable;
-use Filament\Forms\Components\TextInput;
-use Filament\Tables\Columns\ImageColumn;
-use Filament\Actions\Contracts\HasActions;
-use Filament\Forms\Components\CheckboxList;
-use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Actions\Concerns\InteractsWithActions;
-use Filament\Tables\Actions\CreateAction as ActionsCreateAction;
+use Filament\Actions\Contracts\HasActions;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\CheckboxList;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Forms\Contracts\HasForms;
+use Filament\Schemas\Components\Group;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ViewColumn;
-use Illuminate\Support\Facades\Auth;
+use Filament\Tables\Concerns\InteractsWithTable;
+use Filament\Tables\Contracts\HasTable;
+use Filament\Tables\Table;
+use Livewire\Component;
+use Spatie\Permission\Models\Role;
 
-class UserList extends Component implements HasForms, HasActions, HasTable
+class UserList extends Component implements HasActions, HasForms, HasTable
 {
     use InteractsWithActions;
-    use InteractsWithTable;
     use InteractsWithForms;
+    use InteractsWithTable;
     // public function createAction(): Action
     // {
     //     return CreateAction::make('create')
@@ -53,45 +49,51 @@ class UserList extends Component implements HasForms, HasActions, HasTable
     //         ]);
     // }
 
+    protected function getFormSchema(bool $isEdit = false): array
+    {
+        return [
+            Group::make([
+                TextInput::make('name')
+                    ->label(__('messages.name'))
+                    ->required()
+                    ->maxLength(255),
+                TextInput::make('email')
+                    ->unique(ignoreRecord: true)
+                    ->required()
+                    ->maxLength(255),
+                TextInput::make('password')
+                    ->required(fn () => ! $isEdit)
+                    ->maxLength(255)
+                    ->password()
+                    ->revealable()
+                    ->dehydrated(fn ($state) => filled($state)),
+
+                Select::make('roles')
+                    ->relationship('roles', 'name')
+                    ->multiple()
+                    ->preload()
+                    ->label(__('messages.roles'))
+                    ->required()
+                    ->native(false),
+
+                Select::make('branches')
+                    ->relationship('branches', 'name')
+                    ->multiple()
+                    ->preload()
+                    ->label(__('messages.branches'))
+                    ->native(false),
+
+            ]),
+        ];
+    }
+
     public function createAction(): Action
     {
         return CreateAction::make('create')
             ->model(User::class)
             ->label(__('messages.create_user'))
             ->modalHeading(__('messages.create_new_user'))
-            ->schema([
-                Group::make([
-                    TextInput::make('name')
-                        ->label(__('messages.name'))
-                        ->required()
-                        ->maxLength(255),
-                    TextInput::make('email')
-                        ->unique(ignoreRecord: true)
-                        ->required()
-                        ->maxLength(255),
-                    TextInput::make('password')
-                        ->required()
-                        ->maxLength(255)
-                        ->password()
-                        ->revealable(),
-
-                    Select::make('roles')
-                        ->relationship('roles', 'name')
-                        ->multiple()
-                        ->preload()
-                        ->label(__('messages.roles'))
-                        ->required()
-                        ->native(false),
-
-                    Select::make('branches')
-                        ->relationship('branches', 'name')
-                        ->multiple()
-                        ->preload()
-                        ->label(__('messages.branches'))
-                        ->native(false),
-
-                ])
-            ]);
+            ->schema($this->getFormSchema());
     }
 
     public function table(Table $table): Table
@@ -113,7 +115,7 @@ class UserList extends Component implements HasForms, HasActions, HasTable
                 TextColumn::make('branches.name')
                     ->label(__('messages.branches'))
                     ->badge()
-                    ->separator(',')
+                    ->separator(','),
             ])
             ->filters([
                 // ...
@@ -121,51 +123,20 @@ class UserList extends Component implements HasForms, HasActions, HasTable
             ->recordActions([
                 EditAction::make()
                     ->modalHeading(__('messages.edit_user'))
-                    ->visible(fn($record) => !$record->roles->contains('name', 'Super Admin'))
-                    ->schema([
-                        Group::make([
-                            TextInput::make('name')
-                                ->label(__('messages.name'))
-                                ->required()
-                                ->maxLength(255),
-                            TextInput::make('email')
-                                ->unique(ignoreRecord: true)
-                                ->required()
-                                ->maxLength(255),
-                            TextInput::make('password')
-                                ->maxLength(255)
-                                ->password()
-                                ->revealable()
-                                ->dehydrated(fn ($state) => filled($state)),
-
-                            Select::make('roles')
-                                ->relationship('roles', 'name')
-                                ->multiple()
-                                ->preload()
-                                ->label(__('messages.roles'))
-                                ->required()
-                                ->native(false),
-
-                            Select::make('branches')
-                                ->relationship('branches', 'name')
-                                ->multiple()
-                                ->preload()
-                                ->label(__('messages.branches'))
-                                ->native(false),
-
-                        ])
-                    ]),
+                    ->visible(fn ($record) => ! $record->roles->contains('name', 'Super Admin'))
+                    ->schema($this->getFormSchema(true)),
                 DeleteAction::make()
-                    ->visible(fn($record) => !$record->roles->contains('name', 'Super Admin'))
-                    ->requiresConfirmation()
+                    ->visible(fn ($record) => ! $record->roles->contains('name', 'Super Admin'))
+                    ->requiresConfirmation(),
             ])
             ->toolbarActions([
                 // ...
             ])
             ->headerActions([])
             ->paginated([10, 20, 50, 100, 'all'])
-            ->defaultPaginationPageOption(20);;
+            ->defaultPaginationPageOption(20);
     }
+
     public function render()
     {
         return view('livewire.pages.users.user-list');
