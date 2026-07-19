@@ -245,4 +245,7 @@ return [
     'mfg_date' => 'Mfg Date',
     'expiry_date' => 'Expiry Date',
     'edit_transaction' => 'Edit Transaction',
+
+    //Common
+    'view' => 'View',
 ];
