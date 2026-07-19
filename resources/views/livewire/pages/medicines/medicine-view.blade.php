@@ -136,7 +136,7 @@
                                 <span class="text-sm text-text-muted dark:text-text-muted-dark">Barcode</span>
                                 <div class="font-medium text-text dark:text-text-dark flex flex-col gap-2 mt-1">
                                     @if($medicine->barcode)
-                                    <div class="bg-white p-2 rounded-lg inline-block self-start border border-gray-200 dark:border-gray-700" 
+                                    <div wire:ignore class="bg-white p-2 rounded-lg inline-block self-start border border-gray-200 dark:border-gray-700" 
                                          x-data="{ 
                                             initBarcode() {
                                                 if (typeof JsBarcode === 'undefined') {
