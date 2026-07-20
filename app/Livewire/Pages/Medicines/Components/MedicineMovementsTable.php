@@ -9,9 +9,6 @@ use Exception;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Actions\EditAction;
-use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
@@ -96,34 +93,10 @@ class MedicineMovementsTable extends Component implements HasActions, HasForms, 
             ->actions([
                 EditAction::make()
                     ->modalHeading(__('messages.edit_transaction'))
-                    ->form([
-                        DateTimePicker::make('created_at')
-                            ->label(__('messages.date'))
-                            ->required(),
-                        TextInput::make('reason')
-                            ->label(__('messages.reason'))
-                            ->maxLength(255),
-                        TextInput::make('quantity')
-                            ->label(__('messages.quantity'))
-                            ->numeric()
-                            ->required()
-                            ->minValue(1)
-                            ->visible(fn (InventoryLog $record) => $record->source_type === null), // Only manual entries can edit quantity
-                        TextInput::make('batch_number')
-                            ->label(__('messages.batch_number'))
-                            ->maxLength(255)
-                            ->visible(fn (InventoryLog $record) => $record->source_type === null && $record->type === 'in'),
-                        DatePicker::make('mfg_date')
-                            ->label(__('messages.mfg_date'))
-                            ->visible(fn (InventoryLog $record) => $record->source_type === null && $record->type === 'in'),
-                        DatePicker::make('expiry_date')
-                            ->label(__('messages.expiry_date'))
-                            ->visible(fn (InventoryLog $record) => $record->source_type === null && $record->type === 'in'),
-                        TextInput::make('mrp')
-                            ->label(__('messages.mrp') ?? 'MRP')
-                            ->numeric()
-                            ->visible(fn (InventoryLog $record) => $record->source_type === null && $record->type === 'in'),
-                    ])
+                    ->form(\App\Forms\Schemas\StockAdjustmentFormSchema::schema(
+                        medicine: $this->medicine,
+                        isEdit: true
+                    ))
                     ->fillForm(function (InventoryLog $record): array {
                         return [
                             'created_at' => $record->created_at,
@@ -262,8 +235,7 @@ class MedicineMovementsTable extends Component implements HasActions, HasForms, 
             ])
             ->paginated([5, 10, 25])
             ->defaultPaginationPageOption(5)
-            ->heading(__('messages.stock_transactions'))
-            ->description(__('messages.transactions_description'));
+            ->deferLoading();
     }
 
     public function render()

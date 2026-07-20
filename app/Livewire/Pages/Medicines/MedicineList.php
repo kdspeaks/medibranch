@@ -62,4 +62,6 @@ class MedicineList extends Component implements HasForms, HasActions, HasTable
     {
         return view('livewire.pages.medicines.medicine-list');
     }
+
+
 }

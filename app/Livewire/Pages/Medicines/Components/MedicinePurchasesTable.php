@@ -82,8 +82,7 @@ class MedicinePurchasesTable extends Component implements HasForms, HasTable, Ha
             ])
             ->paginated([5, 10, 25])
             ->defaultPaginationPageOption(5)
-            ->heading(__('messages.purchase_history'))
-            ->description(__('messages.purchase_history_desc'));
+            ->deferLoading();
     }
 
     public function render()

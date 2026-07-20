@@ -52,8 +52,7 @@ class MedicineStocksTable extends Component implements HasForms, HasTable, HasAc
             ])
             ->paginated([5, 10, 25])
             ->defaultPaginationPageOption(5)
-            ->heading(__('messages.current_stock'))
-            ->description(__('messages.stock_description'));
+            ->deferLoading();
     }
 
     public function render()

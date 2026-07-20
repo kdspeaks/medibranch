@@ -11,15 +11,11 @@ use Exception;
 use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
-use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Radio;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
-use Livewire\Component;
 use Livewire\Attributes\Computed;
+use Livewire\Component;
 
 class MedicineView extends Component implements HasActions, HasForms
 {
@@ -41,122 +37,12 @@ class MedicineView extends Component implements HasActions, HasForms
         return Action::make('adjustStock')
             ->label(__('messages.adjust_stock'))
             ->icon('heroicon-o-adjustments-horizontal')
-            ->form([
-                Radio::make('adjustment_type')
-                    ->label(__('messages.adjustment_type'))
-                    ->options([
-                        'in' => __('messages.stock_in'),
-                        'out' => __('messages.stock_out'),
-                    ])
-                    ->default('in')
-                    ->inline()
-                    ->live(),
-
-                Select::make('branch_id')
-                    ->label(__('messages.branch'))
-                    ->options(function () {
-                        if ($this->isSuperAdmin()) {
-                            return \App\Models\Branch::pluck('name', 'id');
-                        }
-                        return auth()->user()?->branches()->where('is_active', true)->pluck('branches.name', 'branches.id') ?? [];
-                    })
-                    ->required()
-                    ->visible(function () {
-                        if ($this->isSuperAdmin()) return true;
-                        return auth()->user()?->branches()->where('is_active', true)->count() > 1;
-                    })
-                    ->default(fn () => $this->scopedBranchId())
-                    ->live(),
-
-                TextInput::make('quantity')
-                    ->label(__('messages.quantity'))
-                    ->numeric()
-                    ->required()
-                    ->minValue(1),
-
-                // Fields only for Stock In
-                TextInput::make('mrp')
-                    ->label(__('messages.mrp'))
-                    ->id('mrp_input')
-                    ->numeric()
-                    ->default($this->medicine->mrp)
-                    ->required()
-                    ->extraInputAttributes([
-                        'x-on:input' => '
-                            let mrp = parseFloat($el.value) || 0;
-                            let discount = parseFloat(document.getElementById(\'discount_input\')?.value || 0);
-                            let pp = document.getElementById(\'purchase_price_input\');
-                            if (pp) {
-                                pp.value = (mrp - (mrp * discount / 100)).toFixed(2);
-                                pp.dispatchEvent(new Event(\'input\', { bubbles: true }));
-                            }
-                        '
-                    ])
-                    ->visible(fn ($get) => $get('adjustment_type') === 'in'),
-
-                TextInput::make('discount_on_purchase')
-                    ->label(__('messages.discount_on_purchase'))
-                    ->id('discount_input')
-                    ->numeric()
-                    ->default($this->medicine->discount_on_purchase ?? 0)
-                    ->required()
-                    ->extraInputAttributes([
-                        'x-on:input' => '
-                            let discount = parseFloat($el.value) || 0;
-                            let mrp = parseFloat(document.getElementById(\'mrp_input\')?.value || 0);
-                            let pp = document.getElementById(\'purchase_price_input\');
-                            if (pp) {
-                                pp.value = (mrp - (mrp * discount / 100)).toFixed(2);
-                                pp.dispatchEvent(new Event(\'input\', { bubbles: true }));
-                            }
-                        '
-                    ])
-                    ->visible(fn ($get) => $get('adjustment_type') === 'in'),
-
-                TextInput::make('purchase_price')
-                    ->label(__('messages.purchase_price'))
-                    ->id('purchase_price_input')
-                    ->numeric()
-                    ->default($this->medicine->purchase_price)
-                    ->required()
-                    ->readOnly()
-                    ->visible(fn ($get) => $get('adjustment_type') === 'in'),
-
-                TextInput::make('batch_number')
-                    ->label(__('messages.batch_number'))
-                    ->visible(fn ($get) => $get('adjustment_type') === 'in'),
-
-                DatePicker::make('mfg_date')
-                    ->label(__('messages.mfg_date'))
-                    ->visible(fn ($get) => $get('adjustment_type') === 'in'),
-
-                DatePicker::make('expiry_date')
-                    ->label(__('messages.expiry_date'))
-                    ->visible(fn ($get) => $get('adjustment_type') === 'in'),
-
-                // Fields only for Stock Out
-                Select::make('preferred_batch_id')
-                    ->label(__('messages.preferred_batch'))
-                    ->options(function ($get) {
-                        $branchId = $get('branch_id') ?? $this->scopedBranchId();
-                        if (! $branchId) {
-                            return [];
-                        }
-
-                        return \App\Models\InventoryBatch::query()
-                            ->whereHas('inventory', fn ($q) => $q->where('medicine_id', $this->medicine->id)->where('branch_id', $branchId))
-                            ->available()
-                            ->get()
-                            ->mapWithKeys(fn ($b) => [$b->id => $b->batch_number ? "{$b->batch_number} ({$b->available_quantity} available)" : "No Batch ({$b->available_quantity} available)"]);
-                    })
-                    ->visible(fn ($get) => $get('adjustment_type') === 'out'),
-
-                TextInput::make('reason')
-                    ->label(__('messages.reason'))
-                    ->required()
-                    ->maxLength(255)
-                    ->default(fn ($get) => $get('adjustment_type') === 'in' ? 'Manual Stock Entry' : 'Manual Stock Deduction'),
-            ])
+            ->form(\App\Forms\Schemas\StockAdjustmentFormSchema::schema(
+                medicine: $this->medicine,
+                isEdit: false,
+                scopedBranchId: $this->scopedBranchId(),
+                isSuperAdmin: $this->isSuperAdmin()
+            ))
             ->action(function (array $data, InventoryService $inventoryService) {
                 $branchId = $data['branch_id'] ?? $this->scopedBranchId();
 
@@ -217,6 +103,8 @@ class MedicineView extends Component implements HasActions, HasForms
         ]);
     }
 
+
+
     private function isSuperAdmin(): bool
     {
         return auth()->user()?->hasRole('Super Admin') ?? false;
@@ -228,6 +116,7 @@ class MedicineView extends Component implements HasActions, HasForms
         if ($this->isSuperAdmin()) {
             return \App\Models\Branch::pluck('name', 'id');
         }
+
         return auth()->user()?->branches()->where('is_active', true)->pluck('branches.name', 'branches.id') ?? collect();
     }
 

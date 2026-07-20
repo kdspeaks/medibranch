@@ -78,7 +78,8 @@ class MedicineBatchesTable extends Component implements HasForms, HasTable, HasA
                     }),
             ])
             ->paginated([5, 10, 25])
-            ->defaultPaginationPageOption(5);
+            ->defaultPaginationPageOption(5)
+            ->deferLoading();
     }
 
     public function render()

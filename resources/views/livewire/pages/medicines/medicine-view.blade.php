@@ -136,16 +136,18 @@
                                 <span class="text-sm text-text-muted dark:text-text-muted-dark">Barcode</span>
                                 <div class="font-medium text-text dark:text-text-dark flex flex-col gap-2 mt-1">
                                     @if($medicine->barcode)
-                                    <div wire:ignore class="bg-white p-2 rounded-lg inline-block self-start border border-gray-200 dark:border-gray-700" 
+                                    <div wire:ignore class="bg-white p-2 rounded-lg inline-block self-start border border-gray-200 dark:border-gray-700 min-h-[56px] min-w-[150px]" 
                                          x-data="{ 
+                                            loading: true,
                                             initBarcode() {
                                                 if (typeof JsBarcode === 'undefined') {
                                                     const script = document.createElement('script');
                                                     script.src = 'https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js';
-                                                    script.onload = () => this.renderBarcode();
+                                                    script.onload = () => { this.renderBarcode(); this.loading = false; };
                                                     document.head.appendChild(script);
                                                 } else {
                                                     this.renderBarcode();
+                                                    this.loading = false;
                                                 }
                                             },
                                             renderBarcode() {
@@ -162,7 +164,10 @@
                                             }
                                          }" 
                                          x-init="initBarcode()">
-                                        <svg x-ref="barcode" class="max-w-full"></svg>
+                                        <div x-show="loading" class="flex justify-center items-center w-full h-full">
+                                            <div class="animate-pulse bg-gray-200 h-10 w-32 rounded"></div>
+                                        </div>
+                                        <svg x-ref="barcode" x-show="!loading" class="max-w-full" style="display: none;"></svg>
                                     </div>
                                     @else
                                         <span>-</span>
@@ -211,13 +216,72 @@
                 </div>
             </div>
 
-            <livewire:pages.medicines.components.medicine-stocks-table :medicine="$medicine" :branch-id="$scopedBranchId" />
+            <div x-data="{ activeTab: 'stocks' }" class="mt-8">
+                <!-- Tab Headers -->
+                <div class="border-b border-gray-200 dark:border-gray-700 mb-6">
+                    <nav class="-mb-px flex space-x-8 overflow-x-auto" aria-label="Tabs">
+                        <button 
+                            @click="activeTab = 'stocks'" 
+                            :class="activeTab === 'stocks' ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'"
+                            class="whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium transition-colors">
+                            {{ __('Current Stock') }}
+                        </button>
+                        <button 
+                            @click="activeTab = 'batches'" 
+                            :class="activeTab === 'batches' ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'"
+                            class="whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium transition-colors">
+                            {{ __('Batches') }}
+                        </button>
+                        <button 
+                            @click="activeTab = 'movements'" 
+                            :class="activeTab === 'movements' ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'"
+                            class="whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium transition-colors">
+                            {{ __('Stock Movements') }}
+                        </button>
+                        <button 
+                            @click="activeTab = 'purchases'" 
+                            :class="activeTab === 'purchases' ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'"
+                            class="whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium transition-colors">
+                            {{ __('Purchase History') }}
+                        </button>
+                    </nav>
+                </div>
 
-            <livewire:pages.medicines.components.medicine-batches-table :medicine="$medicine" :branch-id="$scopedBranchId" />
+                <!-- Tab Contents -->
+                <div class="mt-2">
+                    <div x-show="activeTab === 'stocks'">
+                        <div class="mb-4">
+                            <h3 class="text-lg font-medium text-gray-900 dark:text-white">{{ __('Current Stock Overview') }}</h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('View real-time stock levels of this medicine across your branches.') }}</p>
+                        </div>
+                        <livewire:pages.medicines.components.medicine-stocks-table :medicine="$medicine" :branch-id="$scopedBranchId" />
+                    </div>
 
-            <livewire:pages.medicines.components.medicine-movements-table :medicine="$medicine" :branch-id="$scopedBranchId" />
+                    <div x-show="activeTab === 'batches'" style="display: none;">
+                        <div class="mb-4">
+                            <h3 class="text-lg font-medium text-gray-900 dark:text-white">{{ __('Batch Details') }}</h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Track expiry dates and quantities for specific manufacturing batches.') }}</p>
+                        </div>
+                        <livewire:pages.medicines.components.medicine-batches-table :medicine="$medicine" :branch-id="$scopedBranchId" />
+                    </div>
 
-            <livewire:pages.medicines.components.medicine-purchases-table :medicine="$medicine" :branch-id="$scopedBranchId" />
+                    <div x-show="activeTab === 'movements'" style="display: none;">
+                        <div class="mb-4">
+                            <h3 class="text-lg font-medium text-gray-900 dark:text-white">{{ __('Stock Movements') }}</h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Complete audit trail of all manual adjustments, sales, and purchases affecting inventory.') }}</p>
+                        </div>
+                        <livewire:pages.medicines.components.medicine-movements-table :medicine="$medicine" :branch-id="$scopedBranchId" />
+                    </div>
+
+                    <div x-show="activeTab === 'purchases'" style="display: none;">
+                        <div class="mb-4">
+                            <h3 class="text-lg font-medium text-gray-900 dark:text-white">{{ __('Purchase History') }}</h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Log of received purchases from suppliers for this medicine.') }}</p>
+                        </div>
+                        <livewire:pages.medicines.components.medicine-purchases-table :medicine="$medicine" :branch-id="$scopedBranchId" />
+                    </div>
+                </div>
+            </div>
     </div>
     <x-filament-actions::modals />
 </x-page-layout>

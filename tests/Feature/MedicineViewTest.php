@@ -57,8 +57,7 @@ class MedicineViewTest extends TestCase
             ->assertOk()
             ->assertSee('Arsenic Album')
             ->assertSee('Current Stock')
-            ->assertSee('Stock Transactions')
-            ->assertSee('Purchase History')
-            ->assertSee('BATCH-1');
+            ->assertSee('Stock Movements')
+            ->assertSee('Purchase History');
     }
 }
