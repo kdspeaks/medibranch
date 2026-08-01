@@ -83,19 +83,27 @@
                                   @endphp
                                   <li>
                                       <button @click="addToCart(JSON.parse(decodeURIComponent('{{ $payload }}'))); $wire.set('search', '')"  
-                                              class="search-item w-full text-left px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 focus:outline-none border-b border-gray-100 dark:border-gray-800 last:border-0 transition-colors"
+                                              class="search-item w-full text-left px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-800 focus:outline-none border-b border-gray-100 dark:border-gray-800 last:border-0 transition-colors"
                                               :class="{ 'bg-gray-100 dark:bg-gray-700': highlightedIndex === {{ $loop->index }} }">
-                                          <div class="font-medium text-gray-900 dark:text-gray-100">
-                                              {{ $medicine->name }}
-                                              @if(count($medicines) === 1)
-                                                  <span class="ml-2 text-xs text-blue-600 dark:text-blue-400 font-normal bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 px-1.5 py-0.5 rounded shadow-sm">(Enter ↵)</span>
-                                              @endif
-                                          </div>
-                                          <div class="text-sm text-gray-500 dark:text-gray-400 flex justify-between mt-1">
-                                              <span>{{ $medicine->barcode ? $medicine->barcode . ' • ' : '' }}{{ currency() }}{{ number_format($medicine->mrp, 2) }}</span>
-                                              <span class="text-xs font-semibold px-2 py-0.5 rounded-full {{ ($medicine->inventories->first()?->quantity ?? 0) > 0 ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' }}">
+                                          <div class="flex justify-between items-start">
+                                              <div class="text-sm font-bold text-gray-900 dark:text-gray-100">
+                                                  {{ $medicine->name }}
+                                                  @if(count($medicines) === 1)
+                                                      <span class="ml-1 text-[10px] text-blue-600 dark:text-blue-400 font-normal bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 px-1 py-0.5 rounded">(Enter ↵)</span>
+                                                  @endif
+                                              </div>
+                                              <span class="text-xs font-semibold px-1.5 py-0.5 rounded-full {{ ($medicine->inventories->first()?->quantity ?? 0) > 0 ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' }}">
                                                   {{ __('messages.stock') ?? 'Stock' }}: {{ $medicine->inventories->first()?->quantity ?? 0 }}
                                               </span>
+                                          </div>
+                                          <div class="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5 flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
+                                              @if($medicine->manufacturer) <span class="flex items-center gap-0.5"><x-heroicon-o-building-office-2 class="w-3 h-3"/>{{ $medicine->manufacturer->name }}</span> @endif
+                                              @if($medicine->potency) <span>• {{ $medicine->potency }}</span> @endif
+                                              @if($medicine->packing_quantity) <span>• {{ $medicine->packing_quantity }} {{ $medicine->medicineUnit?->name }}</span> @endif
+                                          </div>
+                                          <div class="text-xs text-gray-500 dark:text-gray-400 flex justify-between mt-1 items-center">
+                                              <span>{{ $medicine->barcode ? $medicine->barcode . ' • ' : '' }}</span>
+                                              <span class="font-bold text-gray-800 dark:text-gray-200">{{ currency() }}{{ number_format($medicine->mrp, 2) }}</span>
                                           </div>
                                       </button>
                                   </li>

@@ -24,6 +24,7 @@ return [
     'suppliers' => 'Suppliers',
     'users' => 'Users',
     'medicines' => 'Medicines',
+    'brand' => 'Brand',
     'manufacturers' => 'Manufacturers',
     'inventory' => 'Inventory',
     'purchases' => 'Purchases',

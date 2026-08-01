@@ -14,7 +14,7 @@ class MedicineTableSchema
 {
     public static function table(Table $table, $queryBuilder = null): Table
     {
-        $query = $queryBuilder ?? Medicine::query()->with(['tax']);
+        $query = $queryBuilder ?? Medicine::query()->with(['tax', 'manufacturer']);
 
         return $table
             ->query($query)
@@ -46,6 +46,10 @@ class MedicineTableSchema
 
                 TextColumn::make('potency')
                     ->separator(', '),
+                TextColumn::make('manufacturer.name')
+                    // ->label(__('messages.brand'))
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('medicineForm.name')
                     ->label(__('messages.form'))
                     ->searchable()

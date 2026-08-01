@@ -155,7 +155,7 @@ class PosTerminal extends Component implements HasActions, HasForms
                                 ->orderBy('expiry_date', 'asc')
                                 ->orderBy('created_at', 'asc');
                         }]);
-                    }, 'tax']);
+                    }, 'tax', 'manufacturer', 'medicineUnit']);
                 })
                 ->take(10)
                 ->get();
@@ -209,7 +209,7 @@ class PosTerminal extends Component implements HasActions, HasForms
                     ->orderBy('expiry_date', 'asc')
                     ->orderBy('created_at', 'asc');
             }]);
-        }, 'tax'])->find($medicineId);
+        }, 'tax', 'manufacturer', 'medicineUnit'])->find($medicineId);
     }
 
     public function processCheckout(SaleService $saleService, $checkoutData, $print = true)

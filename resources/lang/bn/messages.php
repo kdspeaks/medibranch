@@ -24,6 +24,7 @@ return [
     'suppliers' => 'সরবরাহকারী',
     'users' => 'ব্যবহারকারী',
     'medicines' => 'ওষুধ',
+    'brand' => 'ব্র্যান্ড',
     'manufacturers' => 'প্রস্তুতকারক',
     'inventory' => 'মজুদ',
     'purchases' => 'ক্রয়',
