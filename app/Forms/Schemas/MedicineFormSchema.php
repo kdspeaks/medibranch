@@ -60,6 +60,8 @@ class MedicineFormSchema
                     ->options(fn () => Manufacturer::pluck('name', 'id')->toArray())
                     ->searchable()
                     ->required()
+                    ->live(debounce: 500)
+                    ->afterStateUpdated($afterStateUpdatedSku)
                     ->createOptionForm([
                         Group::make()
                             ->schema([

@@ -139,13 +139,14 @@ class InventoryService
     {
         $query = $inventory->batches()
             ->available()
-            ->orderByRaw('CASE WHEN expiry_date IS NULL THEN 1 ELSE 0 END, expiry_date ASC')
-            ->orderBy('created_at', 'ASC')
             ->lockForUpdate();
 
         if ($preferredBatchId) {
             $query->orderByRaw('CASE WHEN id = ? THEN 0 ELSE 1 END', [$preferredBatchId]);
         }
+
+        $query->orderByRaw('CASE WHEN expiry_date IS NULL THEN 1 ELSE 0 END, expiry_date ASC')
+            ->orderBy('created_at', 'ASC');
 
         return $query->get();
     }

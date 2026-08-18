@@ -79,7 +79,7 @@ class MedicinesImport implements ToCollection, WithHeadingRow
             }
 
             // Generate SKU if needed
-            $sku = $this->generateSku(trim($row['medicine_name']), trim($row['potency']), trim($row['form']), $row['packing_quantity'], trim($row['unit']));
+            $sku = $this->generateSku(trim($row['medicine_name']), trim($row['potency'] ?? ''), trim($row['form'] ?? ''), $row['packing_quantity'] ?? '', trim($row['unit'] ?? ''), trim($row['manufacturer'] ?? ''));
 
             // Validate prices
             $mrp = floatval($row['mrp'] ?? 0);
@@ -142,13 +142,30 @@ class MedicinesImport implements ToCollection, WithHeadingRow
         }
     }
 
-    protected function generateSku($name, $potency, $form, $qty, $unit)
+    protected function generateSku($name, $potency, $form, $qty, $unit, $brand = null)
     {
         $parts = [];
+        if ($brand) $parts[] = $this->generateBrandCode($brand);
         if ($name) $parts[] = strtoupper(Str::slug($name, '_'));
         if ($potency) $parts[] = strtoupper(Str::slug($potency));
         if ($form) $parts[] = strtoupper(substr(Str::slug($form), 0, 3));
         if ($qty && $unit) $parts[] = $qty . strtoupper(Str::slug($unit));
         return implode('-', $parts);
+    }
+
+    protected function generateBrandCode(string $brandName): string
+    {
+        $cleanName = preg_replace('/[^A-Za-z0-9\s]/', '', $brandName);
+        $words = array_values(array_filter(explode(' ', $cleanName)));
+        
+        if (count($words) > 1) {
+            $code = '';
+            foreach ($words as $word) {
+                $code .= strtoupper(substr($word, 0, 1));
+            }
+            return substr($code, 0, 4);
+        }
+        
+        return strtoupper(substr($cleanName, 0, 3));
     }
 }

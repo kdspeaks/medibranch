@@ -24,7 +24,8 @@ trait HasMedicineForm
             $get('potency') ?? null,
             (int) ($get('medicine_form_id') ?? 0),
             (int) ($get('packing_quantity') ?? 0),
-            (int) ($get('medicine_unit_id') ?? 0)
+            (int) ($get('medicine_unit_id') ?? 0),
+            $get('manufacturer_id') ? (int) $get('manufacturer_id') : null
         );
         $set('sku', $sku);
     }
