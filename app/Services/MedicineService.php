@@ -14,7 +14,8 @@ class MedicineService
             $data->potency,
             $data->medicineFormId,
             $data->packingQuantity,
-            $data->medicineUnitId
+            $data->medicineUnitId,
+            $data->manufacturerId
         );
 
         $payload = [
