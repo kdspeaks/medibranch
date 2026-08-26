@@ -31,6 +31,10 @@ class PosTerminal extends Component implements HasActions, HasForms
 
     public $search = '';
 
+    public $filterBrandId = null;
+
+    public $searchBrands = [];
+
     public $medicines = [];
 
     public $customerId = null;
@@ -125,6 +129,8 @@ class PosTerminal extends Component implements HasActions, HasForms
                 $this->dispatch('exact-match-found', payload: [
                     'id' => $details->id,
                     'name' => $details->name,
+                    'potency' => $details->potency,
+                    'brand' => $details->manufacturer?->name,
                     'sku' => $details->sku,
                     'price' => $price,
                     'batch_id' => $firstBatch?->id,
@@ -137,16 +143,25 @@ class PosTerminal extends Component implements HasActions, HasForms
                     'batches' => $allBatches,
                 ]);
                 $this->search = '';
+                $this->filterBrandId = null;
+                $this->searchBrands = [];
 
                 return;
             }
 
-            // Otherwise, load matches with inventory for the current branch
-            $this->medicines = Medicine::where('is_active', true)
+            $baseQuery = Medicine::where('is_active', true)
                 ->where(function ($q) {
                     $q->where('name', 'like', '%'.$this->search.'%')
                         ->orWhere('barcode', 'like', '%'.$this->search.'%')
                         ->orWhere('sku', 'like', '%'.$this->search.'%');
+                });
+
+            $manufacturerIds = (clone $baseQuery)->whereNotNull('manufacturer_id')->select('manufacturer_id')->distinct()->pluck('manufacturer_id');
+            $this->searchBrands = \App\Models\Manufacturer::whereIn('id', $manufacturerIds)->pluck('name', 'id')->toArray();
+
+            $this->medicines = (clone $baseQuery)
+                ->when($this->filterBrandId, function($q) {
+                    $q->where('manufacturer_id', $this->filterBrandId);
                 })
                 ->when($branchId, function ($query) use ($branchId) {
                     $query->with(['inventories' => function ($q) use ($branchId) {
@@ -161,7 +176,14 @@ class PosTerminal extends Component implements HasActions, HasForms
                 ->get();
         } else {
             $this->medicines = [];
+            $this->filterBrandId = null;
+            $this->searchBrands = [];
         }
+    }
+
+    public function updatedFilterBrandId()
+    {
+        $this->updatedSearch();
     }
 
     public function handleEnter()
@@ -184,6 +206,8 @@ class PosTerminal extends Component implements HasActions, HasForms
             $this->dispatch('exact-match-found', payload: [
                 'id' => $details->id,
                 'name' => $details->name,
+                'potency' => $details->potency,
+                'brand' => $details->manufacturer?->name,
                 'sku' => $details->sku,
                 'price' => $price,
                 'batch_id' => $firstBatch?->id,
@@ -196,6 +220,8 @@ class PosTerminal extends Component implements HasActions, HasForms
                 'batches' => $allBatches,
             ]);
             $this->search = '';
+            $this->filterBrandId = null;
+            $this->searchBrands = [];
         }
     }
 

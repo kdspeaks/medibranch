@@ -21,37 +21,38 @@
             <a href="{{ route('dashboard') }}" wire:navigate class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                  <x-heroicon-o-home class="w-5 h-5" />
             </a>
-             <div class="relative w-full max-w-xl"
-                  x-data="{ 
-                      highlightedIndex: 0,
-                      focusNext() {
-                          let count = this.$el.querySelectorAll('.search-item').length;
-                          if (this.highlightedIndex < count - 1) this.highlightedIndex++;
-                      },
-                      focusPrev() {
-                          if (this.highlightedIndex > 0) this.highlightedIndex--;
-                      },
-                      selectItem() {
-                          let items = this.$el.querySelectorAll('.search-item');
-                          if (items.length > 0 && items[this.highlightedIndex]) {
-                              items[this.highlightedIndex].click();
-                          } else {
-                              $wire.handleEnter();
+             <div class="flex items-center gap-2 w-full max-w-2xl">
+                 <div class="relative flex-1"
+                      x-data="{ 
+                          highlightedIndex: 0,
+                          focusNext() {
+                              let count = this.$el.querySelectorAll('.search-item').length;
+                              if (this.highlightedIndex < count - 1) this.highlightedIndex++;
+                          },
+                          focusPrev() {
+                              if (this.highlightedIndex > 0) this.highlightedIndex--;
+                          },
+                          selectItem() {
+                              let items = this.$el.querySelectorAll('.search-item');
+                              if (items.length > 0 && items[this.highlightedIndex]) {
+                                  items[this.highlightedIndex].click();
+                              } else {
+                                  $wire.handleEnter();
+                              }
                           }
-                      }
-                  }"
-                  @keydown.arrow-down.prevent="focusNext()"
-                  @keydown.arrow-up.prevent="focusPrev()"
-                  @keydown.enter.prevent="selectItem()">
-                  <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <x-heroicon-o-magnifying-glass class="w-5 h-5 text-gray-400" />
-                  </div>
-                  <input wire:model.live.debounce.300ms="search" id="search" type="text" placeholder="{{ __('messages.search_medicine') }}" class="w-full pl-10 pr-12 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-[#0f172a] focus:ring-2 focus:ring-primary focus:border-primary sm:text-sm">
-                  <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                      <span class="text-xs text-gray-400 border border-gray-300 dark:border-gray-700 rounded px-1.5 py-0.5">F2</span>
-                  </div>
-                  
-                  @if(count($medicines) > 0)
+                      }"
+                      @keydown.arrow-down.prevent="focusNext()"
+                      @keydown.arrow-up.prevent="focusPrev()"
+                      @keydown.enter.prevent="selectItem()">
+                      <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <x-heroicon-o-magnifying-glass class="w-5 h-5 text-gray-400" />
+                      </div>
+                      <input wire:model.live.debounce.300ms="search" id="search" type="text" placeholder="{{ __('messages.search_medicine') }}" class="w-full pl-10 pr-12 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-[#0f172a] focus:ring-2 focus:ring-primary focus:border-primary sm:text-sm">
+                      <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                          <span class="text-xs text-gray-400 border border-gray-300 dark:border-gray-700 rounded px-1.5 py-0.5">F2</span>
+                      </div>
+                      
+                      @if(count($medicines) > 0)
                       <div class="absolute z-50 w-full mt-1 bg-white dark:bg-surface-dark rounded-md shadow-xl border border-gray-200 dark:border-gray-800">
                           <ul class="max-h-60 overflow-auto">
                               @foreach($medicines as $medicine)
@@ -70,6 +71,8 @@
                                       $payload = rawurlencode(json_encode([
                                           'id' => $medicine->id,
                                           'name' => $medicine->name,
+                                          'potency' => $medicine->potency,
+                                          'brand' => $medicine->manufacturer?->name,
                                           'price' => $price,
                                           'batch_id' => $firstBatch?->id,
                                           'batch_number' => $firstBatch?->batch_number ?? '--',
@@ -111,7 +114,17 @@
                          </ul>
                      </div>
                  @endif
-            </div>
+                 </div>
+                 
+                 @if(count($searchBrands) > 0)
+                 <select wire:model.live="filterBrandId" class="py-2 pl-3 pr-8 border border-gray-300 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-[#0f172a] focus:ring-2 focus:ring-primary focus:border-primary sm:text-sm text-gray-700 dark:text-gray-300 max-w-[200px]">
+                     <option value="">All Brands</option>
+                     @foreach($searchBrands as $id => $name)
+                         <option value="{{ $id }}">{{ $name }}</option>
+                     @endforeach
+                 </select>
+                 @endif
+             </div>
         </div>
         
         <!-- Top Right Actions -->
@@ -200,8 +213,15 @@
                                 <td class="px-4 py-2">
                                     <div class="flex items-center gap-2">
                                         <div>
-                                            <div class="font-bold text-gray-900 dark:text-gray-100" x-text="item.name"></div>
-                                            <div class="text-xs text-gray-500" x-show="item.sku" x-text="'SKU: ' + item.sku"></div>
+                                            <div class="font-bold text-gray-900 dark:text-gray-100">
+                                                <span x-text="item.name"></span>
+                                                <span class="text-xs font-normal" x-show="item.potency" x-text="'(' + item.potency + ')'"></span>
+                                            </div>
+                                            <div class="text-xs text-gray-500 flex items-center gap-1 mt-0.5">
+                                                <span x-show="item.brand"><x-heroicon-o-building-office-2 class="w-3 h-3 inline-block"/> <span x-text="item.brand"></span></span>
+                                                <span x-show="item.brand && item.sku">|</span>
+                                                <span x-show="item.sku" x-text="'SKU: ' + item.sku"></span>
+                                            </div>
                                         </div>
                                     </div>
                                 </td>
@@ -636,6 +656,8 @@
                         medicine_id: payload.id, // mapped for checkout
                         id: payload.id,
                         name: payload.name,
+                        potency: payload.potency,
+                        brand: payload.brand,
                         sku: payload.sku,
                         unit_price: payload.price,
                         price: payload.price,

@@ -85,9 +85,16 @@
                 <tr>
                     <td style="vertical-align: top;">{{ $index + 1 }}</td>
                     <td class="item-name">
-                        {{ $item->medicine->name }}<br>
+                        {{ $item->medicine->name }}
+                        @if($item->medicine->potency)
+                        <small>({{ $item->medicine->potency }})</small>
+                        @endif
+                        <br>
                         @if($item->medicine->manufacturer)
                         <small style="font-style: italic;">Brand: {{ $item->medicine->manufacturer->name }}</small>
+                        @endif
+                        @if($item->inventoryBatch)
+                        <br><small>Batch: {{ $item->inventoryBatch->batch_number }}</small>
                         @endif
                     </td>
                     <td class="text-right">{{ currency() }}{{ number_format($item->unit_price, 2) }}</td>
