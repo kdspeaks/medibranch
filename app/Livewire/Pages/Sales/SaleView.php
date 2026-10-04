@@ -15,7 +15,7 @@ class SaleView extends Component
 
     public function mount(Sale $sale)
     {
-        $this->sale = $sale->load(['customer', 'branch', 'user', 'items.medicine']);
+        $this->sale = $sale->load(['customer', 'branch', 'user', 'items.medicine.manufacturer']);
     }
 
     public function render()
