@@ -17,11 +17,13 @@
 @endphp
 <div class="px-3 py-1 flex items-center">
     @if($record->logo)
-        <img src="{{ Storage::disk('public')->url($record->logo) }}" 
-             alt="{{ $record->name }}" 
-             class="w-9 h-9 rounded-full object-cover border border-border dark:border-border-dark bg-white shadow-xs">
+        <div class="w-10 h-10 rounded-lg border border-border/80 dark:border-border-dark/80 bg-white dark:bg-surface-dark p-1 shrink-0 flex items-center justify-center shadow-xs overflow-hidden">
+            <img src="{{ Storage::disk('public')->url($record->logo) }}" 
+                 alt="{{ $record->name }}" 
+                 class="w-full h-full object-contain">
+        </div>
     @else
-        <span class="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold border shadow-xs {{ $colorClass }}"
+        <span class="w-10 h-10 rounded-lg flex items-center justify-center text-xs font-bold border shadow-xs leading-none {{ $colorClass }}"
               title="{{ $record->name }}">
             {{ $initials ?: strtoupper(substr($record->name, 0, 1)) }}
         </span>

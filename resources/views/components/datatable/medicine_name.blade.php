@@ -29,18 +29,20 @@
 <div class="flex items-center gap-3 px-3 py-1.5">
     {{-- Row Icon: Manufacturer Logo or Unique Colored Initial Avatar --}}
     @if($manufacturer?->logo)
-        <img src="{{ Storage::disk('public')->url($manufacturer->logo) }}" 
-             alt="{{ $manufacturer->name }}" 
-             title="{{ $manufacturer->name }}"
-             class="w-9 h-9 rounded-full object-cover border border-border dark:border-border-dark bg-white shrink-0 shadow-xs">
+        <div class="w-10 h-10 rounded-lg border border-border/80 dark:border-border-dark/80 bg-white dark:bg-surface-dark p-1 shrink-0 flex items-center justify-center shadow-xs overflow-hidden">
+            <img src="{{ Storage::disk('public')->url($manufacturer->logo) }}" 
+                 alt="{{ $manufacturer->name }}" 
+                 title="{{ $manufacturer->name }}"
+                 class="w-full h-full object-contain">
+        </div>
     @elseif($manufacturer)
-        <span class="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold border shrink-0 shadow-xs {{ $colorClass }}"
+        <span class="w-10 h-10 rounded-lg flex items-center justify-center text-xs font-bold border shrink-0 shadow-xs leading-none {{ $colorClass }}"
               title="{{ $manufacturer->name }}">
             {{ $initials ?: strtoupper(substr($manufacturer->name, 0, 1)) }}
         </span>
     @else
-        <span class="w-9 h-9 rounded-full flex items-center justify-center bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 text-xs shrink-0 border border-border dark:border-border-dark">
-            <x-heroicon-o-beaker class="w-4 h-4" />
+        <span class="w-10 h-10 rounded-lg flex items-center justify-center bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 text-xs shrink-0 border border-border dark:border-border-dark">
+            <x-heroicon-o-beaker class="w-5 h-5" />
         </span>
     @endif
 

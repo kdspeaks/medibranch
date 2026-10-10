@@ -71,10 +71,6 @@ class MedicineFormSchema
                                     ->image()
                                     ->disk('public')
                                     ->directory('manufacturers/logos')
-                                    ->imageResizeMode('cover')
-                                    ->imageCropAspectRatio('1:1')
-                                    ->imageResizeTargetWidth('200')
-                                    ->imageResizeTargetHeight('200')
                                     ->maxSize(2048)
                                     ->saveUploadedFileUsing(function ($file) {
                                         return app(ImageOptimizerService::class)->optimizeAndStore($file, 'manufacturers/logos', 200, 200, 80, 'public');

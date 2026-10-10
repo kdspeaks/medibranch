@@ -24,11 +24,13 @@
 @if($manufacturer)
     <div class="flex items-center gap-2 px-3 whitespace-nowrap">
         @if($manufacturer->logo)
-            <img src="{{ Storage::disk('public')->url($manufacturer->logo) }}" 
-                 alt="{{ $manufacturer->name }}" 
-                 class="w-6 h-6 rounded-full object-cover border border-border dark:border-border-dark bg-white shrink-0">
+            <div class="w-7 h-7 rounded-md border border-border/80 dark:border-border-dark/80 bg-white dark:bg-surface-dark p-0.5 shrink-0 flex items-center justify-center overflow-hidden">
+                <img src="{{ Storage::disk('public')->url($manufacturer->logo) }}" 
+                     alt="{{ $manufacturer->name }}" 
+                     class="w-full h-full object-contain">
+            </div>
         @else
-            <span class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold border shrink-0 {{ $colorClass }}"
+            <span class="w-7 h-7 rounded-md flex items-center justify-center text-[10px] font-bold border shrink-0 leading-none {{ $colorClass }}"
                   title="{{ $manufacturer->name }}">
                 {{ $initials ?: strtoupper(substr($manufacturer->name, 0, 1)) }}
             </span>
