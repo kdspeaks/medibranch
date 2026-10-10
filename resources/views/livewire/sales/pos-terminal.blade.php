@@ -4,10 +4,10 @@
     @keydown.window.prevent.f3="$wire.set('search', '')"
     @keydown.window.prevent.f4="console.log('f4')"
     @keydown.window.prevent.f5="console.log('f5')"
-    @keydown.window.prevent.f6="checkout(true)"
-    @keydown.window.prevent.f7="checkout(false)"
-    @keydown.window.prevent.f8="printLastInvoice()"
-    @keydown.window.prevent.escape="clearCart()"
+    @keydown.window.prevent.f6="if(!isSubmitting) checkout(true)"
+    @keydown.window.prevent.f7="if(!isSubmitting) checkout(false)"
+    @keydown.window.prevent.f8="if(!isSubmitting) printLastInvoice()"
+    @keydown.window.prevent.escape="if(!isSubmitting) clearCart()"
     @exact-match-found.window="addToCart($event.detail.payload)"
     @customer-selected.window="customerId = $event.detail.id; selectedCustomerName = $event.detail.name"
     @customer-cleared.window="customerId = null; selectedCustomerName = ''"
@@ -469,12 +469,18 @@
                 @endif
                 
                 <div class="mt-auto space-y-3">
-                    <button @click="checkout(true)" class="w-full py-4 bg-[#219653] hover:bg-green-700 text-white font-bold rounded-xl flex justify-between items-center px-6 transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed" :disabled="cart.length === 0">
-                        <span>Pay & Print Invoice</span>
+                    <button @click="checkout(true)" class="w-full py-4 bg-[#219653] hover:bg-green-700 text-white font-bold rounded-xl flex justify-between items-center px-6 transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed" :disabled="cart.length === 0 || isSubmitting">
+                        <div class="flex items-center gap-2">
+                            <span>Pay & Print Invoice</span>
+                            <svg x-cloak x-show="isSubmitting" class="w-4 h-4 text-white animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                        </div>
                         <span class="text-green-200 text-sm font-normal">F6</span>
                     </button>
-                    <button @click="checkout(false)" class="w-full py-4 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 font-bold rounded-xl flex justify-between items-center px-6 transition disabled:opacity-50 disabled:cursor-not-allowed" :disabled="cart.length === 0">
-                        <span>Pay (No Print)</span>
+                    <button @click="checkout(false)" class="w-full py-4 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 font-bold rounded-xl flex justify-between items-center px-6 transition disabled:opacity-50 disabled:cursor-not-allowed" :disabled="cart.length === 0 || isSubmitting">
+                        <div class="flex items-center gap-2">
+                            <span>Pay (No Print)</span>
+                            <svg x-cloak x-show="isSubmitting" class="w-4 h-4 text-gray-800 dark:text-gray-200 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                        </div>
                         <span class="text-gray-500 dark:text-gray-400 text-sm font-normal">F7</span>
                     </button>
                 </div>
@@ -485,23 +491,30 @@
 
     <!-- Bottom Footer Bar -->
     <div class="bg-gray-50 dark:bg-[#0f172a] border-t border-gray-200 dark:border-gray-800 px-6 py-4 flex gap-4 overflow-x-auto">
-        <button @click="checkout(true)" class="flex items-center gap-2 bg-white dark:bg-[#1e293b] border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2 font-medium text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed" :disabled="cart.length === 0">
-            <span class="bg-gray-100 dark:bg-gray-800 text-gray-500 px-2 py-0.5 rounded text-xs border border-gray-200 dark:border-gray-700 shadow-sm">F6</span> Pay & Print
+        <button @click="checkout(true)" class="flex items-center gap-2 bg-white dark:bg-[#1e293b] border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2 font-medium text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed" :disabled="cart.length === 0 || isSubmitting">
+            <span class="bg-gray-100 dark:bg-gray-800 text-gray-500 px-2 py-0.5 rounded text-xs border border-gray-200 dark:border-gray-700 shadow-sm">F6</span> 
+            <span>Pay & Print</span>
+            <svg x-cloak x-show="isSubmitting" class="w-4 h-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
         </button>
-        <button @click="checkout(false)" class="flex items-center gap-2 bg-white dark:bg-[#1e293b] border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2 font-medium text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed" :disabled="cart.length === 0">
-            <span class="bg-gray-100 dark:bg-gray-800 text-gray-500 px-2 py-0.5 rounded text-xs border border-gray-200 dark:border-gray-700 shadow-sm">F7</span> Pay (No Print)
+        <button @click="checkout(false)" class="flex items-center gap-2 bg-white dark:bg-[#1e293b] border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2 font-medium text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed" :disabled="cart.length === 0 || isSubmitting">
+            <span class="bg-gray-100 dark:bg-gray-800 text-gray-500 px-2 py-0.5 rounded text-xs border border-gray-200 dark:border-gray-700 shadow-sm">F7</span> 
+            <span>Pay (No Print)</span>
+            <svg x-cloak x-show="isSubmitting" class="w-4 h-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
         </button>
-        <button @click="printLastInvoice()" class="flex items-center gap-2 bg-white dark:bg-[#1e293b] border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2 font-medium text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition">
-            <span class="bg-gray-100 dark:bg-gray-800 text-gray-500 px-2 py-0.5 rounded text-xs border border-gray-200 dark:border-gray-700 shadow-sm">F8</span> Print Invoice
+        <button @click="printLastInvoice()" class="flex items-center gap-2 bg-white dark:bg-[#1e293b] border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2 font-medium text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed" :disabled="isSubmitting">
+            <span class="bg-gray-100 dark:bg-gray-800 text-gray-500 px-2 py-0.5 rounded text-xs border border-gray-200 dark:border-gray-700 shadow-sm">F8</span> 
+            <span>Print Invoice</span>
+            <svg x-cloak x-show="isSubmitting" class="w-4 h-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
         </button>
         <div class="border-r border-gray-300 dark:border-gray-700 mx-1"></div>
-        <button @click="holdInvoice()" class="flex items-center gap-2 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700/50 rounded-lg px-4 py-2 font-medium text-sm text-yellow-700 dark:text-yellow-500 hover:bg-yellow-100 dark:hover:bg-yellow-900/40 transition disabled:opacity-50 disabled:cursor-not-allowed" :disabled="cart.length === 0">
-            Hold Invoice
+        <button @click="holdInvoice()" class="flex items-center gap-2 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700/50 rounded-lg px-4 py-2 font-medium text-sm text-yellow-700 dark:text-yellow-500 hover:bg-yellow-100 dark:hover:bg-yellow-900/40 transition disabled:opacity-50 disabled:cursor-not-allowed" :disabled="cart.length === 0 || isSubmitting">
+            <span>Hold Invoice</span>
+            <svg x-cloak x-show="isSubmitting" class="w-4 h-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
         </button>
-        <button wire:click="mountAction('viewDrafts')" class="flex items-center gap-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700/50 rounded-lg px-4 py-2 font-medium text-sm text-blue-700 dark:text-blue-500 hover:bg-blue-100 dark:hover:bg-blue-900/40 transition">
+        <button wire:click="mountAction('viewDrafts')" class="flex items-center gap-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700/50 rounded-lg px-4 py-2 font-medium text-sm text-blue-700 dark:text-blue-500 hover:bg-blue-100 dark:hover:bg-blue-900/40 transition disabled:opacity-50 disabled:cursor-not-allowed" :disabled="isSubmitting">
             Drafts
         </button>
-        <button @click="clearCart()" class="flex items-center gap-2 ml-auto bg-white dark:bg-[#1e293b] border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2 font-medium text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition">
+        <button @click="clearCart()" class="flex items-center gap-2 ml-auto bg-white dark:bg-[#1e293b] border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2 font-medium text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition disabled:opacity-50 disabled:cursor-not-allowed" :disabled="isSubmitting">
             <span class="bg-gray-100 dark:bg-gray-800 text-gray-500 px-2 py-0.5 rounded text-xs border border-gray-200 dark:border-gray-700 shadow-sm">Esc</span> Cancel Sale
         </button>
     </div>
@@ -529,6 +542,7 @@
         Alpine.data('posTerminal', () => ({
             cart: [],
             discount: 0,
+            isSubmitting: false,
             
             init() {
                 window.addEventListener('draft-loaded', (e) => {
@@ -720,18 +734,23 @@
                 $wire.clearCustomer();
             },
             
-            checkout(print) {
+            async checkout(print) {
                 if (this.cart.length === 0) return;
                 
-                $wire.processCheckout({
-                    cart: JSON.parse(JSON.stringify(this.cart)),
-                    discount: this.discount,
-                    paymentMethod: this.paymentMethod,
-                    paymentReference: this.paymentReference,
-                    applyRoundOff: this.applyRoundOff,
-                    notes: this.notes,
-                    customerId: this.customerId
-                }, print);
+                this.isSubmitting = true;
+                try {
+                    await $wire.processCheckout({
+                        cart: JSON.parse(JSON.stringify(this.cart)),
+                        discount: this.discount,
+                        paymentMethod: this.paymentMethod,
+                        paymentReference: this.paymentReference,
+                        applyRoundOff: this.applyRoundOff,
+                        notes: this.notes,
+                        customerId: this.customerId
+                    }, print);
+                } finally {
+                    this.isSubmitting = false;
+                }
             },
             
             newSale() {
@@ -744,7 +763,7 @@
                 }
             },
             
-            holdInvoice() {
+            async holdInvoice() {
                 if (this.cart.length === 0) return;
                 
                 let refName = prompt("Enter a reference name for this draft (optional):", this.selectedCustomerName || "");
@@ -753,24 +772,34 @@
                     return;
                 }
                 
-                $wire.holdInvoice({
-                    cart: JSON.parse(JSON.stringify(this.cart)),
-                    discount: this.discount,
-                    paymentMethod: this.paymentMethod,
-                    paymentReference: this.paymentReference,
-                    applyRoundOff: this.applyRoundOff,
-                    notes: this.notes,
-                    customerId: this.customerId,
-                    referenceName: refName
-                });
+                this.isSubmitting = true;
+                try {
+                    await $wire.holdInvoice({
+                        cart: JSON.parse(JSON.stringify(this.cart)),
+                        discount: this.discount,
+                        paymentMethod: this.paymentMethod,
+                        paymentReference: this.paymentReference,
+                        applyRoundOff: this.applyRoundOff,
+                        notes: this.notes,
+                        customerId: this.customerId,
+                        referenceName: refName
+                    });
+                } finally {
+                    this.isSubmitting = false;
+                }
             },
             
-            printLastInvoice() {
-                $wire.printLastInvoice({
-                    cart: JSON.parse(JSON.stringify(this.cart)),
-                    discount: this.discount,
-                    applyRoundOff: this.applyRoundOff
-                });
+            async printLastInvoice() {
+                this.isSubmitting = true;
+                try {
+                    await $wire.printLastInvoice({
+                        cart: JSON.parse(JSON.stringify(this.cart)),
+                        discount: this.discount,
+                        applyRoundOff: this.applyRoundOff
+                    });
+                } finally {
+                    this.isSubmitting = false;
+                }
             },
             
             formatCurrency(amount) {
