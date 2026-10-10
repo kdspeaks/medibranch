@@ -11,14 +11,20 @@ class Manufacturer extends Model
 
     protected $fillable = [
         'name',
+        'logo',
         'contact_name',
         'phone',
         'email',
         'address',
         'website',
         'country',
-        'is_active'
+        'is_active',
     ];
+
+    public function getLogoUrlAttribute(): ?string
+    {
+        return $this->logo ? \Illuminate\Support\Facades\Storage::disk('public')->url($this->logo) : null;
+    }
 
     protected $casts = [
         'is_active' => 'boolean',

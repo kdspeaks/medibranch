@@ -246,6 +246,12 @@ return [
     'expiry_date' => 'Expiry Date',
     'edit_transaction' => 'লেনদেন সম্পাদনা করুন',
 
-    //Common
-    "view" => "দেখুন",
+    // Common
+    'view' => 'দেখুন',
+    'total' => 'মোট',
+    'all_branches' => 'সকল শাখা',
+    'total_stock' => 'মোট স্টক',
+    'logo' => 'লোগো',
+    'last_sale' => 'সর্বশেষ বিক্রয়',
+    'never_sold' => 'কখনও বিক্রি হয়নি',
 ];

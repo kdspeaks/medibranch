@@ -41,6 +41,10 @@ class Inventory extends Model
 
     public function getQuantityAttribute(): int
     {
+        if ($this->relationLoaded('batches')) {
+            return (int) $this->batches->sum('available_quantity');
+        }
+
         return (int) $this->batches()->sum('available_quantity');
     }
 }

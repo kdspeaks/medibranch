@@ -14,23 +14,39 @@ class MedicineTableSchema
 {
     public static function table(Table $table, $queryBuilder = null): Table
     {
-        $query = $queryBuilder ?? Medicine::query()->with(['tax', 'manufacturer']);
+        $query = $queryBuilder ?? Medicine::query()
+            ->select('medicines.*')
+            ->selectSub(function ($sub) {
+                $sub->from('sale_items')
+                    ->join('sales', 'sales.id', '=', 'sale_items.sale_id')
+                    ->whereColumn('sale_items.medicine_id', 'medicines.id')
+                    ->select('sales.sale_date')
+                    ->latest('sales.sale_date')
+                    ->limit(1);
+            }, 'last_sold_at')
+            ->with([
+                'tax',
+                'manufacturer',
+                'medicineForm',
+                'medicineUnit',
+                'inventories.branch',
+                'inventories.batches',
+            ]);
 
         return $table
             ->query($query)
             ->columns([
                 ViewColumn::make('name')
                     ->view('components.datatable.medicine_name')
-                    ->searchable(['name', 'sku'])
+                    ->searchable(['name', 'sku', 'potency', 'packing_quantity'])
                     ->sortable(),
 
-                TextColumn::make('stock_available')
+                ViewColumn::make('stock_available')
                     ->label(__('messages.stock') ?? 'Stock')
-                    ->state(fn ($record) => $record->inventories->sum('quantity'))
-                    ->badge()
-                    ->color(fn ($state) => (int) $state > 0 ? 'success' : 'danger')
+                    ->view('components.datatable.medicine_stock')
                     ->sortable(query: function (\Illuminate\Database\Eloquent\Builder $query, string $direction, $livewire) {
-                        $branchId = current($livewire->getTableFilterState('branch_id') ?? []) ?? activeBranch()?->id;
+                        $branchFilter = $livewire->getTableFilterState('branch_id');
+                        $branchId = ! empty($branchFilter['value']) ? $branchFilter['value'] : null;
 
                         $batchQuery = \App\Models\InventoryBatch::selectRaw('COALESCE(SUM(inventory_batches.available_quantity), 0)')
                             ->join('inventories', 'inventories.id', '=', 'inventory_batches.inventory_id')
@@ -44,10 +60,35 @@ class MedicineTableSchema
                         return $query->orderBy($batchQuery, $direction);
                     }),
 
+                TextColumn::make('last_sold_at')
+                    ->label(__('messages.last_sale') ?? 'Last Sale')
+                    ->since()
+                    ->dateTimeTooltip('d M Y, h:i A')
+                    ->placeholder(__('messages.never_sold') ?? 'Never')
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->sortable(query: function (\Illuminate\Database\Eloquent\Builder $query, string $direction, $livewire) {
+                        $branchFilter = $livewire->getTableFilterState('branch_id');
+                        $branchId = ! empty($branchFilter['value']) ? $branchFilter['value'] : null;
+
+                        $lastSaleQuery = \App\Models\SaleItem::query()
+                            ->join('sales', 'sales.id', '=', 'sale_items.sale_id')
+                            ->whereColumn('sale_items.medicine_id', 'medicines.id')
+                            ->select('sales.sale_date')
+                            ->latest('sales.sale_date')
+                            ->limit(1);
+
+                        if ($branchId) {
+                            $lastSaleQuery->where('sales.branch_id', $branchId);
+                        }
+
+                        return $query->orderBy($lastSaleQuery, $direction);
+                    }),
+
                 TextColumn::make('potency')
                     ->separator(', '),
-                TextColumn::make('manufacturer.name')
-                    // ->label(__('messages.brand'))
+                ViewColumn::make('manufacturer.name')
+                    ->label(__('messages.manufacturer'))
+                    ->view('components.datatable.medicine_manufacturer')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('medicineForm.name')
@@ -64,12 +105,13 @@ class MedicineTableSchema
                     ->label(__('messages.last_updated_price'))
                     ->view('components.datatable.medicine_price'),
                 TextColumn::make('tax.name')
-                    ->separator(', '),
+                    ->separator(', ')
+                    ->toggleable(isToggledHiddenByDefault: true),
                 ToggleColumn::make('is_active')
                     ->label(__('messages.active_question'))
                     ->onIcon('heroicon-m-check-circle')
                     ->offIcon('heroicon-m-x-circle')
-                    ->toggleable()
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->sortable()
                     ->visible(Auth::user()?->can('manage-medicines'))
                     ->afterStateUpdated(function ($record, $state) {
@@ -103,13 +145,15 @@ class MedicineTableSchema
                     })
                     ->default(fn () => activeBranch()?->id)
                     ->query(function (\Illuminate\Database\Eloquent\Builder $query, array $data) {
-                        $branchId = $data['value'] ?? activeBranch()?->id;
+                        $branchId = ! empty($data['value']) ? $data['value'] : null;
 
-                        $query->with(['inventories' => function ($q) use ($branchId) {
-                            if ($branchId) {
-                                $q->where('branch_id', $branchId);
-                            }
-                        }]);
+                        if ($branchId) {
+                            $query->with(['inventories' => function ($q) use ($branchId) {
+                                $q->where('branch_id', $branchId)->with(['branch', 'batches']);
+                            }]);
+                        } else {
+                            $query->with(['inventories.branch', 'inventories.batches']);
+                        }
                     }),
                 \Filament\Tables\Filters\SelectFilter::make('manufacturer_id')
                     ->label(__('messages.manufacturer'))
@@ -122,7 +166,7 @@ class MedicineTableSchema
                 fn (Medicine $record) => route('medicines.view', ['medicine' => $record])
             )
             ->filtersLayout(\Filament\Tables\Enums\FiltersLayout::AboveContent)
-            ->deferFilters(false)
+            ->defaultSort('last_sold_at', 'desc')
             ->striped();
     }
 }

@@ -2,18 +2,19 @@
 
 namespace App\Forms\Schemas;
 
-use App\Models\Tax;
-use App\Models\Medicine;
 use App\Models\Manufacturer;
+use App\Models\Tax;
+use App\Services\ImageOptimizerService;
 use Filament\Actions\Action;
-use Illuminate\Validation\Rule;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\ToggleButtons;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\RichEditor;
-use Filament\Forms\Components\ToggleButtons;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Symfony\Component\Intl\Countries;
 
 class MedicineFormSchema
@@ -65,6 +66,20 @@ class MedicineFormSchema
                     ->createOptionForm([
                         Group::make()
                             ->schema([
+                                FileUpload::make('logo')
+                                    ->label(__('messages.logo') ?? 'Logo')
+                                    ->image()
+                                    ->disk('public')
+                                    ->directory('manufacturers/logos')
+                                    ->imageResizeMode('cover')
+                                    ->imageCropAspectRatio('1:1')
+                                    ->imageResizeTargetWidth('200')
+                                    ->imageResizeTargetHeight('200')
+                                    ->maxSize(2048)
+                                    ->saveUploadedFileUsing(function ($file) {
+                                        return app(ImageOptimizerService::class)->optimizeAndStore($file, 'manufacturers/logos', 200, 200, 80, 'public');
+                                    })
+                                    ->columnSpanFull(),
                                 TextInput::make('name')->required()->maxLength(255),
                                 TextInput::make('contact_name')->maxLength(255),
                                 TextInput::make('phone')->tel()->maxLength(20),
@@ -86,6 +101,7 @@ class MedicineFormSchema
                     ->createOptionUsing(function (array $data) {
                         $validator = Validator::make($data, [
                             'name' => ['required', 'string', 'max:255', Rule::unique('manufacturers', 'name')],
+                            'logo' => ['nullable', 'string'],
                             'contact_name' => ['nullable', 'string', 'max:255'],
                             'phone' => ['nullable', 'string', 'max:20'],
                             'email' => ['nullable', 'email', 'max:255', Rule::unique('manufacturers', 'email')],
@@ -95,10 +111,11 @@ class MedicineFormSchema
                             'is_active' => ['nullable', 'boolean'],
                         ]);
                         $validated = $validator->validate();
-                        if (!empty($validated['phone'])) {
+                        if (! empty($validated['phone'])) {
                             $validated['phone'] = preg_replace('/\D+/', '', $validated['phone']);
                         }
                         $manufacturer = Manufacturer::create($validated);
+
                         return $manufacturer->id;
                     }),
             ]),
@@ -132,8 +149,11 @@ class MedicineFormSchema
                     ->required()
                     ->options(function ($get) {
                         $formId = $get('medicine_form_id');
-                        if (!$formId) return [];
+                        if (! $formId) {
+                            return [];
+                        }
                         $form = \App\Models\MedicineForm::find($formId);
+
                         return $form ? $form->units()->where('medicine_units.is_active', true)->pluck('medicine_units.name', 'medicine_units.id') : [];
                     })
                     ->native(false)
@@ -149,7 +169,7 @@ class MedicineFormSchema
                     ->default(0.00)
                     ->required()
                     ->live(debounce: 500)
-                    ->afterStateUpdated(function($get, $set) {
+                    ->afterStateUpdated(function ($get, $set) {
                         $mrp = (float) ($get('mrp') ?? 0);
                         $discount = (float) ($get('discount_on_purchase') ?? 0);
                         $purchase = $mrp - ($mrp * ($discount / 100));
@@ -161,7 +181,7 @@ class MedicineFormSchema
                     ->default(0.00)
                     ->required()
                     ->live(debounce: 500)
-                    ->afterStateUpdated(function($get, $set) {
+                    ->afterStateUpdated(function ($get, $set) {
                         $mrp = (float) ($get('mrp') ?? 0);
                         $discount = (float) ($get('discount_on_purchase') ?? 0);
                         $purchase = $mrp - ($mrp * ($discount / 100));
@@ -195,6 +215,7 @@ class MedicineFormSchema
                         ]);
                         $validated = $validator->validate();
                         $tax = Tax::create($validated);
+
                         return $tax->id;
                     })
                     ->createOptionAction(fn (Action $action) => $action->modalHeading('Create tax')->modalWidth('xl')),

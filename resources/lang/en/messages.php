@@ -247,6 +247,12 @@ return [
     'expiry_date' => 'Expiry Date',
     'edit_transaction' => 'Edit Transaction',
 
-    //Common
+    // Common
     'view' => 'View',
+    'total' => 'Total',
+    'all_branches' => 'All Branches',
+    'total_stock' => 'Total Stock',
+    'logo' => 'Logo',
+    'last_sale' => 'Last Sale',
+    'never_sold' => 'Never',
 ];

@@ -3,13 +3,14 @@
 namespace App\Livewire\Pages\Medicines;
 
 use App\Models\Manufacturer;
+use App\Services\ImageOptimizerService;
 use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
-use Filament\Forms\Components\CheckboxList;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ToggleButtons;
@@ -56,6 +57,21 @@ class ManufacturerList extends Component implements HasActions, HasForms, HasTab
         return [
             Group::make()
                 ->schema([
+                    FileUpload::make('logo')
+                        ->label(__('messages.logo'))
+                        ->image()
+                        ->disk('public')
+                        ->directory('manufacturers/logos')
+                        ->imageResizeMode('cover')
+                        ->imageCropAspectRatio('1:1')
+                        ->imageResizeTargetWidth('200')
+                        ->imageResizeTargetHeight('200')
+                        ->maxSize(2048)
+                        ->saveUploadedFileUsing(function ($file) {
+                            return app(ImageOptimizerService::class)->optimizeAndStore($file, 'manufacturers/logos', 200, 200, 80, 'public');
+                        })
+                        ->columnSpanFull(),
+
                     TextInput::make('name')
                         ->label(__('messages.manufacturer_name'))
                         ->required()
@@ -120,6 +136,9 @@ class ManufacturerList extends Component implements HasActions, HasForms, HasTab
             ->query(Manufacturer::query())
 
             ->columns([
+                \Filament\Tables\Columns\ViewColumn::make('logo')
+                    ->label(__('messages.logo'))
+                    ->view('components.datatable.manufacturer_logo'),
                 TextColumn::make('name')
                     ->label(__('messages.manufacturer_name'))
                     ->searchable()
