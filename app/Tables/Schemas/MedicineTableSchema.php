@@ -65,7 +65,7 @@ class MedicineTableSchema
                     ->since()
                     ->dateTimeTooltip('d M Y, h:i A')
                     ->placeholder(__('messages.never_sold') ?? 'Never')
-                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->toggleable(isToggledHiddenByDefault: false)
                     ->sortable(query: function (\Illuminate\Database\Eloquent\Builder $query, string $direction, $livewire) {
                         $branchFilter = $livewire->getTableFilterState('branch_id');
                         $branchId = ! empty($branchFilter['value']) ? $branchFilter['value'] : null;
